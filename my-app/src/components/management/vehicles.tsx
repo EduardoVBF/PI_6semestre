@@ -42,7 +42,9 @@ export default function VehiclesManagement() {
   ];
   const totalVehicles = mockVehicles.length;
 
-  const editVehicleModal = useEditVehicleModal() as { onOpen: (vehicleId: string) => void };
+  const editVehicleModal = useEditVehicleModal() as {
+    onOpen: (vehicleId: string) => void;
+  };
   const addVehicleModal = useAddVehicleModal() as { onOpen: () => void };
   const router = useRouter();
 
@@ -62,22 +64,28 @@ export default function VehiclesManagement() {
         <div className="bg-primary-purple rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaTruck size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Total de Veículos</p>
-            <h2 className="text-4xl font-bold">{(Math.random() * 100).toFixed(0)}</h2>
+            <p className="text-base text-white/80">Total de Veículos</p>
+            <h2 className="text-4xl font-bold">
+              {(Math.random() * 100).toFixed(0)}
+            </h2>
           </div>
         </div>
         <div className="bg-fuchsia-800 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaTruck size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Veículos Ativos</p>
-            <h2 className="text-4xl font-bold">{(Math.random() * 10).toFixed(0)}</h2>
+            <p className="text-base text-white/80">Veículos Ativos</p>
+            <h2 className="text-4xl font-bold">
+              {(Math.random() * 10).toFixed(0)}
+            </h2>
           </div>
         </div>
         <div className="bg-indigo-900 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaTruck size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Veículos Inativos</p>
-            <h2 className="text-4xl font-bold">{(Math.random() * 5).toFixed(0)}</h2>
+            <p className="text-base text-white/80">Veículos Inativos</p>
+            <h2 className="text-4xl font-bold">
+              {(Math.random() * 5).toFixed(0)}
+            </h2>
           </div>
         </div>
       </section>
@@ -136,11 +144,12 @@ export default function VehiclesManagement() {
             </thead>
             <tbody className="bg-gray-800 divide-y divide-gray-600">
               {mockVehicles.map((vehicle) => (
-                <tr key={vehicle.placa}>
-                  <td
-                    className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white cursor-pointer"
-                    onClick={() => router.push(`/vehicle/${vehicle.placa}`)}
-                  >
+                <tr
+                  key={vehicle.placa}
+                  className="hover:bg-gray-700/50 cursor-pointer transition-colors duration-200"
+                  onClick={() => router.push(`/vehicle/${vehicle.placa}`)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {vehicle.placa}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
@@ -161,10 +170,13 @@ export default function VehiclesManagement() {
                   <td className="px-6 py-4 text-xs">
                     <button
                       className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                      onClick={() => editVehicleModal.onOpen(vehicle.placa)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // evita disparar o clique da linha
+                        editVehicleModal.onOpen(vehicle.placa);
+                      }}
                     >
                       <FaPencilAlt
-                        className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
+                        className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
                         size={16}
                       />
                     </button>
