@@ -56,21 +56,21 @@ export default function UsersManagement() {
           <FaUsers size={40} className="text-white opacity-75" />
           <div>
             <p className="text-sm text-white/80">Total de Usuários</p>
-            <h2 className="text-4xl font-bold">{totalUsers}</h2>
+            <h2 className="text-4xl font-bold">{(Math.random() * 20).toFixed(0)}</h2>
           </div>
         </div>
         <div className="bg-fuchsia-800 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaUsers size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Total de Usuários</p>
-            <h2 className="text-4xl font-bold">{totalUsers}</h2>
+            <p className="text-sm text-white/80">Usuários Ativos</p>
+            <h2 className="text-4xl font-bold">{(Math.random() * 10).toFixed(0)}</h2>
           </div>
         </div>
         <div className="bg-indigo-900 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaUsers size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Total de Usuários</p>
-            <h2 className="text-4xl font-bold">{totalUsers}</h2>
+            <p className="text-sm text-white/80">Novos Usuários no mês</p>
+            <h2 className="text-4xl font-bold">{(Math.random() * 5).toFixed(0)}</h2>
           </div>
         </div>
       </section>

@@ -116,22 +116,22 @@ export default function FuelManagement() {
         <div className="bg-primary-purple rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaGasPump size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Total de Abastecimentos</p>
-            <h2 className="text-4xl font-bold">{totalFuelSupplies}</h2>
+            <p className="text-sm text-white/80">Custo Mensal</p>
+            <h2 className="text-4xl font-bold">R$ {(Math.random() * 1000).toFixed(2)}</h2>
           </div>
         </div>
         <div className="bg-fuchsia-800 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaGasPump size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Total de Abastecimentos</p>
-            <h2 className="text-4xl font-bold">{totalFuelSupplies}</h2>
+            <p className="text-sm text-white/80">Litros no mês</p>
+            <h2 className="text-4xl font-bold">{(Math.random() * 1000).toFixed(2)} L</h2>
           </div>
         </div>
         <div className="bg-indigo-900 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaGasPump size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Total de Abastecimentos</p>
-            <h2 className="text-4xl font-bold">{totalFuelSupplies}</h2>
+            <p className="text-sm text-white/80">Abastecimentos no mês</p>
+            <h2 className="text-4xl font-bold">{(Math.random() * 100).toFixed(0)}</h2>
           </div>
         </div>
       </section>

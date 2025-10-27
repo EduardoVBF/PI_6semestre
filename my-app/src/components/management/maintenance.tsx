@@ -4,6 +4,7 @@ import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { FaWrench, FaPlus, FaPen, FaPencilAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { mock } from "node:test";
 
 export default function MaintenanceManagement() {
   const mockMaintenance = [
@@ -108,22 +109,25 @@ export default function MaintenanceManagement() {
         <div className="bg-primary-purple rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaWrench size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Total de Manutenções</p>
+            <p className="text-sm text-white/80">Manutenções Atrasadas</p>
             <h2 className="text-4xl font-bold">{totalMaintenance}</h2>
           </div>
         </div>
         <div className="bg-fuchsia-800 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaWrench size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Custo Total</p>
-            <h2 className="text-4xl font-bold">R$ {totalCost.toFixed(2)}</h2>
+            <p className="text-sm text-white/80">Manutenções no Ano</p>
+            {/* <h2 className="text-4xl font-bold">R$ {totalCost.toFixed(2)}</h2> */}
+            <h2 className="text-4xl font-bold">{(Math.random() * 200).toFixed(0)}</h2>
           </div>
         </div>
         <div className="bg-indigo-900 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaWrench size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-sm text-white/80">Manutenções Urgentes</p>
-            <h2 className="text-4xl font-bold">{urgentMaintenance}</h2>
+            <p className="text-sm text-white/80">Próxima Manutenção</p>
+            {/* <h2 className="text-4xl font-bold">{urgentMaintenance}</h2> */}
+            <h2 className="text-xl font-bold">{mockMaintenance[0].veiculo}</h2>
+            <h2 className="text-xl font-bold text-gray-400">{mockMaintenance[0].proximaTroca} KM</h2>
           </div>
         </div>
       </section>
