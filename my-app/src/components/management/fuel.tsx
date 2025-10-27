@@ -1,7 +1,12 @@
 "use client";
 import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
-import { FaGasPump, FaPlus, FaPencilAlt } from "react-icons/fa";
+import {
+  FaGasPump,
+  FaPlus,
+  FaPencilAlt,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -99,7 +104,7 @@ export default function FuelManagement() {
     <div className="space-y-6 mt-6">
       <div className="flex gap-4 justify-end">
         <button
-          className="flex items-center gap-2 bg-primary-purple text-white py-3 px-6 rounded-lg font-semibold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
+          className="flex items-center gap-2 bg-primary-purple text-white py-2 px-4 rounded-lg text-sm font-bold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
           onClick={addFuelSupplyModal.onOpen}
         >
           <FaPlus />
@@ -181,23 +186,36 @@ export default function FuelManagement() {
               {sortedAbastecimentos.map((abastecimento, index) => {
                 const previousAbastecimento = sortedAbastecimentos[index + 1];
                 return (
-                  <tr key={abastecimento.id}>
-                    <td className="px-6 py-4 text-xs text-gray-400">
-                      <div className="font-semibold text-white">
-                        {abastecimento.data_hora}
-                      </div>
+                  <tr
+                    key={abastecimento.id}
+                    className={`${
+                      abastecimento.media < 5.6 ? "bg-yellow-800/50" : ""
+                    }`}
+                  >
+                    <td className="px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
+                      {abastecimento.media < 5.6 && (
+                        <FaExclamationTriangle
+                          size={18}
+                          className="text-yellow-400"
+                        />
+                      )}
                       <div>
-                        {abastecimento.km_abastecimento.toLocaleString("pt-BR")}{" "}
-                        km
+                        <div className="font-semibold text-white">
+                          {abastecimento.data_hora}
+                        </div>
+                        <div>
+                          {abastecimento.km_abastecimento.toLocaleString("pt-BR")}{" "}
+                          km
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-xs">
+                      <div className="font-bold text-white">
+                        R$ {abastecimento.total_abastecimento.toFixed(2)}
+                      </div>
                       <div className="text-gray-400">
                         {abastecimento.litros.toFixed(2)} L × R${" "}
                         {abastecimento.preco_litro.toFixed(2)}
-                      </div>
-                      <div className="font-bold text-white">
-                        R$ {abastecimento.total_abastecimento.toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-400">
@@ -208,11 +226,9 @@ export default function FuelManagement() {
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-400">
                       <div className="font-semibold text-white">
-                        {abastecimento.motorista}
-                      </div>
-                      <div>
                         {abastecimento.marca} {abastecimento.modelo}
                       </div>
+                      <div>{abastecimento.motorista}</div>
                     </td>
                     <td className="px-6 py-4 text-xs font-medium">
                       <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white">

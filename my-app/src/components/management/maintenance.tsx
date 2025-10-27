@@ -96,7 +96,7 @@ export default function MaintenanceManagement() {
     <div className="space-y-6 mt-6">
       <div className="flex gap-4 justify-end">
         <button
-          className="flex items-center gap-2 bg-primary-purple text-white py-3 px-6 rounded-lg font-semibold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
+          className="flex items-center gap-2 bg-primary-purple text-white py-2 px-4 rounded-lg text-sm font-bold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
           onClick={addMaintenanceModal.onOpen}
         >
           <FaPlus />

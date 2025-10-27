@@ -50,7 +50,7 @@ export default function VehiclesManagement() {
     <div className="space-y-6 mt-6">
       <div className="flex gap-4 justify-end">
         <button
-          className="flex items-center gap-2 bg-primary-purple text-white py-3 px-6 rounded-lg font-semibold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
+          className="flex items-center gap-2 bg-primary-purple text-white text-sm py-2 px-4 rounded-lg font-bold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
           onClick={addVehicleModal.onOpen}
         >
           <FaPlus />

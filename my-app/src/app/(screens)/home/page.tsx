@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { FaGear } from "react-icons/fa6";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
+import Link from "next/link";
 
 // --- Interfaces de Tipagem ---
 interface Vehicle {
@@ -175,7 +176,9 @@ const getMockedFilteredData = (): FilteredData => {
 
 export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
-  const addMaintenanceModal = useAddMaintenanceModal() as { onOpen: () => void };
+  const addMaintenanceModal = useAddMaintenanceModal() as {
+    onOpen: () => void;
+  };
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
   const router = useRouter();
 
@@ -306,15 +309,18 @@ export default function Home() {
 
         {/* --- Cards de Visão Geral --- */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-          <div className="bg-primary-purple rounded-xl shadow-lg p-6 flex items-center space-x-4">
+          <Link
+            href="/management#vehicles"
+            className="bg-primary-purple rounded-xl shadow-lg p-6 flex items-center space-x-4"
+          >
             <FaTruck size={40} className="text-white opacity-75" />
             <div>
-              <p className="text-sm text-white/80">Total de Veículos</p>
+              <p className="text-sm text-white/80">Veículos</p>
               <h2 className="text-4xl font-bold">
                 {filteredData.dashboardMetrics.totalVeiculos}
               </h2>
             </div>
-          </div>
+          </Link>
           <div className="bg-fuchsia-800 rounded-xl shadow-lg p-6 flex items-center space-x-4">
             <FaDollarSign size={40} className="text-white opacity-75" />
             <div>
@@ -337,7 +343,7 @@ export default function Home() {
               </h2>
             </div>
           </div>
-          <div className="bg-emerald-600 rounded-xl shadow-lg p-6 flex flex-col items-start justify-start space-y-2">
+          {/* <div className="bg-emerald-600 rounded-xl shadow-lg p-6 flex flex-col items-start justify-start space-y-2">
             {filteredData.veiculoMaisEconomico && (
               <div className="flex flex-col gap-1">
                 <div className="flex items-center space-x-2">
@@ -369,6 +375,53 @@ export default function Home() {
                     {filteredData.veiculoMaisConsome.name}
                   </h2>
                   <p className="text-lg text-white/80">
+                    {filteredData.veiculoMaisConsome.consumo?.toFixed(2)} Km/L
+                  </p>
+                </div>
+              </div>
+            )}
+          </div> */}
+          <div className="space-y-3">
+            {/* --- Mais Econômico --- */}
+            {filteredData.veiculoMaisEconomico && (
+              <div className="bg-emerald-600 rounded-xl shadow-lg py-2 px-3 flex flex-col justify-between items-center">
+                {/* Ícone + Label no canto superior direito */}
+                <div className="w-full top-2 right-3 flex space-x-1">
+                  <FaCar size={16} className="text-white opacity-80" />
+                  <p className="text-xs text-white/80 font-semibold">
+                    Mais Econômico
+                  </p>
+                </div>
+
+                {/* Conteúdo principal */}
+                <div className="flex w-full justify-between">
+                  <p className="text-sm font-bold truncate max-w-[120px]">
+                    {filteredData.veiculoMaisEconomico.name}
+                  </p>
+                  <p className="text-sm text-white font-bold">
+                    {filteredData.veiculoMaisEconomico.consumo?.toFixed(2)} Km/L
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* --- Mais Consome --- */}
+            {filteredData.veiculoMaisConsome && (
+              <div className="bg-yellow-600 rounded-xl shadow-lg py-2 px-3 flex flex-col justify-between items-center">
+                {/* Ícone + Label no canto superior direito */}
+                <div className="w-full top-2 right-3 flex space-x-1">
+                  <FaCar size={16} className="text-white opacity-80" />
+                  <p className="text-xs text-white/80 font-semibold">
+                    Mais Consome
+                  </p>
+                </div>
+
+                {/* Conteúdo principal */}
+                <div className="flex w-full justify-between">
+                  <p className="text-sm font-bold truncate max-w-[120px]">
+                    {filteredData.veiculoMaisConsome.name}
+                  </p>
+                  <p className="text-sm text-white font-bold">
                     {filteredData.veiculoMaisConsome.consumo?.toFixed(2)} Km/L
                   </p>
                 </div>

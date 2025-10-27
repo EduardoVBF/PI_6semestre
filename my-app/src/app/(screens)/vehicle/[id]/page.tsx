@@ -142,18 +142,18 @@ const calculateAverageConsumption = (data: any[], count: number) => {
 };
 
 // Função para calcular o consumo em relação ao abastecimento anterior
-const calculateLastConsumption = (
-  abastecimentoAtual: any,
-  abastecimentoAnterior: any
-) => {
-  if (!abastecimentoAnterior || !abastecimentoAtual) return 0;
-  const kmTravelled =
-    abastecimentoAtual.km_abastecimento -
-    abastecimentoAnterior.km_abastecimento;
-  return abastecimentoAnterior.litros > 0
-    ? kmTravelled / abastecimentoAnterior.litros
-    : 0;
-};
+// const calculateLastConsumption = (
+//   abastecimentoAtual: any,
+//   abastecimentoAnterior: any
+// ) => {
+//   if (!abastecimentoAnterior || !abastecimentoAtual) return 0;
+//   const kmTravelled =
+//     abastecimentoAtual.km_abastecimento -
+//     abastecimentoAnterior.km_abastecimento;
+//   return abastecimentoAnterior.litros > 0
+//     ? kmTravelled / abastecimentoAnterior.litros
+//     : 0;
+// };
 
 export default function VehicleDetails() {
   const editMaintenanceModal = useEditMaintenanceModal() as {
@@ -420,23 +420,38 @@ export default function VehicleDetails() {
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
                 {sortedAbastecimentos.map((abastecimento, index) => (
-                  <tr key={abastecimento.id}>
-                    <td className="px-6 py-4 text-xs text-gray-400">
-                      <div className="font-semibold text-white">
-                        {abastecimento.data_hora}
-                      </div>
+                  <tr
+                    key={abastecimento.id}
+                    className={`${
+                      abastecimento.media < 5.6 ? "bg-yellow-800/50" : ""
+                    }`}
+                  >
+                    <td className="px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
+                      {abastecimento.media < 5.6 && (
+                        <FaExclamationTriangle
+                          size={18}
+                          className="text-yellow-400"
+                        />
+                      )}
                       <div>
-                        {abastecimento.km_abastecimento.toLocaleString("pt-BR")}{" "}
-                        km
+                        <div className="font-semibold text-white">
+                          {abastecimento.data_hora}
+                        </div>
+                        <div>
+                          {abastecimento.km_abastecimento.toLocaleString(
+                            "pt-BR"
+                          )}{" "}
+                          km
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-xs">
+                      <div className="font-bold text-white">
+                        R$ {abastecimento.total_abastecimento.toFixed(2)}
+                      </div>
                       <div className="text-gray-400">
                         {abastecimento.litros.toFixed(2)} L × R$
                         {abastecimento.preco_litro.toFixed(2)}
-                      </div>
-                      <div className="font-bold text-white">
-                        R$ {abastecimento.total_abastecimento.toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-400">
@@ -447,9 +462,9 @@ export default function VehicleDetails() {
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-400">
                       <div className="font-semibold text-white">
-                        {abastecimento.motorista}
+                        {abastecimento.placa}
                       </div>
-                      <div>{abastecimento.placa}</div>
+                      <div>{abastecimento.motorista}</div>
                     </td>
                     <td className="px-6 py-4 text-xs font-medium">
                       <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white">
