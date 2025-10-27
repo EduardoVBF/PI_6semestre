@@ -19,6 +19,7 @@ import {
   FaPlus,
   FaCar,
 } from "react-icons/fa";
+import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import React, { useState, useEffect } from "react";
 import { IoWaterOutline } from "react-icons/io5";
@@ -174,6 +175,7 @@ const getMockedFilteredData = (): FilteredData => {
 
 export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
+  const addMaintenanceModal = useAddMaintenanceModal() as { onOpen: () => void };
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
   const router = useRouter();
 
@@ -206,12 +208,18 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
           <button
             onClick={addFuelSupplyModal.onOpen}
-            className="bg-primary-purple hover:bg-fuchsia-800 text-white py-2 px-4 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer w-fit"
+            className="bg-primary-purple hover:bg-fuchsia-800 text-white py-2 px-4 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer w-fit text-sm"
           >
             <FaPlus /> Adicionar Abastecimento
+          </button>
+          <button
+            onClick={addMaintenanceModal.onOpen}
+            className="bg-primary-purple hover:bg-fuchsia-800 text-white py-2 px-4 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer w-fit text-sm"
+          >
+            <FaPlus /> Adicionar Manutenção
           </button>
         </div>
 

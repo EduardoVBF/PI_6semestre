@@ -1,6 +1,7 @@
 "use client";
+import { useEditVehicleModal } from "@/utils/hooks/useEditVehicleModal";
 import { useAddVehicleModal } from "@/utils/hooks/useAddVehicleModal";
-import { FaTruck, FaPlus } from "react-icons/fa";
+import { FaTruck, FaPlus, FaPencilAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -41,6 +42,7 @@ export default function VehiclesManagement() {
   ];
   const totalVehicles = mockVehicles.length;
 
+  const editVehicleModal = useEditVehicleModal() as { onOpen: (vehicleId: string) => void };
   const addVehicleModal = useAddVehicleModal() as { onOpen: () => void };
   const router = useRouter();
 
@@ -124,6 +126,12 @@ export default function VehiclesManagement() {
                 >
                   Motorista
                 </th>
+                <th
+                  scope="col"
+                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                >
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody className="bg-gray-800 divide-y divide-gray-600">
@@ -149,6 +157,17 @@ export default function VehiclesManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {vehicle.motorista}
+                  </td>
+                  <td className="px-6 py-4 text-xs">
+                    <button
+                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                      onClick={() => editVehicleModal.onOpen(vehicle.placa)}
+                    >
+                      <FaPencilAlt
+                        className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
+                        size={16}
+                      />
+                    </button>
                   </td>
                 </tr>
               ))}

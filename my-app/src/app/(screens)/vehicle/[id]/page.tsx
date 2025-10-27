@@ -15,6 +15,7 @@ import { useEditMaintenanceModal } from "@/utils/hooks/useEditMaintenanceModal";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
+import { useEditVehicleModal } from "@/utils/hooks/useEditVehicleModal";
 import { IoSpeedometerOutline, IoWaterOutline } from "react-icons/io5";
 import { FaCarSide } from "react-icons/fa6";
 import Header from "@/components/header";
@@ -155,9 +156,18 @@ const calculateLastConsumption = (
 };
 
 export default function VehicleDetails() {
-  const editMaintenanceModal = useEditMaintenanceModal() as { onOpen: (id: string) => void };
-  const editFuelSupplyModal = useEditFuelSupplyModal() as { onOpen: (id: string) => void };
-  const addMaintenanceModal = useAddMaintenanceModal() as { onOpen: () => void };
+  const editMaintenanceModal = useEditMaintenanceModal() as {
+    onOpen: (id: string) => void;
+  };
+  const editFuelSupplyModal = useEditFuelSupplyModal() as {
+    onOpen: (id: string) => void;
+  };
+  const addMaintenanceModal = useAddMaintenanceModal() as {
+    onOpen: () => void;
+  };
+  const editVehicleModal = useEditVehicleModal() as {
+    onOpen: (id: string) => void;
+  };
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
   const [showAlerts, setShowAlerts] = React.useState(false);
   const abastecimentos = mockAbastecimentos;
@@ -314,7 +324,7 @@ export default function VehicleDetails() {
 
         {/* Seção de Dados do Veículo */}
         <section className="bg-gray-800 rounded-xl shadow-lg p-6 space-y-4">
-          <div className="flex items-center space-x-4 mb-4">
+          <div className="flex items-center justify-between space-x-4 mb-4">
             {/* <FaTruck size={48} className="text-primary-purple" /> */}
             <div>
               <h1 className="text-3xl font-bold text-primary-purple">
@@ -323,6 +333,17 @@ export default function VehicleDetails() {
               <p className="text-xl text-gray-400">
                 {vehicle.marca}, {vehicle.ano}
               </p>
+            </div>
+            <div>
+              <button
+                className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                onClick={() => editVehicleModal.onOpen(vehicle.placa)}
+              >
+                <FaPencilAlt
+                  className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
+                  size={16}
+                />
+              </button>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -545,9 +566,7 @@ export default function VehicleDetails() {
                       <button
                         className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                         onClick={() =>
-                          editMaintenanceModal.onOpen(
-                            maintenance.id.toString()
-                          )
+                          editMaintenanceModal.onOpen(maintenance.id.toString())
                         }
                       >
                         <FaPencilAlt

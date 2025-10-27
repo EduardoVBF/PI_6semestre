@@ -1,5 +1,5 @@
 "use client";
-import { FaWrench, FaPlus, FaPen } from "react-icons/fa";
+import { FaWrench, FaPlus, FaPen, FaPencilAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -17,7 +17,7 @@ export default function MaintenanceManagement() {
       status: "Próximo",
       dataUltimaTroca: "15/07/2025",
       responsavel: "João Silva",
-      custo: 4500.00
+      custo: 4500.0,
     },
     {
       id: 2,
@@ -31,7 +31,7 @@ export default function MaintenanceManagement() {
       status: "Regular",
       dataUltimaTroca: "01/08/2025",
       responsavel: "Maria Oliveira",
-      custo: 150.00
+      custo: 150.0,
     },
     {
       id: 3,
@@ -45,7 +45,7 @@ export default function MaintenanceManagement() {
       status: "Regular",
       dataUltimaTroca: "20/07/2025",
       responsavel: "Pedro Souza",
-      custo: 350.00
+      custo: 350.0,
     },
     {
       id: 4,
@@ -59,12 +59,14 @@ export default function MaintenanceManagement() {
       status: "Atrasado",
       dataUltimaTroca: "10/06/2025",
       responsavel: "Ana Costa",
-      custo: 800.00
+      custo: 800.0,
     },
   ];
   const totalMaintenance = mockMaintenance.length;
   const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
-  const urgentMaintenance = mockMaintenance.filter(m => m.proximaTroca <= 1000 || m.proximaTroca < 0).length;
+  const urgentMaintenance = mockMaintenance.filter(
+    (m) => m.proximaTroca <= 1000 || m.proximaTroca < 0
+  ).length;
 
   const router = useRouter();
 
@@ -84,9 +86,7 @@ export default function MaintenanceManagement() {
   return (
     <div className="space-y-6 mt-6">
       <div className="flex gap-4 justify-end">
-        <button
-          className="flex items-center gap-2 bg-primary-purple text-white py-3 px-6 rounded-lg font-semibold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
-        >
+        <button className="flex items-center gap-2 bg-primary-purple text-white py-3 px-6 rounded-lg font-semibold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer">
           <FaPlus />
           Cadastrar Manutenção
         </button>
@@ -175,9 +175,7 @@ export default function MaintenanceManagement() {
                     <div className="font-semibold text-white">
                       {maintenance.veiculo}
                     </div>
-                    <div className="text-xs">
-                      {maintenance.placa}
-                    </div>
+                    <div className="text-xs">{maintenance.placa}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {maintenance.tipo}
@@ -199,7 +197,11 @@ export default function MaintenanceManagement() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`px-3 py-1 rounded-full ${getStatusColor(maintenance.status)} text-white text-xs`}>
+                    <span
+                      className={`px-3 py-1 rounded-full ${getStatusColor(
+                        maintenance.status
+                      )} text-white text-xs`}
+                    >
                       {maintenance.status}
                       {maintenance.proximaTroca < 0
                         ? ` (${Math.abs(maintenance.proximaTroca)} km)`
@@ -211,12 +213,14 @@ export default function MaintenanceManagement() {
                       R$ {maintenance.custo.toFixed(2)}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-6 py-4 text-xs">
                     <button
-                      className="text-primary-purple hover:text-fuchsia-800 transition-colors"
-                      title="Editar manutenção"
+                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                     >
-                      <FaPen size={16} />
+                      <FaPencilAlt
+                        className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
+                        size={16}
+                      />
                     </button>
                   </td>
                 </tr>

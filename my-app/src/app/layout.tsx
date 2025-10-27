@@ -1,10 +1,11 @@
-import AddVehicleModalWrapper from "@/components/AddVehicleModalWrapper";
-import AddUserModalWrapper from "@/components/AddUserModalWrapper";
-import AddFuelSupplyModalWrapper from "@/components/AddFuelSupplyModalWrapper";
+import EditMaintenanceModalWrapper from "@/components/EditMaintenanceModalWrapper";
 import EditFuelSupplyModalWrapper from "@/components/EditFuelSupplyModalWrapper";
 import AddMaintenanceModalWrapper from "@/components/AddMaintenanceModalWrapper";
-import EditMaintenanceModalWrapper from "@/components/EditMaintenanceModalWrapper";
+import AddFuelSupplyModalWrapper from "@/components/AddFuelSupplyModalWrapper";
+import EditVehicleModalWrapper from "@/components/EditVehicleModalWrapper";
+import AddVehicleModalWrapper from "@/components/AddVehicleModalWrapper";
 import EditUserModalWrapper from "@/components/EditUserModalWrapper";
+import AddUserModalWrapper from "@/components/AddUserModalWrapper";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -36,6 +37,7 @@ export default function RootLayout({
       >
         {children}
         {/* wrapper client que usa Zustand */}
+        <EditVehicleModalWrapper />
         <AddVehicleModalWrapper />
         <AddUserModalWrapper />
         <AddFuelSupplyModalWrapper />
