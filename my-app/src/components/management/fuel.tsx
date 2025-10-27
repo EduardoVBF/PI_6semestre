@@ -7,7 +7,7 @@ import {
   FaPencilAlt,
   FaExclamationTriangle,
 } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function FuelManagement() {
@@ -92,13 +92,13 @@ export default function FuelManagement() {
   const sortedAbastecimentos = [...mockAbastecimentos].sort(
     (a, b) => b.id - a.id
   );
-  const totalFuelSupplies = mockAbastecimentos.length;
+  // const totalFuelSupplies = mockAbastecimentos.length;
 
   const editFuelSupplyModal = useEditFuelSupplyModal() as {
     onOpen: (id: string) => void;
   };
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <div className="space-y-6 mt-6">
@@ -183,8 +183,8 @@ export default function FuelManagement() {
               </tr>
             </thead>
             <tbody className="bg-gray-800 divide-y divide-gray-700">
-              {sortedAbastecimentos.map((abastecimento, index) => {
-                const previousAbastecimento = sortedAbastecimentos[index + 1];
+              {sortedAbastecimentos.map((abastecimento) => {
+                // const previousAbastecimento = sortedAbastecimentos[index + 1];
                 return (
                   <tr
                     key={abastecimento.id}
