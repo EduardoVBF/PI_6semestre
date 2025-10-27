@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-export default function EditMaintenanceModal({
+export default function EditPreventiveMaintenanceModal({
   isOpen,
   onClose,
   maintenanceData,
@@ -15,48 +15,70 @@ export default function EditMaintenanceModal({
   const [isLoading, setIsLoading] = useState(false);
 
   const initialFormData = {
-    tipo: "",
-    kmTroca: "",
-    kmAtual: "",
-    kmUltimaTroca: "",
-    proximaTroca: "",
-    status: "Regular",
-    dataUltimaTroca: "",
-    responsavel: "",
-    custo: "",
     placa: "",
-    veiculo: "",
+    kmAtual: "",
+    manutencoes: {
+      oleo: false,
+      filtroOleo: false,
+      filtroCombustivel: false,
+      filtroAr: false,
+      engraxamento: false,
+    },
   };
 
   const [formData, setFormData] = useState(initialFormData);
 
+  // Mock de veículos para dropdown
+  const mockVehicles = [
+    { placa: "ABC-1234", modelo: "Onix", marca: "Chevrolet" },
+    { placa: "DEF-5678", modelo: "HR-V", marca: "Honda" },
+    { placa: "GHI-9012", modelo: "S10", marca: "Chevrolet" },
+    { placa: "JKL-3456", modelo: "Actros", marca: "Mercedes-Benz" },
+  ];
+
   useEffect(() => {
     if (isOpen && maintenanceData) {
-      setFormData({ ...initialFormData, ...maintenanceData });
+      // Garante que o objeto manutencoes sempre existe e tem as chaves corretas
+      setFormData({
+        ...initialFormData,
+        ...maintenanceData,
+        manutencoes: {
+          ...initialFormData.manutencoes,
+          ...(maintenanceData.manutencoes || {}),
+        },
+      });
     }
   }, [isOpen, maintenanceData]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox") {
+      setFormData((prev) => ({
+        ...prev,
+        manutencoes: { ...prev.manutencoes, [name]: checked },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCloseModal = () => {
     setFormData(initialFormData);
-    onClose();
     setIsLoading(false);
+    onClose();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: handle update logic
+
+    // TODO: Integrar com backend (PUT / PATCH)
+    console.log("Dados atualizados:", formData);
+
     setTimeout(() => {
       setIsLoading(false);
       handleCloseModal();
-    }, 1500);
+    }, 1000);
   };
 
   if (!isOpen) return null;
@@ -64,7 +86,7 @@ export default function EditMaintenanceModal({
   return (
     <div className="fixed inset-0 z-50 bg-gray-500/60 backdrop-blur-sm flex justify-center items-center p-4">
       <div
-        className="w-full max-w-lg flex flex-col bg-gray-800 p-8 rounded-xl shadow-2xl relative"
+        className="w-full max-w-md flex flex-col bg-gray-800 p-8 rounded-xl shadow-2xl relative max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -75,136 +97,84 @@ export default function EditMaintenanceModal({
         </button>
 
         <h1 className="text-2xl font-bold text-primary-purple mb-6 text-center">
-          Editar Manutenção
+          Editar Manutenção Preventiva
         </h1>
 
         {isLoading ? (
           <div className="flex justify-center items-center py-20 px-10">
-            Carregando...
+            Salvando alterações...
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Veículo */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Veículo
               </label>
-              <Input
-                type="text"
+              <select
                 name="placa"
                 value={formData.placa}
                 onChange={handleChange}
-                placeholder="Placa do veículo"
                 required
-                className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-              />
+                className="w-full h-12 text-sm px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple transition-all duration-200"
+              >
+                <option value="">Selecione o veículo</option>
+                {mockVehicles.map((v) => (
+                  <option key={v.placa} value={v.placa}>
+                    {v.marca} {v.modelo} - {v.placa}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* KM Atual */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Tipo
+                KM Atual
               </label>
               <Input
-                type="text"
-                name="tipo"
-                value={formData.tipo}
+                type="number"
+                name="kmAtual"
+                value={formData.kmAtual}
                 onChange={handleChange}
-                placeholder="Tipo de manutenção"
+                placeholder="Informe o KM atual"
                 required
-                className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
+                className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple transition-all duration-200"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  KM Manutenção
-                </label>
-                <Input
-                  type="number"
-                  name="kmTroca"
-                  value={formData.kmTroca}
-                  onChange={handleChange}
-                  placeholder="KM da próxima troca"
-                  required
-                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Próxima Troca (km)
-                </label>
-                <Input
-                  type="number"
-                  name="proximaTroca"
-                  value={formData.proximaTroca}
-                  onChange={handleChange}
-                  placeholder="Diferença para próxima troca"
-                  required
-                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                    required
+
+            {/* Manutenções realizadas */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Manutenções Realizadas
+              </label>
+              <div className="space-y-2">
+                {[
+                  { name: "oleo", label: "Troca de óleo" },
+                  { name: "filtroOleo", label: "Troca de filtro de óleo lubrificante" },
+                  { name: "filtroCombustivel", label: "Troca de filtro de combustível" },
+                  { name: "filtroAr", label: "Troca de filtro de ar" },
+                  { name: "engraxamento", label: "Engraxamento" },
+                ].map((item) => (
+                  <label
+                    key={item.name}
+                    className="flex items-center gap-2 text-gray-300"
                   >
-                    <option value="Regular">Regular</option>
-                    <option value="Próximo">Próximo</option>
-                    <option value="Atrasado">Atrasado</option>
-                    <option value="Concluída">Concluída</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Custo
+                    <input
+                      type="checkbox"
+                      name={item.name}
+                      checked={formData.manutencoes[item.name as keyof typeof formData.manutencoes]}
+                      onChange={handleChange}
+                      className="w-5 h-5 text-primary-purple bg-gray-700 border-gray-600 rounded focus:ring-primary-purple"
+                    />
+                    {item.label}
                   </label>
-                  <Input
-                    type="number"
-                    name="custo"
-                    value={formData.custo}
-                    onChange={handleChange}
-                    placeholder="Custo da manutenção"
-                    required
-                    className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                  />
-                </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Data Última Troca
-                </label>
-                <Input
-                  type="date"
-                  name="dataUltimaTroca"
-                  value={formData.dataUltimaTroca}
-                  onChange={handleChange}
-                  required
-                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Responsável
-                </label>
-                <Input
-                  type="text"
-                  name="responsavel"
-                  value={formData.responsavel}
-                  onChange={handleChange}
-                  placeholder="Responsável pela manutenção"
-                  required
-                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                />
+                ))}
               </div>
             </div>
-            <div className="flex justify-end pt-2">
+
+            {/* Botão de salvar */}
+            <div className="flex justify-end pt-4">
               <button
                 type="submit"
                 disabled={isLoading}

@@ -1,4 +1,6 @@
 "use client";
+import { useEditMaintenanceModal } from "@/utils/hooks/useEditMaintenanceModal";
+import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { FaWrench, FaPlus, FaPen, FaPencilAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -62,6 +64,13 @@ export default function MaintenanceManagement() {
       custo: 800.0,
     },
   ];
+
+  const editMaintenanceModal = useEditMaintenanceModal() as {
+    onOpen: (id: string) => void;
+  };
+  const addMaintenanceModal = useAddMaintenanceModal() as {
+    onOpen: () => void;
+  };
   const totalMaintenance = mockMaintenance.length;
   const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
   const urgentMaintenance = mockMaintenance.filter(
@@ -86,7 +95,10 @@ export default function MaintenanceManagement() {
   return (
     <div className="space-y-6 mt-6">
       <div className="flex gap-4 justify-end">
-        <button className="flex items-center gap-2 bg-primary-purple text-white py-3 px-6 rounded-lg font-semibold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer">
+        <button
+          className="flex items-center gap-2 bg-primary-purple text-white py-3 px-6 rounded-lg font-semibold hover:bg-fuchsia-800 transition-colors duration-200 cursor-pointer"
+          onClick={addMaintenanceModal.onOpen}
+        >
           <FaPlus />
           Cadastrar Manutenção
         </button>
@@ -214,12 +226,15 @@ export default function MaintenanceManagement() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-xs">
-                    <button
-                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                    >
+                    <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
                       <FaPencilAlt
                         className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
                         size={16}
+                        onClick={() =>
+                          editMaintenanceModal.onOpen(
+                            maintenance.id.toString()
+                          )
+                        }
                       />
                     </button>
                   </td>
