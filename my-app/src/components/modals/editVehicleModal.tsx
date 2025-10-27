@@ -143,7 +143,6 @@ export default function EditVehicleModal({
 
   const motoristas = mockUsers.filter((u) => u.funcao === "Motorista");
 
-  console.log("Editing vehicle:", vehicle);
   return (
     <div className="fixed inset-0 z-50 bg-gray-500/60 backdrop-blur-sm flex justify-center items-center p-4">
       <div

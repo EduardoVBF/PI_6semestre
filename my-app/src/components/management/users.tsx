@@ -1,12 +1,24 @@
 "use client";
 import { useEditUserModal } from "@/utils/hooks/useEditUserModal";
 import { FaUsers, FaPencilAlt } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import React from "react";
 
+interface IUserData {
+  id: number;
+  nome: string;
+  sobrenome: string;
+  telefone: string;
+  funcao: string;
+  admin: boolean;
+  status: string;
+}
+
 export default function UsersManagement() {
-  const editUserModal = useEditUserModal() as { onOpen: (data: any) => void };
-  const mockUsers = [
+  const editUserModal = useEditUserModal() as {
+    onOpen: (userData: IUserData | null) => void;
+  };
+  const mockUsers: IUserData[] = [
     {
       id: 1,
       nome: "João",
@@ -44,9 +56,9 @@ export default function UsersManagement() {
       status: "ativo",
     },
   ];
-  const totalUsers = mockUsers.length;
+  // const totalUsers = mockUsers.length;
 
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <div className="space-y-6 mt-6">

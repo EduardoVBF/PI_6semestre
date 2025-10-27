@@ -3,6 +3,16 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
+interface IUserData {
+  id: number;
+  nome: string;
+  sobrenome: string;
+  telefone: string;
+  funcao: string;
+  admin: boolean;
+  status: string;
+}
+
 export default function EditUserModal({
   isOpen,
   onClose,
@@ -10,7 +20,7 @@ export default function EditUserModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  userData: any;
+  userData: IUserData | null;
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,6 +29,7 @@ export default function EditUserModal({
     sobrenome: "",
     telefone: "",
     funcao: "",
+    admin: false,
     status: "ativo",
   };
 

@@ -79,7 +79,7 @@ export default function Management() {
                     <>
                       <motion.div
                         layoutId="tab-bg"
-                        className="absolute inset-0 rounded-md bg-primary-purple/15"
+                        className="absolute inset-0 rounded-md bg-gradient-to-t from-primary-purple/30 via-primary-purple/15 to-transparent"
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       />
                       <motion.div
