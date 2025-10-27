@@ -6,7 +6,16 @@ import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function VehiclesManagement() {
-  const mockVehicles = [
+  interface Vehicle {
+    placa: string;
+    modelo: string;
+    marca: string;
+    ano: number;
+    tipo: string;
+    motorista: string;
+  }
+
+  const mockVehicles: Vehicle[] = [
     {
       placa: "ABC-1234",
       modelo: "Onix",
@@ -40,10 +49,10 @@ export default function VehiclesManagement() {
       motorista: "Ana Costa",
     },
   ];
-  const totalVehicles = mockVehicles.length;
+  // const totalVehicles = mockVehicles.length;
 
   const editVehicleModal = useEditVehicleModal() as {
-    onOpen: (vehicleId: string) => void;
+    onOpen: (vehicle: Vehicle | null) => void;
   };
   const addVehicleModal = useAddVehicleModal() as { onOpen: () => void };
   const router = useRouter();
@@ -172,7 +181,7 @@ export default function VehiclesManagement() {
                       className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation(); // evita disparar o clique da linha
-                        editVehicleModal.onOpen(vehicle.placa);
+                        editVehicleModal.onOpen(vehicle);
                       }}
                     >
                       <FaPencilAlt

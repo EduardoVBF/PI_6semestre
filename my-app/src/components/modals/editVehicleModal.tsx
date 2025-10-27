@@ -14,36 +14,73 @@ const mockUsers = [
 ];
 
 const mockVehicles = [
-  { id: 1, placa: "ABC-1234", modelo: "Onix", marca: "Chevrolet", ano: "2018", tipo: "Carro", motorista: "João Silva" },
-  { id: 2, placa: "DEF-5678", modelo: "HR-V", marca: "Honda", ano: "2020", tipo: "Carro", motorista: "Pedro Souza" },
-  { id: 3, placa: "GHI-9012", modelo: "S10", marca: "Chevrolet", ano: "2019", tipo: "Caminhonete", motorista: "Ana Costa" },
+  {
+    placa: "ABC-1234",
+    modelo: "Onix",
+    marca: "Chevrolet",
+    ano: 2022,
+    tipo: "Carro",
+    motorista: "João Silva",
+  },
+  {
+    placa: "DEF-5678",
+    modelo: "HR-V",
+    marca: "Honda",
+    ano: 2023,
+    tipo: "SUV",
+    motorista: "Maria Oliveira",
+  },
+  {
+    placa: "GHI-9012",
+    modelo: "S10",
+    marca: "Chevrolet",
+    ano: 2021,
+    tipo: "Picape",
+    motorista: "Pedro Souza",
+  },
+  {
+    placa: "JKL-3456",
+    modelo: "Actros",
+    marca: "Mercedes-Benz",
+    ano: 2020,
+    tipo: "Caminhão",
+    motorista: "Ana Costa",
+  },
 ];
+
+interface Vehicle {
+  placa: string;
+  modelo: string;
+  marca: string;
+  ano: number;
+  tipo: string;
+  motorista: string;
+}
 
 export default function EditVehicleModal({
   isOpen,
   onClose,
-  vehicleId,
+  vehicle,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  vehicleId: string;
+  vehicle: Vehicle | null;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     placa: "",
     modelo: "",
     marca: "",
-    ano: "",
+    ano: 0,
     tipo: "",
     motorista: "",
   });
 
   // Carrega os dados do veículo quando o modal abre.
   useEffect(() => {
-    if (isOpen && vehicleId) {
+    if (isOpen && vehicle) {
       // carregar dados do veículo (mock)
-      const idNum = parseInt(vehicleId, 10);
-      const found = mockVehicles.find((v) => v.id === idNum);
+      const found = mockVehicles.find((v) => v.placa === vehicle.placa);
       if (found) {
         setFormData({
           placa: found.placa,
@@ -55,15 +92,24 @@ export default function EditVehicleModal({
         });
       }
     }
-  }, [isOpen, vehicleId]);
+  }, [isOpen, vehicle]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCloseModal = () => {
-    setFormData({ placa: "", modelo: "", marca: "", ano: "", tipo: "", motorista: "" });
+    setFormData({
+      placa: "",
+      modelo: "",
+      marca: "",
+      ano: 0,
+      tipo: "",
+      motorista: "",
+    });
     onClose();
     setIsLoading(false);
   };
@@ -97,6 +143,7 @@ export default function EditVehicleModal({
 
   const motoristas = mockUsers.filter((u) => u.funcao === "Motorista");
 
+  console.log("Editing vehicle:", vehicle);
   return (
     <div className="fixed inset-0 z-50 bg-gray-500/60 backdrop-blur-sm flex justify-center items-center p-4">
       <div
@@ -110,7 +157,9 @@ export default function EditVehicleModal({
           <X size={28} />
         </button>
 
-        <h1 className="text-2xl font-bold text-primary-purple mb-6 text-center">Editar Veículo</h1>
+        <h1 className="text-2xl font-bold text-primary-purple mb-6 text-center">
+          Editar Veículo
+        </h1>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {isLoading ? (
@@ -120,7 +169,9 @@ export default function EditVehicleModal({
           ) : (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Placa</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Placa
+                </label>
                 <Input
                   type="text"
                   name="placa"
@@ -134,7 +185,9 @@ export default function EditVehicleModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Modelo</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Modelo
+                  </label>
                   <Input
                     type="text"
                     name="modelo"
@@ -146,7 +199,9 @@ export default function EditVehicleModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Marca</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Marca
+                  </label>
                   <Input
                     type="text"
                     name="marca"
@@ -161,7 +216,9 @@ export default function EditVehicleModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Ano</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Ano
+                  </label>
                   <Input
                     type="number"
                     name="ano"
@@ -173,7 +230,9 @@ export default function EditVehicleModal({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Tipo</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Tipo
+                  </label>
                   <Input
                     type="text"
                     name="tipo"
@@ -187,7 +246,9 @@ export default function EditVehicleModal({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Motorista</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Motorista
+                </label>
                 <select
                   name="motorista"
                   value={formData.motorista}
@@ -195,7 +256,9 @@ export default function EditVehicleModal({
                   className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
                   required
                 >
-                  <option value="" disabled>Selecione um motorista</option>
+                  <option value="" disabled>
+                    Selecione um motorista
+                  </option>
                   {motoristas.map((motorista) => (
                     <option key={motorista.id} value={motorista.nome}>
                       {motorista.nome}
