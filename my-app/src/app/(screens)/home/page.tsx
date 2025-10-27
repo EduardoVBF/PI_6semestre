@@ -202,16 +202,16 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-primary-purple">
             Dashboard da Frota
           </h1>
-          <div className="p-2 rounded-lg hover:bg-gray-500 text-gray-400 hover:text-gray-800 transition-colors duration-200">
-            <FaGear
-              size={24}
-              className="inline-block cursor-pointer"
-              onClick={() => router.push("/management")}
-            />
-          </div>
+          <Link
+            href="/management"
+            className="flex items-center gap-2 bg-indigo-900 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg font-semibold transition-colors"
+          >
+            <FaGear size={20} />
+            Gerenciamento
+          </Link>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-start gap-2">
           <button
             onClick={addFuelSupplyModal.onOpen}
             className="bg-primary-purple hover:bg-fuchsia-800 text-white py-2 px-4 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer w-fit text-sm"
