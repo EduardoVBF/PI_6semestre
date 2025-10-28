@@ -4,15 +4,15 @@ import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import EditFuelSupplyModal from "@/components/modals/editFuelSupply";
 
 export default function EditFuelSupplyModalWrapper() {
-  const { isOpen, onClose, fuelSupplyId } = useEditFuelSupplyModal();
+  const { isOpen, onClose, fuelSupply } = useEditFuelSupplyModal();
 
-  if (!fuelSupplyId) return null;
+  if (!fuelSupply) return null;
 
   return (
     <EditFuelSupplyModal
       isOpen={isOpen}
       onClose={onClose}
-      fuelSupplyId={fuelSupplyId}
+      fuelSupply={fuelSupply}
     />
   );
 }

@@ -10,6 +10,22 @@ import {
 // import { useRouter } from "next/navigation";
 import React from "react";
 
+interface IFuelSupply {
+  id: number;
+  km_abastecimento: number;
+  litros: number;
+  preco_litro: number;
+  data_hora: string;
+  posto: string;
+  tipo_combustivel: string;
+  motorista: string;
+  placa: string;
+  marca: string;
+  modelo: string;
+  total_abastecimento: number;
+  media: number;
+}
+
 export default function FuelManagement() {
   // Dados simulados para os abastecimentos
   const mockAbastecimentos = [
@@ -94,9 +110,7 @@ export default function FuelManagement() {
   );
   // const totalFuelSupplies = mockAbastecimentos.length;
 
-  const editFuelSupplyModal = useEditFuelSupplyModal() as {
-    onOpen: (id: string) => void;
-  };
+  const editFuelSupplyModal = useEditFuelSupplyModal() as { onOpen: (fuelSupply: IFuelSupply) => void };
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
   // const router = useRouter();
 
@@ -240,7 +254,7 @@ export default function FuelManagement() {
                         className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                         onClick={() =>
                           editFuelSupplyModal.onOpen(
-                            abastecimento.id.toString()
+                            abastecimento as IFuelSupply
                           )
                         }
                       >
