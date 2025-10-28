@@ -3,6 +3,21 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
+interface IMaintenance {
+  id: number;
+  veiculo: string;
+  placa: string;
+  tipo: string;
+  kmTroca: number;
+  kmAtual: number;
+  kmUltimaTroca: number;
+  proximaTroca: number;
+  status: string;
+  dataUltimaTroca: string;
+  responsavel: string;
+  custo: number;
+}
+
 export default function EditPreventiveMaintenanceModal({
   isOpen,
   onClose,
@@ -10,7 +25,7 @@ export default function EditPreventiveMaintenanceModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  maintenanceData: any;
+  maintenanceData: IMaintenance | null;
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,19 +54,33 @@ export default function EditPreventiveMaintenanceModal({
   useEffect(() => {
     if (isOpen && maintenanceData) {
       // Garante que o objeto manutencoes sempre existe e tem as chaves corretas
+      // setFormData({
+      //   ...initialFormData,
+      //   ...maintenanceData,
+      //   manutencoes: {
+      //     ...initialFormData.manutencoes,
+      //     ...(maintenanceData.manutencoes || {}),
+      //   },
+      // });
       setFormData({
-        ...initialFormData,
-        ...maintenanceData,
+        placa: maintenanceData.placa,
+        kmAtual: maintenanceData.kmAtual.toString(),
         manutencoes: {
-          ...initialFormData.manutencoes,
-          ...(maintenanceData.manutencoes || {}),
+          oleo: false,
+          filtroOleo: false,
+          filtroCombustivel: false,
+          filtroAr: false,
+          engraxamento: false,
         },
       });
     }
   }, [isOpen, maintenanceData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const { name, value, type } = target;
+    const checked = (target as HTMLInputElement).checked;
+
     if (type === "checkbox") {
       setFormData((prev) => ({
         ...prev,

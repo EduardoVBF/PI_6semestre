@@ -1,13 +1,27 @@
 "use client";
 import { useEditMaintenanceModal } from "@/utils/hooks/useEditMaintenanceModal";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
-import { FaWrench, FaPlus, FaPen, FaPencilAlt } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { FaWrench, FaPlus, FaPencilAlt } from "react-icons/fa";
+// import { useRouter } from "next/navigation";
 import React from "react";
-import { mock } from "node:test";
+
+interface IMaintenance {
+  id: number;
+  veiculo: string;
+  placa: string;
+  tipo: string;
+  kmTroca: number;
+  kmAtual: number;
+  kmUltimaTroca: number;
+  proximaTroca: number;
+  status: string;
+  dataUltimaTroca: string;
+  responsavel: string;
+  custo: number;
+}
 
 export default function MaintenanceManagement() {
-  const mockMaintenance = [
+  const mockMaintenance: IMaintenance[] = [
     {
       id: 1,
       veiculo: "Caminhão IVECO",
@@ -67,18 +81,18 @@ export default function MaintenanceManagement() {
   ];
 
   const editMaintenanceModal = useEditMaintenanceModal() as {
-    onOpen: (id: string) => void;
+    onOpen: (maintenanceData: IMaintenance) => void;
   };
   const addMaintenanceModal = useAddMaintenanceModal() as {
     onOpen: () => void;
   };
   const totalMaintenance = mockMaintenance.length;
-  const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
-  const urgentMaintenance = mockMaintenance.filter(
-    (m) => m.proximaTroca <= 1000 || m.proximaTroca < 0
-  ).length;
+  // const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
+  // const urgentMaintenance = mockMaintenance.filter(
+  //   (m) => m.proximaTroca <= 1000 || m.proximaTroca < 0
+  // ).length;
 
-  const router = useRouter();
+  // const router = useRouter();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -236,7 +250,7 @@ export default function MaintenanceManagement() {
                         size={16}
                         onClick={() =>
                           editMaintenanceModal.onOpen(
-                            maintenance.id.toString()
+                            maintenance
                           )
                         }
                       />

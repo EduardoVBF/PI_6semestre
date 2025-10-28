@@ -1,10 +1,25 @@
 'use client';
 import { create } from 'zustand';
 
+interface IMaintenance {
+  id: number;
+  veiculo: string;
+  placa: string;
+  tipo: string;
+  kmTroca: number;
+  kmAtual: number;
+  kmUltimaTroca: number;
+  proximaTroca: number;
+  status: string;
+  dataUltimaTroca: string;
+  responsavel: string;
+  custo: number;
+}
+
 interface EditMaintenanceModalStore {
     isOpen: boolean;
-    maintenanceData: any | null;
-    onOpen: (data: any) => void;
+    maintenanceData: IMaintenance | null;
+    onOpen: (data: IMaintenance) => void;
     onClose: () => void;
 }
 
