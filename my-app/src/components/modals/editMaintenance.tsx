@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { usePathname } from "next/navigation";
 
 interface IMaintenance {
   id: number;
@@ -27,6 +28,8 @@ export default function EditPreventiveMaintenanceModal({
   onClose: () => void;
   maintenanceData: IMaintenance | null;
 }) {
+  const pathname = usePathname();
+  const [placaDisabled, setPlacaDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const initialFormData = {
@@ -76,7 +79,9 @@ export default function EditPreventiveMaintenanceModal({
     }
   }, [isOpen, maintenanceData]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const target = e.target as HTMLInputElement | HTMLSelectElement;
     const { name, value, type } = target;
     const checked = (target as HTMLInputElement).checked;
@@ -109,6 +114,20 @@ export default function EditPreventiveMaintenanceModal({
       handleCloseModal();
     }, 1000);
   };
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    if (pathname.includes("/vehicle/")) {
+      setPlacaDisabled(true);
+      setFormData((prev) => ({
+        ...prev,
+        placa: pathname.split("/vehicle/")[1],
+      }));
+    } else {
+      setPlacaDisabled(false);
+    }
+  }, [isOpen, pathname]);
 
   if (!isOpen) return null;
 
@@ -145,6 +164,7 @@ export default function EditPreventiveMaintenanceModal({
                 value={formData.placa}
                 onChange={handleChange}
                 required
+                disabled={placaDisabled}
                 className="w-full h-12 text-sm px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple transition-all duration-200"
               >
                 <option value="">Selecione o veículo</option>
@@ -180,8 +200,14 @@ export default function EditPreventiveMaintenanceModal({
               <div className="space-y-2">
                 {[
                   { name: "oleo", label: "Troca de óleo" },
-                  { name: "filtroOleo", label: "Troca de filtro de óleo lubrificante" },
-                  { name: "filtroCombustivel", label: "Troca de filtro de combustível" },
+                  {
+                    name: "filtroOleo",
+                    label: "Troca de filtro de óleo lubrificante",
+                  },
+                  {
+                    name: "filtroCombustivel",
+                    label: "Troca de filtro de combustível",
+                  },
                   { name: "filtroAr", label: "Troca de filtro de ar" },
                   { name: "engraxamento", label: "Engraxamento" },
                 ].map((item) => (
@@ -192,7 +218,11 @@ export default function EditPreventiveMaintenanceModal({
                     <input
                       type="checkbox"
                       name={item.name}
-                      checked={formData.manutencoes[item.name as keyof typeof formData.manutencoes]}
+                      checked={
+                        formData.manutencoes[
+                          item.name as keyof typeof formData.manutencoes
+                        ]
+                      }
                       onChange={handleChange}
                       className="w-5 h-5 text-primary-purple bg-gray-700 border-gray-600 rounded focus:ring-primary-purple"
                     />
