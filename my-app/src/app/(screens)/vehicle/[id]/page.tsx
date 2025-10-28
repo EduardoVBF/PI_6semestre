@@ -22,8 +22,50 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import React from "react";
 
+interface IFuelSupply {
+  id: number;
+  km_abastecimento: number;
+  litros: number;
+  preco_litro: number;
+  data_hora: string;
+  posto: string;
+  tipo_combustivel: string;
+  motorista: string;
+  placa: string;
+  marca: string;
+  modelo: string;
+  total_abastecimento: number;
+  media: number;
+}
+
+interface IMaintenance {
+  id: number;
+  veiculo: string;
+  placa: string;
+  tipo: string;
+  kmTroca: number;
+  kmAtual: number;
+  kmUltimaTroca: number;
+  proximaTroca: number;
+  status: string;
+  dataUltimaTroca: string;
+  responsavel: string;
+  custo: number;
+}
+
+interface Vehicle {
+    placa: string;
+    modelo: string;
+    marca: string;
+    ano: number;
+    tipo: string;
+    motorista: string;
+    odometro: string;
+    proximaManutencao: string;
+  }
+
 // Dados simulados para o veículo
-const mockVehicleDetails = {
+const mockVehicleDetails: Vehicle = {
   placa: "ABC-1234",
   modelo: "Onix",
   marca: "Chevrolet",
@@ -35,7 +77,7 @@ const mockVehicleDetails = {
 };
 
 // Dados simulados para os abastecimentos
-const mockAbastecimentos = [
+const mockAbastecimentos: IFuelSupply[] = [
   {
     id: 1,
     km_abastecimento: 45120,
@@ -46,6 +88,8 @@ const mockAbastecimentos = [
     tipo_combustivel: "Gasolina Comum",
     motorista: "João Silva",
     placa: "ABC-1234",
+    marca: "Chevrolet",
+    modelo: "Onix",
     total_abastecimento: 301.2,
     media: 5.0,
   },
@@ -59,6 +103,8 @@ const mockAbastecimentos = [
     tipo_combustivel: "Gasolina Aditivada",
     motorista: "João Silva",
     placa: "ABC-1234",
+    marca: "Chevrolet",
+    modelo: "Onix",
     total_abastecimento: 281.25,
     media: 6.0,
   },
@@ -72,6 +118,8 @@ const mockAbastecimentos = [
     tipo_combustivel: "Gasolina Comum",
     motorista: "João Silva",
     placa: "ABC-1234",
+    marca: "Chevrolet",
+    modelo: "Onix",
     total_abastecimento: 326.8,
     media: 5.5,
   },
@@ -85,6 +133,8 @@ const mockAbastecimentos = [
     tipo_combustivel: "Gasolina Comum",
     motorista: "João Silva",
     placa: "ABC-1234",
+    marca: "Chevrolet",
+    modelo: "Onix",
     total_abastecimento: 292.8,
     media: 5.8,
   },
@@ -98,6 +148,8 @@ const mockAbastecimentos = [
     tipo_combustivel: "Gasolina Comum",
     motorista: "João Silva",
     placa: "ABC-1234",
+    marca: "Chevrolet",
+    modelo: "Onix",
     total_abastecimento: 314.6,
     media: 5.6,
   },
@@ -123,7 +175,7 @@ const mockAlerts = [
 ];
 
 // Função para calcular a média de consumo dos últimos X abastecimentos
-const calculateAverageConsumption = (data: any[], count: number) => {
+const calculateAverageConsumption = (data: IFuelSupply[], count: number) => {
   if (data.length < 2) return 0;
 
   const lastAbastecimentos = data.slice(0, count + 1);
@@ -157,17 +209,18 @@ const calculateAverageConsumption = (data: any[], count: number) => {
 
 export default function VehicleDetails() {
   const editMaintenanceModal = useEditMaintenanceModal() as {
-    onOpen: (id: string) => void;
+    onOpen: (maintenanceData: IMaintenance) => void;
   };
   const editFuelSupplyModal = useEditFuelSupplyModal() as {
-    onOpen: (id: string) => void;
+    onOpen: (fuelSupplyData: IFuelSupply) => void;
   };
   const addMaintenanceModal = useAddMaintenanceModal() as {
     onOpen: () => void;
   };
   const editVehicleModal = useEditVehicleModal() as {
-    onOpen: (id: string) => void;
+    onOpen: (vehicleId: Vehicle) => void;
   };
+
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
   const [showAlerts, setShowAlerts] = React.useState(false);
   const abastecimentos = mockAbastecimentos;
@@ -247,11 +300,11 @@ export default function VehicleDetails() {
       custo: 120.0,
     },
   ];
-  const totalMaintenance = mockMaintenance.length;
-  const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
-  const urgentMaintenance = mockMaintenance.filter(
-    (m) => m.proximaTroca <= 1000 || m.proximaTroca < 0
-  ).length;
+  // const totalMaintenance = mockMaintenance.length;
+  // const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
+  // const urgentMaintenance = mockMaintenance.filter(
+  //   (m) => m.proximaTroca <= 1000 || m.proximaTroca < 0
+  // ).length;
 
   // Função para cor do status
   const getStatusColor = (status: string) => {
@@ -337,7 +390,7 @@ export default function VehicleDetails() {
             <div>
               <button
                 className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                onClick={() => editVehicleModal.onOpen(vehicle.placa)}
+                onClick={() => editVehicleModal.onOpen(vehicle)}
               >
                 <FaPencilAlt
                   className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
@@ -419,7 +472,7 @@ export default function VehicleDetails() {
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {sortedAbastecimentos.map((abastecimento, index) => (
+                {sortedAbastecimentos.map((abastecimento) => (
                   <tr
                     key={abastecimento.id}
                     className={`${
@@ -476,7 +529,7 @@ export default function VehicleDetails() {
                         className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                         onClick={() =>
                           editFuelSupplyModal.onOpen(
-                            abastecimento.id.toString()
+                            abastecimento as IFuelSupply
                           )
                         }
                       >
@@ -581,7 +634,7 @@ export default function VehicleDetails() {
                       <button
                         className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                         onClick={() =>
-                          editMaintenanceModal.onOpen(maintenance.id.toString())
+                          editMaintenanceModal.onOpen(maintenance as IMaintenance)
                         }
                       >
                         <FaPencilAlt

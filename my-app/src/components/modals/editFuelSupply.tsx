@@ -1,9 +1,9 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 import Loader from "@/components/loader";
 
@@ -32,6 +32,8 @@ export default function EditFuelSupplyModal({
   onClose: () => void;
   fuelSupply: IFuelSupply | null;
 }) {
+  const pathname = usePathname();
+  const [placaDisabled, setPlacaDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: "",
@@ -143,6 +145,20 @@ export default function EditFuelSupplyModal({
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (pathname.includes("/vehicle/")) {
+      setPlacaDisabled(true);
+      setFormData((prev) => ({
+        ...prev,
+        licensePlate: pathname.split("/vehicle/")[1],
+      }));
+    } else {
+      setPlacaDisabled(false);
+    }
+  }, [isOpen, pathname]);
+
   if (!isOpen) return null;
 
   return (
@@ -182,6 +198,7 @@ export default function EditFuelSupplyModal({
                     licensePlate: e.target.value,
                   }))
                 }
+                disabled={placaDisabled}
                 className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary-purple"
                 required
               >

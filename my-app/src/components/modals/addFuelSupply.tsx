@@ -1,6 +1,7 @@
 "use client";
 import { toast, Bounce } from "react-toastify";
 import { CircleLoader } from "react-spinners";
+import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { Input } from "../ui/input";
 import { useState } from "react";
@@ -15,7 +16,9 @@ export default function AddFuelSupplyModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const [placaDisabled, setPlacaDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const pathname = usePathname();
   const [formData, setFormData] = useState({
     date: "",
     time: "",
@@ -96,8 +99,23 @@ export default function AddFuelSupplyModal({
       isFullTank: false,
     });
     onClose();
+    setPlacaDisabled(false);
     setIsLoading(false);
   };
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    if (pathname.includes("/vehicle/")) {
+      setPlacaDisabled(true);
+      setFormData((prev) => ({
+        ...prev,
+        licensePlate: pathname.split("/vehicle/")[1],
+      }));
+    } else {
+      setPlacaDisabled(false);
+    }
+  }, [isOpen, pathname]);
 
   if (!isOpen) return null;
 
@@ -122,17 +140,17 @@ export default function AddFuelSupplyModal({
           <div
             className="flex justify-center items-center py-20 px-10"
             onClick={() => {
-                handleCloseModal();
-                toast.success("Abastecimento registrado com sucesso!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                });
-                router.push("/home");
+              handleCloseModal();
+              toast.success("Abastecimento registrado com sucesso!", {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+              });
+              router.push("/home");
             }}
           >
             <Loader />
@@ -160,6 +178,7 @@ export default function AddFuelSupplyModal({
                     }
                     className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
                     required
+                    disabled={placaDisabled}
                   >
                     <option value="">Selecione o veículo</option>
                     {mockVehicles.map((vehicle) => (
