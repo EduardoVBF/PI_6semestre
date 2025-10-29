@@ -4,19 +4,19 @@ import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
 
-interface IMaintenance {
+interface IPreventiveMaintenance {
   id: number;
-  veiculo: string;
   placa: string;
-  tipo: string;
-  kmTroca: number;
   kmAtual: number;
-  kmUltimaTroca: number;
-  proximaTroca: number;
+  manutencoes: {
+    oleo: boolean;
+    filtroOleo: boolean;
+    filtroCombustivel: boolean;
+    filtroAr: boolean;
+    engraxamento: boolean;
+  };
+  data: string;
   status: string;
-  dataUltimaTroca: string;
-  responsavel: string;
-  custo: number;
 }
 
 export default function EditPreventiveMaintenanceModal({
@@ -26,7 +26,7 @@ export default function EditPreventiveMaintenanceModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  maintenanceData: IMaintenance | null;
+  maintenanceData: IPreventiveMaintenance | null;
 }) {
   const pathname = usePathname();
   const [placaDisabled, setPlacaDisabled] = useState(false);

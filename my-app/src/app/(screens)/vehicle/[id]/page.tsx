@@ -1,7 +1,5 @@
 "use client";
 import {
-  FaTruck,
-  FaMapMarkerAlt,
   FaExclamationTriangle,
   FaUser,
   FaChevronDown,
@@ -9,7 +7,6 @@ import {
   FaChevronUp,
   FaWrench,
   FaPlus,
-  FaPen,
 } from "react-icons/fa";
 import { useEditMaintenanceModal } from "@/utils/hooks/useEditMaintenanceModal";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
@@ -17,7 +14,6 @@ import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import { useEditVehicleModal } from "@/utils/hooks/useEditVehicleModal";
 import { IoSpeedometerOutline, IoWaterOutline } from "react-icons/io5";
-import { FaCarSide } from "react-icons/fa6";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import React from "react";
@@ -38,31 +34,31 @@ interface IFuelSupply {
   media: number;
 }
 
-interface IMaintenance {
+interface IPreventiveMaintenance {
   id: number;
-  veiculo: string;
   placa: string;
-  tipo: string;
-  kmTroca: number;
   kmAtual: number;
-  kmUltimaTroca: number;
-  proximaTroca: number;
+  manutencoes: {
+    oleo: boolean;
+    filtroOleo: boolean;
+    filtroCombustivel: boolean;
+    filtroAr: boolean;
+    engraxamento: boolean;
+  };
+  data: string;
   status: string;
-  dataUltimaTroca: string;
-  responsavel: string;
-  custo: number;
 }
 
 interface Vehicle {
-    placa: string;
-    modelo: string;
-    marca: string;
-    ano: number;
-    tipo: string;
-    motorista: string;
-    odometro: string;
-    proximaManutencao: string;
-  }
+  placa: string;
+  modelo: string;
+  marca: string;
+  ano: number;
+  tipo: string;
+  motorista: string;
+  odometro: string;
+  proximaManutencao: string;
+}
 
 // Dados simulados para o veículo
 const mockVehicleDetails: Vehicle = {
@@ -209,7 +205,7 @@ const calculateAverageConsumption = (data: IFuelSupply[], count: number) => {
 
 export default function VehicleDetails() {
   const editMaintenanceModal = useEditMaintenanceModal() as {
-    onOpen: (maintenanceData: IMaintenance) => void;
+    onOpen: (maintenanceData: IPreventiveMaintenance) => void;
   };
   const editFuelSupplyModal = useEditFuelSupplyModal() as {
     onOpen: (fuelSupplyData: IFuelSupply) => void;
@@ -228,78 +224,73 @@ export default function VehicleDetails() {
   const alerts = mockAlerts;
 
   // Mock de manutenções
-  const mockMaintenance = [
+  const mockMaintenance: IPreventiveMaintenance[] = [
     {
       id: 1,
-      veiculo: "Carro FIAT",
       placa: "ABC-1234",
-      tipo: "Troca de Pneus",
-      kmTroca: 50000, // próxima troca prevista
-      kmAtual: 45120, // km atual do veículo
-      kmUltimaTroca: 40000, // última troca
-      proximaTroca: 4880, // diferença para próxima troca
-      status: "Regular",
-      dataUltimaTroca: "01/04/2025",
-      responsavel: "Maria Oliveira",
-      custo: 450.0,
+      kmAtual: 45600,
+      manutencoes: {
+        oleo: true,
+        filtroOleo: true,
+        filtroCombustivel: false,
+        filtroAr: false,
+        engraxamento: true,
+      },
+      data: "15/10/2025",
+      status: "Concluída",
     },
     {
       id: 2,
-      veiculo: "Carro FIAT",
-      placa: "ABC-1234",
-      tipo: "Alinhamento",
-      kmTroca: 46000,
-      kmAtual: 45120,
-      kmUltimaTroca: 42000,
-      proximaTroca: 880,
-      status: "Próximo",
-      dataUltimaTroca: "15/03/2025",
-      responsavel: "Maria Oliveira",
-      custo: 150.0,
+      placa: "DEF-5678",
+      kmAtual: 87200,
+      manutencoes: {
+        oleo: false,
+        filtroOleo: false,
+        filtroCombustivel: true,
+        filtroAr: true,
+        engraxamento: false,
+      },
+      data: "02/09/2025",
+      status: "Atrasado",
     },
     {
       id: 3,
-      veiculo: "Carro FIAT",
-      placa: "ABC-1234",
-      tipo: "Troca de Óleo",
-      kmTroca: 45000,
-      kmAtual: 45120,
-      kmUltimaTroca: 40000,
-      proximaTroca: -120,
-      status: "Atrasado",
-      dataUltimaTroca: "10/02/2025",
-      responsavel: "Maria Oliveira",
-      custo: 350.0,
+      placa: "GHI-9012",
+      kmAtual: 132000,
+      manutencoes: {
+        oleo: true,
+        filtroOleo: true,
+        filtroCombustivel: true,
+        filtroAr: true,
+        engraxamento: true,
+      },
+      data: "01/08/2025",
+      status: "Próximo",
     },
     {
       id: 4,
-      veiculo: "Carro FIAT",
-      placa: "ABC-1234",
-      tipo: "Revisão",
-      kmTroca: 50000,
-      kmAtual: 45120,
-      kmUltimaTroca: 40000,
-      proximaTroca: 4880,
+      placa: "JKL-3456",
+      kmAtual: 54000,
+      manutencoes: {
+        oleo: false,
+        filtroOleo: true,
+        filtroCombustivel: false,
+        filtroAr: true,
+        engraxamento: false,
+      },
+      data: "20/11/2025",
       status: "Regular",
-      dataUltimaTroca: "20/03/2025",
-      responsavel: "Maria Oliveira",
-      custo: 800.0,
-    },
-    {
-      id: 5,
-      veiculo: "Carro FIAT",
-      placa: "ABC-1234",
-      tipo: "Troca de Filtro",
-      kmTroca: 45120,
-      kmAtual: 45120,
-      kmUltimaTroca: 45120,
-      proximaTroca: 10000,
-      status: "Concluída",
-      dataUltimaTroca: "25/04/2025",
-      responsavel: "Maria Oliveira",
-      custo: 120.0,
     },
   ];
+
+  const labelMap: Record<string, string> = {
+    oleo: "Troca de óleo",
+    filtroOleo: "Filtro de óleo",
+    filtroCombustivel: "Filtro de combustível",
+    filtroAr: "Filtro de ar",
+    engraxamento: "Engraxamento",
+  };
+
   // const totalMaintenance = mockMaintenance.length;
   // const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
   // const urgentMaintenance = mockMaintenance.filter(
@@ -551,7 +542,7 @@ export default function VehicleDetails() {
           <div className="flex justify-between items-center mb-4">
             <div className="flex itens-center space-x-4">
               <h3 className="text-2xl font-semibold text-primary-purple">
-                Manutenções
+                Manutenções Preventivas
               </h3>
               <div className="flex space-x-1 items-center">
                 <IoSpeedometerOutline size={25} className="text-gray-400" />
@@ -574,19 +565,19 @@ export default function VehicleDetails() {
               <thead className="bg-gray-600">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Veículo
+                    Placa
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Tipo
+                    Data
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    KM Troca
+                    KM Manutenção
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Manutenções Realizadas
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Custo
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Ações
@@ -596,50 +587,53 @@ export default function VehicleDetails() {
               <tbody className="bg-gray-800 divide-y divide-gray-600">
                 {mockMaintenance.map((maintenance) => (
                   <tr key={maintenance.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                      {maintenance.placa}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      <div className="font-semibold text-white">
-                        {maintenance.veiculo}
+                      {maintenance.data}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      {maintenance.kmAtual.toLocaleString()} km
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-300">
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(maintenance.manutencoes)
+                          .filter(([_, v]) => v)
+                          .map(([k]) => (
+                            <span
+                              key={k}
+                              className="px-2 py-1 bg-primary-purple/40 text-white rounded-lg text-xs text-center w-fit"
+                            >
+                              {labelMap[k]}
+                            </span>
+                          ))}
+                        {Object.values(maintenance.manutencoes).every(
+                          (v) => !v
+                        ) && (
+                          <span className="text-gray-500 italic text-xs">
+                            Nenhuma realizada
+                          </span>
+                        )}
                       </div>
-                      <div className="text-xs">{maintenance.placa}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      {maintenance.tipo}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      <div className="text-sm">
-                        {maintenance.kmTroca.toLocaleString()} km
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full ${getStatusColor(
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
                           maintenance.status
-                        )} text-white text-xs`}
+                        )}`}
                       >
                         {maintenance.status}
-                        {/* Só mostra km se não for concluída */}
-                        {maintenance.status !== "Concluída"
-                          ? maintenance.proximaTroca < 0
-                            ? ` (${Math.abs(maintenance.proximaTroca)} km)`
-                            : ` (${maintenance.proximaTroca} km)`
-                          : ""}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      <div className="font-semibold text-white">
-                        R$ {maintenance.custo.toFixed(2)}
-                      </div>
-                    </td>
                     <td className="px-6 py-4 text-xs">
-                      <button
-                        className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                        onClick={() =>
-                          editMaintenanceModal.onOpen(maintenance as IMaintenance)
-                        }
-                      >
+                      <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
                         <FaPencilAlt
-                          className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
+                          className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
                           size={16}
+                          onClick={() =>
+                            editMaintenanceModal.onOpen(maintenance)
+                          }
                         />
                       </button>
                     </td>
