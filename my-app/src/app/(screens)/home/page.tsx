@@ -11,18 +11,16 @@ import {
 import {
   FaTruck,
   FaWrench,
-  FaGasPump,
   FaDollarSign,
   FaExclamationTriangle,
   FaChevronDown,
-  FaChevronUp,
   FaPlus,
   FaCar,
 } from "react-icons/fa";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import React, { useState, useEffect } from "react";
-import { IoWaterOutline } from "react-icons/io5";
+import { IoWaterOutline, IoCloseCircle } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import { FaGear } from "react-icons/fa6";
 import Footer from "@/components/footer";
@@ -68,8 +66,11 @@ interface ChartData {
 
 interface Alert {
   id: number;
+  user: string;
+  placa: string;
+  veiculo: string;
   message: string;
-  type: "warning" | "info";
+  status?: "pendente";
 }
 
 interface FilteredData {
@@ -127,8 +128,20 @@ const mockData = {
 
 const getMockedFilteredData = (): FilteredData => {
   const mockAlerts: Alert[] = [
-    { id: 1, message: "BQI0502 - Consumo maior que o normal", type: "warning" },
-    { id: 2, message: "BSR9401 - Abastecimento suspeito", type: "warning" },
+    {
+      id: 1,
+      message: "Consumo maior que o normal",
+      placa: "BQI0502",
+      veiculo: "Caminhão IVECO",
+      user: "José Silveira",
+    },
+    {
+      id: 2,
+      message: "Abastecimento suspeito",
+      placa: "BSR9401",
+      veiculo: "Carro FIAT",
+      user: "João Silva",
+    },
   ];
 
   const mockDashboardMetrics: DashboardMetrics = {
@@ -204,12 +217,92 @@ export default function Home() {
           </h1>
           <Link
             href="/management"
-            className="flex items-center gap-2 bg-indigo-900 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-lg font-semibold transition-colors"
+            className="flex items-center gap-2 bg-[#d08700] hover:bg-[#bc6202] text-white px-4 py-2 rounded-lg shadow-lg font-semibold transition-colors"
           >
             <FaGear size={20} />
             Gerenciamento
           </Link>
         </div>
+
+        {/* --- Seção de Alertas Colapsável --- */}
+        {filteredData.alertas.length > 0 && (
+          <div className="w-full flex justify-start">
+            <section className="w-fit">
+              <div
+                className={`bg-yellow-800/50 border border-yellow-600 text-yellow-100 rounded-xl shadow-lg transition-all duration-300 ${
+                  showAlerts
+                    ? "space-y-3 p-4"
+                    : "cursor-pointer hover:bg-yellow-800/70 px-4 py-2"
+                }`}
+                onClick={!showAlerts ? () => setShowAlerts(true) : undefined}
+              >
+                {/* Cabeçalho */}
+                <div className="flex justify-between items-center gap-8">
+                  <div className="flex items-center gap-3">
+                    <FaExclamationTriangle
+                      size={22}
+                      className="text-yellow-400 animate-pulse"
+                    />
+                    <h3 className="text-lg font-bold text-yellow-300">
+                      Alertas {showAlerts ? "Pendentes" : ""} (
+                      {filteredData.alertas.length})
+                    </h3>
+                  </div>
+                  {showAlerts ? (
+                    <IoCloseCircle
+                      size={22}
+                      className="text-yellow-400 cursor-pointer hover:text-yellow-300 transition"
+                      onClick={() => setShowAlerts(false)}
+                    />
+                  ) : (
+                    <FaChevronDown
+                      size={16}
+                      className="text-yellow-400 transition-transform group-hover:translate-y-1"
+                    />
+                  )}
+                </div>
+                {/* Lista de alertas */}
+                {showAlerts && (
+                  <div className="animate-fadeIn">
+                    <ul className="divide-y divide-yellow-700 mt-3">
+                      {filteredData.alertas.map((alert, index) => (
+                        <Link
+                          href="/management#alerts"
+                          key={alert.id}
+                          className="hover:bg-yellow-900/30 transition-colors block px-4"
+                        >
+                          <li
+                            key={index}
+                            className="py-2 text-sm flex flex-wrap items-center gap-2"
+                          >
+                            <span className="font-semibold text-yellow-200">
+                              {alert.user}
+                            </span>
+                            <span className="text-yellow-500">|</span>
+                            <span className="font-semibold">{alert.placa}</span>
+                            <span className="text-yellow-500">|</span>
+                            <span className="font-semibold">{alert.veiculo}</span>
+                            <span className="text-yellow-500">-</span>
+                            <span>{alert.message}</span>
+                          </li>
+                        </Link>
+                      ))}
+                    </ul>
+                    {/* Rodapé */}
+                    <div className="mt-4 flex justify-end">
+                      <Link
+                        href="/management#alerts"
+                        className="text-yellow-300 hover:text-yellow-100 text-sm font-medium underline underline-offset-4 transition cursor-pointer"
+                      >
+                        Ver todos
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+        )}
 
         <div className="flex justify-start gap-2">
           <button
@@ -225,42 +318,6 @@ export default function Home() {
             <FaPlus /> Adicionar Manutenção
           </button>
         </div>
-
-        {/* --- Seção de Alertas Colapsável --- */}
-        {filteredData.alertas.length > 0 && (
-          <section className="w-full">
-            <div
-              className={`bg-yellow-800 text-yellow-100 p-4 rounded-xl shadow-lg border border-yellow-500 text-sm font-semibold flex flex-col cursor-pointer transition-all duration-300`}
-              onClick={() => setShowAlerts(!showAlerts)}
-            >
-              <div className="flex justify-between items-center w-full">
-                <div className="flex items-center gap-2">
-                  <FaExclamationTriangle
-                    size={24}
-                    className="text-yellow-400"
-                  />
-                  <p className="text-xl text-yellow-300 font-bold">
-                    Alertas ({filteredData.alertas.length})
-                  </p>
-                </div>
-                {showAlerts ? (
-                  <FaChevronUp size={16} className="text-yellow-400" />
-                ) : (
-                  <FaChevronDown size={16} className="text-yellow-400" />
-                )}
-              </div>
-              {showAlerts && (
-                <ul className="list-disc list-inside space-y-2 mt-4">
-                  {filteredData.alertas.map((alert, index) => (
-                    <li key={index} className="text-white text-sm">
-                      {alert.message}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
-        )}
 
         {/* --- Seção de Filtros e Ações --- */}
         <section className="bg-gray-800 rounded-xl shadow-lg p-6 space-y-4">
