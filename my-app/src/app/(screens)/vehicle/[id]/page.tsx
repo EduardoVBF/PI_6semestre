@@ -14,6 +14,8 @@ import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import { useEditVehicleModal } from "@/utils/hooks/useEditVehicleModal";
 import { IoSpeedometerOutline, IoWaterOutline } from "react-icons/io5";
+import Breadcrumb from "@/components/sections/breabcrumb";
+import { FaGear, FaTruck } from "react-icons/fa6";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import React from "react";
@@ -322,6 +324,13 @@ export default function VehicleDetails() {
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <Header />
       <main className="flex-grow p-8 space-y-8">
+        <Breadcrumb
+          items={[
+            { label: "Gerenciamento", href: "/management", icon: <FaGear size={16} /> },
+            { label: "Veículos", href: "/management#vehicles", icon: <FaTruck size={16} /> },
+            { label: `${vehicle.modelo} - ${vehicle.placa}` }
+          ]}
+        />
         <h1 className="text-3xl font-bold text-primary-purple">Veículo</h1>
         {/* Seção de Alertas Colapsável */}
         {alerts.length > 0 && (

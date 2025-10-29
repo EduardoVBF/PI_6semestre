@@ -10,6 +10,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { FaGear } from "react-icons/fa6";
 import React from "react";
 
 import AlertsManagement from "@/components/management/alerts";
@@ -17,6 +18,7 @@ import VehiclesManagement from "@/components/management/vehicles";
 import UsersManagement from "@/components/management/users";
 import FuelManagement from "@/components/management/fuel";
 import MaintenanceManagement from "@/components/management/maintenance";
+import Breadcrumb from "@/components/sections/breabcrumb";
 
 export default function Management() {
   const [activeTab, setActiveTab] = React.useState("alerts");
@@ -52,6 +54,13 @@ export default function Management() {
     }
   };
 
+  const handleTabInfos = (tabId: string) => {
+    const tab = tabs.find((t) => t.id === tabId);
+    return tab
+      ? { label: tab.label, icon: React.createElement(tab.icon, { size: 16 }) }
+      : { label: "", icon: null };
+  };
+
   const contentAnimation = {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },
@@ -64,6 +73,12 @@ export default function Management() {
       <Header />
 
       <main className="flex-grow py-6 px-8 space-y-4">
+        <Breadcrumb
+          items={[
+            { label: "Gerenciamento", icon: <FaGear size={16} /> },
+            { label: handleTabInfos(activeTab).label, icon: handleTabInfos(activeTab).icon },
+          ]}
+        />
         <h1 className="text-3xl font-bold text-primary-purple">
           Gerenciamento
         </h1>
