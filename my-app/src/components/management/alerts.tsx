@@ -113,8 +113,8 @@ export default function AlertsManagement() {
         </div>
       </section>
 
-      <div className="bg-gray-800 rounded-xl shadow-lg p-6">
-      <h3 className="text-2xl font-semibold mb-4 text-primary-purple">
+      <div className="bg-gray-800 rounded-xl shadow-lg p-2 md:p-6">
+      <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
         Alertas Recentes
       </h3>
 
@@ -122,22 +122,22 @@ export default function AlertsManagement() {
         <table className="min-w-full divide-y divide-gray-600">
           <thead className="bg-gray-600">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Usuário
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Placa
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Veículo
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Mensagem
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                 Ações
               </th>
             </tr>
@@ -146,23 +146,23 @@ export default function AlertsManagement() {
           <tbody className="bg-gray-800 divide-y divide-gray-600">
             {mockAlerts.map((alert) => (
               <tr key={alert.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                   {alert.usuario}
                 </td>
 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                   {alert.placa}
                 </td>
 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                   {alert.veiculo}
                 </td>
 
-                <td className="px-6 py-4 text-sm text-gray-300 flex items-center gap-2">
+                <td className="px-3 md:px-6 py-4 text-sm text-gray-300 flex items-center gap-2 min-w-[200px]">
                   {alert.mensagem}
                 </td>
 
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
                       alert.status
@@ -172,7 +172,7 @@ export default function AlertsManagement() {
                   </span>
                 </td>
 
-                <td className="px-6 py-4 text-sm space-x-2">
+                <td className="px-3 md:px-6 py-4 text-sm space-x-2">
                   <button
                     className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                     onClick={() => console.log("Concluir alerta:", alert)}

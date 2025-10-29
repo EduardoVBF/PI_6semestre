@@ -323,7 +323,7 @@ export default function VehicleDetails() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <Header />
-      <main className="flex-grow p-8 space-y-8">
+      <main className="flex-grow py-6 px-4 md:px-8 space-y-4">
         <Breadcrumb
           items={[
             { label: "Gerenciamento", href: "/management", icon: <FaGear size={16} /> },
@@ -331,7 +331,7 @@ export default function VehicleDetails() {
             { label: `${vehicle.modelo} - ${vehicle.placa}` }
           ]}
         />
-        <h1 className="text-3xl font-bold text-primary-purple">Veículo</h1>
+        {/* <h1 className="text-3xl font-bold text-primary-purple">Veículo</h1> */}
         {/* Seção de Alertas Colapsável */}
         {alerts.length > 0 && (
           <div className="w-full flex justify-end">
@@ -376,7 +376,7 @@ export default function VehicleDetails() {
         )}
 
         {/* Seção de Dados do Veículo */}
-        <section className="bg-gray-800 rounded-xl shadow-lg p-6 space-y-4">
+        <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 space-y-4">
           <div className="flex items-center justify-between space-x-4 mb-4">
             {/* <FaTruck size={48} className="text-primary-purple" /> */}
             <div>
@@ -435,8 +435,8 @@ export default function VehicleDetails() {
         </section>
 
         {/* Tabela de Abastecimentos */}
-        <section className="bg-gray-800 rounded-xl shadow-lg p-6 relative">
-          <h3 className="text-2xl font-semibold mb-4 text-primary-purple">
+        <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 relative">
+          <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2 max-w-[80%]">
             Histórico de Abastecimentos
           </h3>
           {/* Botão de adicionar abastecimento no canto superior direito */}
@@ -451,22 +451,22 @@ export default function VehicleDetails() {
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-700">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Data e KM
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Abastecimento
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Local e Tipo
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Motorista
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Média
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
@@ -479,7 +479,7 @@ export default function VehicleDetails() {
                       abastecimento.media < 5.6 ? "bg-yellow-800/50" : ""
                     }`}
                   >
-                    <td className="px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
+                    <td className="px-3 md:px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
                       {abastecimento.media < 5.6 && (
                         <FaExclamationTriangle
                           size={18}
@@ -498,7 +498,7 @@ export default function VehicleDetails() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs">
+                    <td className="px-3 md:px-6 py-4 text-xs">
                       <div className="font-bold text-white">
                         R$ {abastecimento.total_abastecimento.toFixed(2)}
                       </div>
@@ -507,24 +507,24 @@ export default function VehicleDetails() {
                         {abastecimento.preco_litro.toFixed(2)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-400">
+                    <td className="px-3 md:px-6 py-4 text-xs text-gray-400">
                       <div className="font-semibold text-white">
                         {abastecimento.posto}
                       </div>
                       <div>{abastecimento.tipo_combustivel}</div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-400">
+                    <td className="px-3 md:px-6 py-4 text-xs text-gray-400">
                       <div className="font-semibold text-white">
                         {abastecimento.placa}
                       </div>
                       <div>{abastecimento.motorista}</div>
                     </td>
-                    <td className="px-6 py-4 text-xs font-medium">
-                      <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white">
+                    <td className="px-3 md:px-6 py-4 text-xs font-medium">
+                      <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white truncate">
                         {abastecimento.media} km/L
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs">
+                    <td className="px-3 md:px-6 py-4 text-xs">
                       <button
                         className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                         onClick={() =>
@@ -547,9 +547,9 @@ export default function VehicleDetails() {
         </section>
 
         {/* Tabela de Manutenções */}
-        <section className="bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
-            <div className="flex itens-center space-x-4">
+            <div className="flex flex-col md:flex-row md:items-center space-x-4 m-2">
               <h3 className="text-2xl font-semibold text-primary-purple">
                 Manutenções Preventivas
               </h3>
@@ -573,22 +573,22 @@ export default function VehicleDetails() {
             <table className="min-w-full divide-y divide-gray-600">
               <thead className="bg-gray-600">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Placa
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Data
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     KM Manutenção
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Manutenções Realizadas
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
@@ -596,23 +596,23 @@ export default function VehicleDetails() {
               <tbody className="bg-gray-800 divide-y divide-gray-600">
                 {mockMaintenance.map((maintenance) => (
                   <tr key={maintenance.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                       {maintenance.placa}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                       {maintenance.data}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                       {maintenance.kmAtual.toLocaleString()} km
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-300">
+                    <td className="px-3 md:px-6 py-4 text-sm text-gray-300">
                       <div className="flex flex-wrap gap-2">
                         {Object.entries(maintenance.manutencoes)
                           .filter(([_, v]) => v)
                           .map(([k]) => (
                             <span
                               key={k}
-                              className="px-2 py-1 bg-primary-purple/40 text-white rounded-lg text-xs text-center w-fit"
+                              className="px-2 py-1 bg-primary-purple/40 text-white rounded-lg text-xs text-center w-fit truncate"
                             >
                               {labelMap[k]}
                             </span>
@@ -626,7 +626,7 @@ export default function VehicleDetails() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
                           maintenance.status
@@ -635,7 +635,7 @@ export default function VehicleDetails() {
                         {maintenance.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs">
+                    <td className="px-3 md:px-6 py-4 text-xs">
                       <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
                         <FaPencilAlt
                           className="text-gray-300 hover:text-primary-purple transition-colors duration-200"

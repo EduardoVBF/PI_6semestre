@@ -108,8 +108,8 @@ export default function UsersManagement() {
         </div>
       </section>
       {/* Tabela de Usuários */}
-      <div className="bg-gray-800 rounded-xl shadow-lg p-6">
-        <h3 className="text-2xl font-semibold mb-4 text-primary-purple">
+      <div className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6">
+        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
           Usuários
         </h3>
         <div className="overflow-x-auto">
@@ -119,31 +119,31 @@ export default function UsersManagement() {
                 {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th> */}
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Nome
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Telefone
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Função
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Status
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Ações
                 </th>
@@ -153,7 +153,7 @@ export default function UsersManagement() {
               {mockUsers.map((user) => (
                 <tr key={user.id}>
                   {/* ...existing code... */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     <div className="flex gap-1 items-center">
                       <p>
                         {user.nome} {user.sobrenome}
@@ -161,13 +161,13 @@ export default function UsersManagement() {
                       {user.admin && <p>⭐</p>}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {user.telefone}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {user.funcao}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm">
                     <span
                       className={`px-3 py-1 rounded-full font-semibold text-xs ${
                         user.status === "ativo"
@@ -181,7 +181,7 @@ export default function UsersManagement() {
                         user.status.slice(1)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm">
                     <button
                       className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                       onClick={() => editUserModal.onOpen(user)}

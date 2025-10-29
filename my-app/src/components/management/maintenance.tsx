@@ -161,30 +161,30 @@ export default function MaintenanceManagement() {
       </section>
 
       {/* --- Tabela de manutenções --- */}
-      <div className="bg-gray-800 rounded-xl shadow-lg p-6">
-        <h3 className="text-2xl font-semibold mb-4 text-primary-purple">
+      <div className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6">
+        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
           Manutenções Preventivas
         </h3>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-600">
             <thead className="bg-gray-600">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Placa
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Data
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   KM Manutenção
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Manutenções Realizadas
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Ações
                 </th>
               </tr>
@@ -192,23 +192,23 @@ export default function MaintenanceManagement() {
             <tbody className="bg-gray-800 divide-y divide-gray-600">
               {mockMaintenance.map((maintenance) => (
                 <tr key={maintenance.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                     {maintenance.placa}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {maintenance.data}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {maintenance.kmAtual.toLocaleString()} km
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-300">
+                  <td className="p-3 md:px-6 py-4 text-sm text-gray-300">
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(maintenance.manutencoes)
                         .filter(([_, v]) => v)
                         .map(([k]) => (
                           <span
                             key={k}
-                            className="px-2 py-1 bg-primary-purple/40 text-white rounded-lg text-xs text-center w-fit"
+                            className="px-2 py-1 bg-primary-purple/40 text-white rounded-lg text-xs text-center w-fit truncate"
                           >
                             {labelMap[k]}
                           </span>
@@ -222,7 +222,7 @@ export default function MaintenanceManagement() {
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="p-3 md:px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
                         maintenance.status
@@ -231,7 +231,7 @@ export default function MaintenanceManagement() {
                       {maintenance.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-xs">
+                  <td className="p-3 md:px-6 py-4 text-xs">
                     <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
                       <FaPencilAlt
                         className="text-gray-300 hover:text-primary-purple transition-colors duration-200"

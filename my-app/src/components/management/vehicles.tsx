@@ -99,8 +99,8 @@ export default function VehiclesManagement() {
         </div>
       </section>
       {/* Tabela de Veículos */}
-      <div className="bg-gray-800 rounded-xl shadow-lg p-6">
-        <h3 className="text-2xl font-semibold mb-4 text-primary-purple">
+      <div className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6">
+        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
           Veículos
         </h3>
         <div className="overflow-x-auto">
@@ -109,43 +109,43 @@ export default function VehiclesManagement() {
               <tr>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Placa
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Modelo
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Marca
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Ano
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Tipo
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Motorista
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Ações
                 </th>
@@ -158,25 +158,25 @@ export default function VehiclesManagement() {
                   className="hover:bg-gray-700/50 cursor-pointer transition-colors duration-200"
                   onClick={() => router.push(`/vehicle/${vehicle.placa}`)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {vehicle.placa}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {vehicle.modelo}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {vehicle.marca}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {vehicle.ano}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {vehicle.tipo}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {vehicle.motorista}
                   </td>
-                  <td className="px-6 py-4 text-xs">
+                  <td className="p-3 md:px-6 py-4 text-xs">
                     <button
                       className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                       onClick={(e) => {

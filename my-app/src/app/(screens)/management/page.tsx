@@ -72,7 +72,7 @@ export default function Management() {
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <Header />
 
-      <main className="flex-grow py-6 px-8 space-y-4">
+      <main className="flex-grow py-6 px-4 md:px-8 space-y-4">
         <Breadcrumb
           items={[
             { label: "Gerenciamento", icon: <FaGear size={16} /> },

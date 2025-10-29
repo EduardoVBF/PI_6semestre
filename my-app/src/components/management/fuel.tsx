@@ -150,8 +150,8 @@ export default function FuelManagement() {
         </div>
       </section>
       {/* Tabela de Abastecimentos */}
-      <section className="bg-gray-800 rounded-xl shadow-lg p-6">
-        <h3 className="text-2xl font-semibold mb-4 text-primary-purple">
+      <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6">
+        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
           Histórico de Abastecimentos
         </h3>
         <div className="overflow-x-auto">
@@ -160,37 +160,37 @@ export default function FuelManagement() {
               <tr>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Data e KM
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Abastecimento
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Local e Tipo
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Motorista e Veículo
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Média
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
+                  className="p-3 md:px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"
                 >
                   Ações
                 </th>
@@ -206,7 +206,7 @@ export default function FuelManagement() {
                       abastecimento.media < 5.6 ? "bg-yellow-800/50" : ""
                     }`}
                   >
-                    <td className="px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
+                    <td className="p-3 md:px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
                       {abastecimento.media < 5.6 && (
                         <FaExclamationTriangle
                           size={18}
@@ -223,7 +223,7 @@ export default function FuelManagement() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs">
+                    <td className="p-3 md:px-6 py-4 text-xs">
                       <div className="font-bold text-white">
                         R$ {abastecimento.total_abastecimento.toFixed(2)}
                       </div>
@@ -232,24 +232,24 @@ export default function FuelManagement() {
                         {abastecimento.preco_litro.toFixed(2)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-400">
+                    <td className="p-3 md:px-6 py-4 text-xs text-gray-400">
                       <div className="font-semibold text-white">
                         {abastecimento.posto}
                       </div>
                       <div>{abastecimento.tipo_combustivel}</div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-400">
+                    <td className="p-3 md:px-6 py-4 text-xs text-gray-400">
                       <div className="font-semibold text-white">
                         {abastecimento.marca} {abastecimento.modelo}
                       </div>
                       <div>{abastecimento.motorista}</div>
                     </td>
-                    <td className="px-6 py-4 text-xs font-medium">
-                      <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white">
+                    <td className="p-3 md:px-6 py-4 text-xs font-medium min-w-[10px]">
+                      <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white truncate">
                         {abastecimento.media} km/L
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs">
+                    <td className="p-3 md:px-6 py-4 text-xs">
                       <button
                         className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                         onClick={() =>

@@ -16,6 +16,7 @@ import {
   FaChevronDown,
   FaPlus,
   FaCar,
+  FaFilter,
 } from "react-icons/fa";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
@@ -189,6 +190,7 @@ const getMockedFilteredData = (): FilteredData => {
 
 export default function Home() {
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const addMaintenanceModal = useAddMaintenanceModal() as {
     onOpen: () => void;
   };
@@ -211,13 +213,13 @@ export default function Home() {
       <Header />
       <main className="flex-grow px-4 md:px-8 py-4 space-y-4">
         {/* --- Cabeçalho e Botão de Gerenciamento --- */}
-        <div className="w-full flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-primary-purple">
+        <div className="w-full flex flex-col lg:flex-row justify-between lg:items-center mb-6">
+          <h1 className="text-3xl font-bold text-primary-purple order-2 lg:order-1 mt-4 lg:mt-0">
             Dashboard da Frota
           </h1>
           <Link
             href="/management"
-            className="flex items-center gap-2 bg-[#d08700] hover:bg-[#bc6202] text-white px-4 py-2 rounded-lg shadow-lg font-semibold transition-colors"
+            className="flex items-center gap-2 bg-[#d08700] hover:bg-[#bc6202] text-white px-4 py-2 rounded-lg shadow-lg font-semibold transition-colors order-1 lg:order-2 cursor-pointer w-fit self-end"
           >
             <FaGear size={20} />
             Gerenciamento
@@ -321,7 +323,16 @@ export default function Home() {
 
         {/* --- Seção de Filtros e Ações --- */}
         <section className="bg-gray-800 rounded-xl shadow-lg p-6 space-y-4">
-          <h2 className="text-xl font-semibold mb-2">Filtros e Ações</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold mb-2">Filtros e Ações</h2>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              {showFilters ? <FaFilter /> : <FaFilter />}
+            </button>
+          </div>
+          {showFilters && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex flex-col col-span-1 lg:col-span-2">
               <label className="text-sm font-semibold mb-1 text-gray-400">
@@ -362,6 +373,7 @@ export default function Home() {
               />
             </div>
           </div>
+          )}
         </section>
 
         {/* --- Cards de Visão Geral --- */}
@@ -489,14 +501,14 @@ export default function Home() {
 
         {/* --- Seção de Gráficos --- */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
-          <div className="col-span-1 bg-gray-700 rounded-xl shadow-lg p-6">
+          <div className="col-span-1 bg-gray-700 rounded-xl shadow-lg p-4 lg:p-6">
             <h3 className="text-xl font-semibold mb-4">
               Gasto de Combustível por Período
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={filteredData.gastoData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 20, right: 0, left: 0, bottom: 5 }}
               >
                 <XAxis dataKey="name" stroke="#A0AEC0" />
                 <YAxis stroke="#A0AEC0" />
@@ -505,14 +517,14 @@ export default function Home() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="col-span-1 bg-gray-700 rounded-xl shadow-lg p-6">
+          <div className="col-span-1 bg-gray-700 rounded-xl shadow-lg p-4 lg:p-6">
             <h3 className="text-xl font-semibold mb-4">
               Consumo Médio por Veículo
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={filteredData.vehicleConsumptionData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 20, right: 0, left: 0, bottom: 5 }}
               >
                 <XAxis dataKey="name" stroke="#A0AEC0" />
                 <YAxis stroke="#A0AEC0" />
@@ -524,7 +536,7 @@ export default function Home() {
         </section>
 
         {/* --- Próximas Manutenções --- */}
-        <section className="bg-gray-700 rounded-xl shadow-lg p-6 space-y-4">
+        <section className="bg-gray-700 rounded-xl shadow-lg p-4 lg:p-6 space-y-4">
           <h3 className="text-xl font-semibold mb-4">Próximas Manutenções</h3>
           <ul className="space-y-3">
             {mockData.manutencoes.map((manutencao) => {
