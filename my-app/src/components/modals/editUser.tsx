@@ -31,6 +31,8 @@ export default function EditUserModal({
     funcao: "",
     admin: false,
     status: "ativo",
+    senha: "",
+    confirmarSenha: "",
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -163,6 +165,51 @@ export default function EditUserModal({
                 <option value="pendente">Pendente</option>
               </select>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Nova senha
+                </label>
+                <Input
+                  type="password"
+                  name="senha"
+                  value={formData.senha}
+                  onChange={handleChange}
+                  placeholder="Senha"
+                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Confirmar nova senha
+                </label>
+                <Input
+                  type="password"
+                  name="confirmarSenha"
+                  value={formData.confirmarSenha}
+                  onChange={handleChange}
+                  placeholder="Confirmar Senha"
+                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                id="admin"
+                name="admin"
+                type="checkbox"
+                checked={formData.admin}
+                onChange={handleChange}
+                className="w-5 h-5 text-primary-purple bg-gray-700 border-gray-600 rounded focus:ring-primary-purple"
+              />
+              <label htmlFor="admin" className="text-gray-300 text-sm">
+                Usuário administrador
+              </label>
+            </div>
+
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
