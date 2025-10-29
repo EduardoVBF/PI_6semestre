@@ -76,7 +76,7 @@ export default function Management() {
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className={`relative flex items-center gap-2 py-4 px-4 rounded-md transition-all duration-200 ${
+                  className={`relative flex items-center gap-2 pt-4 pb-2 px-4 rounded-md transition-all duration-200 ${
                     isActive
                       ? tab.id === "alerts"
                         ? "text-yellow-400"
