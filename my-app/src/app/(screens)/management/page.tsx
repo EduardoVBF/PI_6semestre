@@ -1,20 +1,28 @@
 "use client";
 
-import React from "react";
+import {
+  FaTruck,
+  FaUsers,
+  FaGasPump,
+  FaTools,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTruck, FaUsers, FaGasPump, FaTools } from "react-icons/fa";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import React from "react";
 
+import AlertsManagement from "@/components/management/alerts";
 import VehiclesManagement from "@/components/management/vehicles";
 import UsersManagement from "@/components/management/users";
 import FuelManagement from "@/components/management/fuel";
 import MaintenanceManagement from "@/components/management/maintenance";
 
 export default function Management() {
-  const [activeTab, setActiveTab] = React.useState("vehicles");
+  const [activeTab, setActiveTab] = React.useState("alerts");
 
   const tabs = [
+    { id: "alerts", label: "Alertas", icon: FaExclamationTriangle },
     { id: "vehicles", label: "Veículos", icon: FaTruck },
     { id: "users", label: "Usuários", icon: FaUsers },
     { id: "fuel", label: "Abastecimentos", icon: FaGasPump },
@@ -25,11 +33,11 @@ export default function Management() {
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "");
       const validTab = tabs.some((tab) => tab.id === hash);
-      setActiveTab(validTab ? hash : "vehicles");
+      setActiveTab(validTab ? hash : "alerts");
     };
 
     if (!window.location.hash) {
-      window.history.replaceState(null, "", "#vehicles");
+      window.history.replaceState(null, "", "#alerts");
     }
 
     handleHashChange();
@@ -56,7 +64,9 @@ export default function Management() {
       <Header />
 
       <main className="flex-grow py-6 px-8 space-y-4">
-        <h1 className="text-3xl font-bold text-primary-purple">Gerenciamento</h1>
+        <h1 className="text-3xl font-bold text-primary-purple">
+          Gerenciamento
+        </h1>
 
         <div className="border-b border-gray-700 relative">
           <div className="flex space-x-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
@@ -68,24 +78,50 @@ export default function Management() {
                   onClick={() => handleTabClick(tab.id)}
                   className={`relative flex items-center gap-2 py-4 px-4 rounded-md transition-all duration-200 ${
                     isActive
-                      ? "text-primary-purple"
+                      ? tab.id === "alerts"
+                        ? "text-yellow-400"
+                        : "text-primary-purple"
                       : "text-gray-400 hover:text-gray-300"
                   }`}
                 >
-                  <tab.icon className="h-5 w-5" />
+                  <tab.icon
+                    className={`h-5 w-5 ${
+                      isActive
+                        ? tab.id === "alerts"
+                          ? "text-yellow-400"
+                          : "text-primary-purple"
+                        : "text-gray-500"
+                    }`}
+                  />
                   <span className="whitespace-nowrap">{tab.label}</span>
 
                   {isActive && (
                     <>
                       <motion.div
                         layoutId="tab-bg"
-                        className="absolute inset-0 rounded-md bg-gradient-to-t from-primary-purple/30 via-primary-purple/15 to-transparent"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        className={`absolute inset-0 rounded-t-md bg-gradient-to-t ${
+                          tab.id === "alerts"
+                            ? "from-yellow-400/30 via-yellow-400/15 to-transparent"
+                            : "from-primary-purple/30 via-primary-purple/15 to-transparent"
+                        }`}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
                       />
                       <motion.div
                         layoutId="tab-underline"
-                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary-purple rounded-full"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        className={`absolute bottom-0 left-0 right-0 h-[2px] ${
+                          tab.id === "alerts"
+                            ? "bg-yellow-400"
+                            : "bg-primary-purple"
+                        } rounded-full`}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
                       />
                     </>
                   )}
@@ -97,6 +133,11 @@ export default function Management() {
 
         <div className="mt-6">
           <AnimatePresence mode="wait">
+            {activeTab === "alerts" && (
+              <motion.div key="alerts" {...contentAnimation}>
+                <AlertsManagement />
+              </motion.div>
+            )}
             {activeTab === "vehicles" && (
               <motion.div key="vehicles" {...contentAnimation}>
                 <VehiclesManagement />
