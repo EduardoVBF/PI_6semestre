@@ -19,6 +19,7 @@ import { FaGear, FaTruck } from "react-icons/fa6";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import React from "react";
+import PendingAlerts from "@/components/sections/pendingAlerts";
 
 interface IFuelSupply {
   id: number;
@@ -34,6 +35,15 @@ interface IFuelSupply {
   modelo: string;
   total_abastecimento: number;
   media: number;
+}
+
+interface Alert {
+  id: number;
+  user: string;
+  placa: string;
+  veiculo: string;
+  message: string;
+  status?: "pendente";
 }
 
 interface IPreventiveMaintenance {
@@ -154,21 +164,20 @@ const mockAbastecimentos: IFuelSupply[] = [
 ];
 
 // Dados simulados para os alertas
-const mockAlerts = [
+const mockAlerts: Alert[] = [
   {
     id: 1,
-    message: "Preço do litro acima do normal no último abastecimento.",
-    type: "warning",
+    message: "Consumo maior que o normal",
+    placa: "BQI0502",
+    veiculo: "Caminhão IVECO",
+    user: "José Silveira",
   },
   {
     id: 2,
-    message: "Manutenção preventiva recomendada em 15 dias.",
-    type: "info",
-  },
-  {
-    id: 3,
-    message: "Última média de consumo está abaixo do esperado.",
-    type: "info",
+    message: "Abastecimento suspeito",
+    placa: "BSR9401",
+    veiculo: "Carro FIAT",
+    user: "João Silva",
   },
 ];
 
@@ -326,53 +335,23 @@ export default function VehicleDetails() {
       <main className="flex-grow py-6 px-4 md:px-8 space-y-4">
         <Breadcrumb
           items={[
-            { label: "Gerenciamento", href: "/management", icon: <FaGear size={16} /> },
-            { label: "Veículos", href: "/management#vehicles", icon: <FaTruck size={16} /> },
-            { label: `${vehicle.modelo} - ${vehicle.placa}` }
+            {
+              label: "Gerenciamento",
+              href: "/management",
+              icon: <FaGear size={16} />,
+            },
+            {
+              label: "Veículos",
+              href: "/management#vehicles",
+              icon: <FaTruck size={16} />,
+            },
+            { label: `${vehicle.modelo} - ${vehicle.placa}` },
           ]}
         />
         {/* <h1 className="text-3xl font-bold text-primary-purple">Veículo</h1> */}
         {/* Seção de Alertas Colapsável */}
         {alerts.length > 0 && (
-          <div className="w-full flex justify-end">
-            <div
-              className={`bg-yellow-800 text-yellow-100 px-4 py-2 rounded-xl shadow-lg border border-yellow-500 text-sm font-semibold flex flex-col items-center gap-2 cursor-pointer ${
-                showAlerts ? "w-full" : "w-fit"
-              } transition-all duration-300 ${
-                showAlerts ? "h-auto" : "h-full overflow-hidden"
-              }`}
-              onClick={() => setShowAlerts(!showAlerts)}
-            >
-              <div className="flex justify-between items-center w-full gap-2">
-                <div className="flex items-center gap-2">
-                  <FaExclamationTriangle
-                    size={24}
-                    className="text-yellow-400"
-                  />
-                  <p className="text-xl text-yellow-300 font-bold">Alertas</p>
-                  <span className="bg-yellow-500 text-gray-900 px-2 py-1 rounded-full text-xs font-bold">
-                    {alerts.length}
-                  </span>
-                </div>
-                {showAlerts ? (
-                  <FaChevronUp size={16} className="text-yellow-400" />
-                ) : (
-                  <FaChevronDown size={16} className="text-yellow-400" />
-                )}
-              </div>
-              <ul
-                className={`list-disc list-inside space-y-2 w-full mt-2 ${
-                  showAlerts ? "" : "hidden"
-                }`}
-              >
-                {alerts.map((alert) => (
-                  <li key={alert.id} className="text-white text-sm">
-                    {alert.message}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <PendingAlerts filteredData={{ alertas: mockAlerts }} />
         )}
 
         {/* Seção de Dados do Veículo */}

@@ -28,6 +28,8 @@ import Footer from "@/components/footer";
 import Header from "@/components/header";
 import Link from "next/link";
 
+import PendingAlerts from "@/components/sections/pendingAlerts";
+
 // --- Interfaces de Tipagem ---
 interface Vehicle {
   placa: string;
@@ -189,7 +191,7 @@ const getMockedFilteredData = (): FilteredData => {
 };
 
 export default function Home() {
-  const [showAlerts, setShowAlerts] = useState(false);
+  // const [showAlerts, setShowAlerts] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const addMaintenanceModal = useAddMaintenanceModal() as {
     onOpen: () => void;
@@ -228,82 +230,7 @@ export default function Home() {
 
         {/* --- Seção de Alertas Colapsável --- */}
         {filteredData.alertas.length > 0 && (
-          <div className="w-full flex justify-start">
-            <section className="w-fit">
-              <div
-                className={`bg-yellow-800/50 border border-yellow-600 text-yellow-100 rounded-xl shadow-lg transition-all duration-300 ${
-                  showAlerts
-                    ? "space-y-3 p-4"
-                    : "cursor-pointer hover:bg-yellow-800/70 px-4 py-2"
-                }`}
-                onClick={!showAlerts ? () => setShowAlerts(true) : undefined}
-              >
-                {/* Cabeçalho */}
-                <div className="flex justify-between items-center gap-8">
-                  <div className="flex items-center gap-3">
-                    <FaExclamationTriangle
-                      size={22}
-                      className="text-yellow-400 animate-pulse"
-                    />
-                    <h3 className="text-lg font-bold text-yellow-300">
-                      Alertas {showAlerts ? "Pendentes" : ""} (
-                      {filteredData.alertas.length})
-                    </h3>
-                  </div>
-                  {showAlerts ? (
-                    <IoCloseCircle
-                      size={22}
-                      className="text-yellow-400 cursor-pointer hover:text-yellow-300 transition"
-                      onClick={() => setShowAlerts(false)}
-                    />
-                  ) : (
-                    <FaChevronDown
-                      size={16}
-                      className="text-yellow-400 transition-transform group-hover:translate-y-1"
-                    />
-                  )}
-                </div>
-                {/* Lista de alertas */}
-                {showAlerts && (
-                  <div className="animate-fadeIn">
-                    <ul className="divide-y divide-yellow-700 mt-3">
-                      {filteredData.alertas.map((alert, index) => (
-                        <Link
-                          href="/management#alerts"
-                          key={alert.id}
-                          className="hover:bg-yellow-900/30 transition-colors block px-4"
-                        >
-                          <li
-                            key={index}
-                            className="py-2 text-sm flex flex-wrap items-center gap-2"
-                          >
-                            <span className="font-semibold text-yellow-200">
-                              {alert.user}
-                            </span>
-                            <span className="text-yellow-500">|</span>
-                            <span className="font-semibold">{alert.placa}</span>
-                            <span className="text-yellow-500">|</span>
-                            <span className="font-semibold">{alert.veiculo}</span>
-                            <span className="text-yellow-500">-</span>
-                            <span>{alert.message}</span>
-                          </li>
-                        </Link>
-                      ))}
-                    </ul>
-                    {/* Rodapé */}
-                    <div className="mt-4 flex justify-end">
-                      <Link
-                        href="/management#alerts"
-                        className="text-yellow-300 hover:text-yellow-100 text-sm font-medium underline underline-offset-4 transition cursor-pointer"
-                      >
-                        Ver todos
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-          </div>
+          <PendingAlerts filteredData={filteredData} />
         )}
 
         <div className="flex justify-start gap-2">
@@ -333,46 +260,46 @@ export default function Home() {
             </button>
           </div>
           {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="flex flex-col col-span-1 lg:col-span-2">
-              <label className="text-sm font-semibold mb-1 text-gray-400">
-                Placas
-              </label>
-              <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
-                {allVehiclePlacas.map((placa) => (
-                  <span
-                    key={placa}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors duration-200 ${
-                      selectedPlacas.includes(placa)
-                        ? "bg-primary-purple text-white"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    }`}
-                    onClick={() => handlePillClick(placa)}
-                  >
-                    {placa}
-                  </span>
-                ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex flex-col col-span-1 lg:col-span-2">
+                <label className="text-sm font-semibold mb-1 text-gray-400">
+                  Placas
+                </label>
+                <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
+                  {allVehiclePlacas.map((placa) => (
+                    <span
+                      key={placa}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors duration-200 ${
+                        selectedPlacas.includes(placa)
+                          ? "bg-primary-purple text-white"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      }`}
+                      onClick={() => handlePillClick(placa)}
+                    >
+                      {placa}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold mb-1 text-gray-400">
+                  Data Inicial
+                </label>
+                <input
+                  type="date"
+                  className="bg-gray-700 rounded-md p-2 text-white"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-sm font-semibold mb-1 text-gray-400">
+                  Data Final
+                </label>
+                <input
+                  type="date"
+                  className="bg-gray-700 rounded-md p-2 text-white"
+                />
               </div>
             </div>
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold mb-1 text-gray-400">
-                Data Inicial
-              </label>
-              <input
-                type="date"
-                className="bg-gray-700 rounded-md p-2 text-white"
-              />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-sm font-semibold mb-1 text-gray-400">
-                Data Final
-              </label>
-              <input
-                type="date"
-                className="bg-gray-700 rounded-md p-2 text-white"
-              />
-            </div>
-          </div>
           )}
         </section>
 
