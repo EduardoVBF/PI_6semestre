@@ -464,7 +464,12 @@ export default function Home() {
 
         {/* --- Próximas Manutenções --- */}
         <section className="bg-gray-700 rounded-xl shadow-lg p-4 lg:p-6 space-y-4">
-          <h3 className="text-xl font-semibold mb-4">Próximas Manutenções</h3>
+          <div className="flex w-full justify-between">
+            <h3 className="text-xl font-semibold mb-4">Próximas Manutenções</h3>
+            <Link href="/management#maintenance" className="text-gray-400 hover:underline hover:text-white">
+              Ver todas
+            </Link>
+          </div>
           <ul className="space-y-3">
             {mockData.manutencoes.map((manutencao) => {
               const progress =

@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 // import { useRouter } from "next/navigation";
 import React from "react";
+import Link from "next/link";
 
 interface IFuelSupply {
   id: number;
@@ -239,9 +240,9 @@ export default function FuelManagement() {
                       <div>{abastecimento.tipo_combustivel}</div>
                     </td>
                     <td className="p-3 md:px-6 py-4 text-xs text-gray-400">
-                      <div className="font-semibold text-white">
+                      <Link href={`/vehicle/${abastecimento.placa}`} className="font-semibold text-white hover:underline">
                         {abastecimento.marca} {abastecimento.modelo}
-                      </div>
+                      </Link>
                       <div>{abastecimento.motorista}</div>
                     </td>
                     <td className="p-3 md:px-6 py-4 text-xs font-medium min-w-[10px]">

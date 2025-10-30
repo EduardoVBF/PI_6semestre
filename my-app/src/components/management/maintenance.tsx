@@ -2,6 +2,7 @@
 import { useEditMaintenanceModal } from "@/utils/hooks/useEditMaintenanceModal";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { FaWrench, FaPlus, FaPencilAlt } from "react-icons/fa";
+import Link from "next/link";
 import React from "react";
 
 interface IPreventiveMaintenance {
@@ -193,7 +194,12 @@ export default function MaintenanceManagement() {
               {mockMaintenance.map((maintenance) => (
                 <tr key={maintenance.id}>
                   <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
-                    {maintenance.placa}
+                    <Link
+                      href={`/vehicle/${maintenance.placa}`}
+                      className="hover:underline hover:text-white"
+                    >
+                      {maintenance.placa}
+                    </Link>
                   </td>
                   <td className="p-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {maintenance.data}

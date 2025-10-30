@@ -1,5 +1,6 @@
 "use client";
 import { FaExclamationTriangle, FaPencilAlt, FaCheck } from "react-icons/fa";
+import Link from "next/link";
 import React from "react";
 
 export default function AlertsManagement() {
@@ -151,7 +152,9 @@ export default function AlertsManagement() {
                 </td>
 
                 <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                  <Link href={`/vehicle/${alert.placa}`} className="hover:underline hover:text-white">
                   {alert.placa}
+                  </Link>
                 </td>
 
                 <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
