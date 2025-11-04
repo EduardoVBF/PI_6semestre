@@ -186,121 +186,125 @@ export default function UsersManagement() {
         </div>
       </section>
 
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader />
-        </div>
-      ) : (
-        <div className="bg-gray-800 rounded-xl shadow-lg p-5">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-            <h3 className="text-2xl font-semibold text-primary-purple">
-              Usuários
-            </h3>
+      <div className="bg-gray-800 rounded-xl shadow-lg p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+          <h3 className="text-2xl font-semibold text-primary-purple">
+            Usuários
+          </h3>
 
-            <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
-              <Filters
-                statusOptions={statusOptions}
-                typeOptions={typeOptions}
-                selectedStatus={status}
-                selectedType={type}
-                onStatusChange={setStatus}
-                onTypeChange={setType}
-              />
-            </div>
-          </div>
-          <div className="w-full">
-            <SearchBar
-              value={search}
-              onChange={setSearch}
-              placeholder="Buscar por nome ou email..."
-              width="w-full md:w-64 lg:w-full"
+          <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
+            <Filters
+              statusOptions={statusOptions}
+              typeOptions={typeOptions}
+              selectedStatus={status}
+              selectedType={type}
+              onStatusChange={setStatus}
+              onTypeChange={setType}
             />
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-600">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Nome
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Email
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Função
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Status
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Criado
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-gray-800 divide-y divide-gray-700 text-sm">
-                {users.length > 0 ? (
-                  users.map((user) => (
-                    <tr key={user.id}>
-                      <td className="p-3 text-gray-300 capitalize">
-                        {user.name} {user.lastName}
-                      </td>
-                      <td className="p-3 text-gray-300">{user.email}</td>
-                      <td className="p-3 text-gray-300 capitalize">
-                        {handleUserType(user.type)}
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
-                            user.status === "ativo"
-                              ? "bg-green-700 text-white"
-                              : user.status === "inativo"
-                              ? "bg-red-700 text-white"
-                              : "bg-yellow-600 text-white"
-                          }`}
-                        >
-                          {user.status}
-                        </span>
-                      </td>
-                      <td className="p-3 text-gray-400 text-sm">
-                        {user.created_at
-                          ? dayjs(user.created_at).format("DD/MM/YYYY")
-                          : "—"}
-                      </td>
-                      <td className="p-3">
-                        <button
-                          onClick={() => editUserModal.onOpen(user)}
-                          className="p-2 rounded-lg hover:bg-gray-700"
-                        >
-                          <FaPencilAlt
-                            className="text-gray-300 hover:text-primary-purple"
-                            size={16}
-                          />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="text-center py-6 text-gray-400">
-                      Nenhum usuário encontrado.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
+        </div>
+        <div className="w-full">
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por nome ou email..."
+            width="w-full md:w-64 lg:w-full"
           />
         </div>
-      )}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader />
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-600">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Nome
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Email
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Função
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Status
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Criado
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-gray-800 divide-y divide-gray-700 text-sm">
+                  {users.length > 0 ? (
+                    users.map((user) => (
+                      <tr key={user.id}>
+                        <td className="p-3 text-gray-300 capitalize">
+                          {user.name} {user.lastName}
+                        </td>
+                        <td className="p-3 text-gray-300">{user.email}</td>
+                        <td className="p-3 text-gray-300 capitalize">
+                          {handleUserType(user.type)}
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                              user.status === "ativo"
+                                ? "bg-green-700 text-white"
+                                : user.status === "inativo"
+                                ? "bg-red-700 text-white"
+                                : "bg-yellow-600 text-white"
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
+                        <td className="p-3 text-gray-400 text-sm">
+                          {user.created_at
+                            ? dayjs(user.created_at).format("DD/MM/YYYY")
+                            : "—"}
+                        </td>
+                        <td className="p-3">
+                          <button
+                            onClick={() => editUserModal.onOpen(user)}
+                            className="p-2 rounded-lg hover:bg-gray-700"
+                          >
+                            <FaPencilAlt
+                              className="text-gray-300 hover:text-primary-purple"
+                              size={16}
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="text-center py-6 text-gray-400"
+                      >
+                        Nenhum usuário encontrado.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }

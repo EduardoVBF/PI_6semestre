@@ -191,133 +191,135 @@ export default function VehiclesManagement() {
       </section>
 
       {/* Tabela */}
-      {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader />
-        </div>
-      ) : (
-        <div className="bg-gray-800 rounded-xl shadow-lg p-5">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-            <h3 className="text-2xl font-semibold text-primary-purple">
-              Veículos
-            </h3>
+      <div className="bg-gray-800 rounded-xl shadow-lg p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+          <h3 className="text-2xl font-semibold text-primary-purple">
+            Veículos
+          </h3>
 
-            <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
-              {/* Filtros personalizados */}
-              <Filters
-                // statusOptions={manutencaoOptions}
-                typeOptions={tipoOptions}
-                selectedStatus={manutencaoVencida}
-                selectedType={tipo}
-                onStatusChange={setManutencaoVencida}
-                onTypeChange={setTipo}
-              />
-            </div>
-          </div>
-
-          <div className="w-full">
-            <SearchBar
-              value={search}
-              onChange={setSearch}
-              placeholder="Buscar por placa, modelo ou marca..."
-              width="w-full md:w-64 lg:w-full"
+          <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
+            {/* Filtros personalizados */}
+            <Filters
+              // statusOptions={manutencaoOptions}
+              typeOptions={tipoOptions}
+              selectedStatus={manutencaoVencida}
+              selectedType={tipo}
+              onStatusChange={setManutencaoVencida}
+              onTypeChange={setTipo}
             />
           </div>
+        </div>
 
-          <div className="overflow-x-auto mt-4">
-            <table className="min-w-full divide-y divide-gray-600">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Placa
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Modelo
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Marca
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Ano
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Tipo
-                  </th>
-                  {/* <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Frota
-                  </th> */}
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Motorista
-                  </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody className="bg-gray-800 divide-y divide-gray-700 text-sm">
-                {vehicles.length > 0 ? (
-                  vehicles.map((vehicle) => (
-                    <tr
-                      key={vehicle.placa}
-                      className="hover:bg-gray-700/50 cursor-pointer transition-colors duration-200"
-                      onClick={() => router.push(`/vehicle/${vehicle.placa}`)}
-                    >
-                      <td className="p-3 text-gray-300">{vehicle.placa}</td>
-                      <td className="p-3 text-gray-300 capitalize">
-                        {vehicle.modelo}
-                      </td>
-                      <td className="p-3 text-gray-300 capitalize">
-                        {vehicle.marca}
-                      </td>
-                      <td className="p-3 text-gray-300">{vehicle.ano}</td>
-                      <td className="p-3 text-gray-300 capitalize">
-                        {vehicle.tipo}
-                      </td>
-                      {/* <td className="p-3 text-gray-300 capitalize">
-                        {vehicle.frota || "—"}
-                      </td> */}
-                      <td className="p-3 text-gray-300 capitalize">
-                        {getUserInfosById(vehicle.id_usuario)}
-                      </td>
-                      
-                      <td className="p-3">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            editVehicleModal.onOpen(vehicle);
-                          }}
-                          className="p-2 rounded-lg hover:bg-gray-700"
-                        >
-                          <FaPencilAlt
-                            className="text-gray-300 hover:text-primary-purple"
-                            size={16}
-                          />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="text-center py-6 text-gray-400 text-sm"
-                    >
-                      Nenhum veículo encontrado.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
+        <div className="w-full">
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar por placa, modelo ou marca..."
+            width="w-full md:w-64 lg:w-full"
           />
         </div>
-      )}
+
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader />
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto mt-4">
+              <table className="min-w-full divide-y divide-gray-600">
+                <thead className="bg-gray-700">
+                  <tr>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Placa
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Modelo
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Marca
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Ano
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Tipo
+                    </th>
+                    {/* <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Frota
+                  </th> */}
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Motorista
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="bg-gray-800 divide-y divide-gray-700 text-sm">
+                  {vehicles.length > 0 ? (
+                    vehicles.map((vehicle) => (
+                      <tr
+                        key={vehicle.placa}
+                        className="hover:bg-gray-700/50 cursor-pointer transition-colors duration-200"
+                        onClick={() => router.push(`/vehicle/${vehicle.placa}`)}
+                      >
+                        <td className="p-3 text-gray-300">{vehicle.placa}</td>
+                        <td className="p-3 text-gray-300 capitalize">
+                          {vehicle.modelo}
+                        </td>
+                        <td className="p-3 text-gray-300 capitalize">
+                          {vehicle.marca}
+                        </td>
+                        <td className="p-3 text-gray-300">{vehicle.ano}</td>
+                        <td className="p-3 text-gray-300 capitalize">
+                          {vehicle.tipo}
+                        </td>
+                        {/* <td className="p-3 text-gray-300 capitalize">
+                        {vehicle.frota || "—"}
+                      </td> */}
+                        <td className="p-3 text-gray-300 capitalize">
+                          {getUserInfosById(vehicle.id_usuario)}
+                        </td>
+
+                        <td className="p-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              editVehicleModal.onOpen(vehicle);
+                            }}
+                            className="p-2 rounded-lg hover:bg-gray-700"
+                          >
+                            <FaPencilAlt
+                              className="text-gray-300 hover:text-primary-purple"
+                              size={16}
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="text-center py-6 text-gray-400 text-sm"
+                      >
+                        Nenhum veículo encontrado.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 }
