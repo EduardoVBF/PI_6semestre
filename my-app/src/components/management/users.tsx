@@ -14,27 +14,10 @@ import Filters from "../filters";
 import { useEditUserModal } from "@/utils/hooks/useEditUserModal";
 import { useAddUserModal } from "@/utils/hooks/useAddUserModal";
 
-interface IUserData {
-  id: string;
-  name: string;
-  lastName: string;
-  email: string;
-  cpf: string;
-  type: string;
-  status: string;
-  created_at?: string;
-  updated_at?: string | null;
-}
-
-interface IUsersResponse {
-  users: IUserData[];
-  total: number;
-  page: number;
-  per_page: number;
-}
+import type { TUserData, TUsersResponse } from "@/types/TUser";
 
 export default function UsersManagement() {
-  const [users, setUsers] = useState<IUserData[]>([]);
+  const [users, setUsers] = useState<TUserData[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalAtivos: 0,
@@ -72,7 +55,7 @@ export default function UsersManagement() {
   ];
 
   const editUserModal = useEditUserModal() as {
-    onOpen: (userData: IUserData | null) => void;
+    onOpen: (userData: TUserData | null) => void;
     isOpen: boolean;
   };
 
@@ -99,7 +82,7 @@ export default function UsersManagement() {
         if (status) params.status = status;
         if (type) params.user_type = type;
 
-        const res = await api.get<IUsersResponse>("/api/v1/users/", {
+        const res = await api.get<TUsersResponse>("/api/v1/users/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params,
         });
@@ -129,7 +112,7 @@ export default function UsersManagement() {
     const fetchStats = async () => {
       if (!session?.accessToken) return;
       try {
-        const res = await api.get<IUsersResponse>("/api/v1/users/", {
+        const res = await api.get<TUsersResponse>("/api/v1/users/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: {
             limit: 1000,
