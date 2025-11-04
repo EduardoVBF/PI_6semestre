@@ -1,7 +1,12 @@
 "use client";
-import React, { useState } from "react";
-import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import React, { useState } from "react";
+import { TUser } from "@/types/TUser";
+import toast from "react-hot-toast";
+import { X } from "lucide-react";
+import Loader from "../loader";
+import api from "@/utils/api";
 
 export default function AddUserModal({
   isOpen,
@@ -12,45 +17,40 @@ export default function AddUserModal({
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const initialFormData = {
-    nome: "",
-    sobrenome: "",
-    telefone: "",
-    funcao: "",
-    admin: false,
-    status: "ativo",
-    senha: "",
-    confirmarSenha: "",
-  };
-
-  const [formData, setFormData] = useState(initialFormData);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const target = e.target as HTMLInputElement | HTMLSelectElement;
-    const { name, value, type } = target;
-    const checked = (target as HTMLInputElement).checked;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm<TUser>({
+    defaultValues: {
+      name: "",
+      lastName: "",
+      email: "",
+      cpf: "",
+      type: "adm",
+      status: "ativo",
+      password: "",
+    },
+  });
 
   const handleCloseModal = () => {
-    setFormData(initialFormData);
-    onClose();
+    reset();
     setIsLoading(false);
+    onClose();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddUser = async (data: TUser) => {
     setIsLoading(true);
-    // TODO: enviar dados para API de criação
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      await api.post(`/api/v1/users/`, data);
+      toast.success("Usuário cadastrado com sucesso!");
       handleCloseModal();
-    }, 1500);
+    } catch (error) {
+      console.error("Erro ao cadastrar usuário:", error);
+      toast.error("Erro ao cadastrar usuário. Verifique os dados e tente novamente.");
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -74,34 +74,26 @@ export default function AddUserModal({
 
         {isLoading ? (
           <div className="flex justify-center items-center py-20 px-10">
-            Cadastrando...
+            <Loader />
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(handleAddUser)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Nome
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Nome</label>
                 <Input
+                  {...register("name")}
                   type="text"
-                  name="nome"
-                  value={formData.nome}
-                  onChange={handleChange}
                   placeholder="Nome"
                   required
                   className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Sobrenome
-                </label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Sobrenome</label>
                 <Input
+                  {...register("lastName")}
                   type="text"
-                  name="sobrenome"
-                  value={formData.sobrenome}
-                  onChange={handleChange}
                   placeholder="Sobrenome"
                   required
                   className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
@@ -110,43 +102,45 @@ export default function AddUserModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Telefone
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
               <Input
+                {...register("email")}
                 type="text"
-                name="telefone"
-                value={formData.telefone}
-                onChange={handleChange}
-                placeholder="Telefone"
+                placeholder="Email"
                 required
                 className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Função
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">CPF</label>
               <Input
+                {...register("cpf")}
                 type="text"
-                name="funcao"
-                value={formData.funcao}
-                onChange={handleChange}
-                placeholder="Função"
+                placeholder="CPF"
                 required
                 className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Status
-              </label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Função</label>
               <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
+                {...register("type")}
+                className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
+                required
+              >
+                <option value="adm">Gerente</option>
+                <option value="mecanico">Mecânico</option>
+                <option value="motorista">Motorista</option>
+                <option value="escritorio">Escritório</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Status</label>
+              <select
+                {...register("status")}
                 className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
                 required
               >
@@ -156,50 +150,15 @@ export default function AddUserModal({
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Senha
-                </label>
-                <Input
-                  type="password"
-                  name="senha"
-                  value={formData.senha}
-                  onChange={handleChange}
-                  placeholder="Senha"
-                  required
-                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Confirmar Senha
-                </label>
-                <Input
-                  type="password"
-                  name="confirmarSenha"
-                  value={formData.confirmarSenha}
-                  onChange={handleChange}
-                  placeholder="Confirmar Senha"
-                  required
-                  className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                id="admin"
-                name="admin"
-                type="checkbox"
-                checked={formData.admin}
-                onChange={handleChange}
-                className="w-5 h-5 text-primary-purple bg-gray-700 border-gray-600 rounded focus:ring-primary-purple"
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Senha</label>
+              <Input
+                {...register("password")}
+                type="password"
+                placeholder="Senha"
+                required
+                className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
               />
-              <label htmlFor="admin" className="text-gray-300 text-sm">
-                Usuário administrador
-              </label>
             </div>
 
             <div className="flex justify-end pt-2">
