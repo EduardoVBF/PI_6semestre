@@ -4,13 +4,18 @@ export type TPostVehicle = {
   marca: string;
   ano: number;
   tipo: "carro" | "caminhao" | "moto" | "onibus";
-  frota: string;
+  frota?: string;
   km_atual: number;
   frequencia_km_manutencao: number;
-  km_prox_manutencao: number;
-  capacidade_tanque: number;
-  km_ultimo_abastecimento: number;
+  km_prox_manutencao?: number;
+  capacidade_tanque?: number;
+  km_ultimo_abastecimento?: number;
   id_usuario: string;
+};
+
+export type TGetVehicle = TPostVehicle & {
+  id: string;
+  data_criacao: string;
 };
 
 export type VehicleQueryParams = {

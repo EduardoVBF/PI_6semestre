@@ -243,9 +243,9 @@ export default function VehiclesManagement() {
                   <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
                     Tipo
                   </th>
-                  <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                  {/* <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
                     Frota
-                  </th>
+                  </th> */}
                   <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
                     Motorista
                   </th>
@@ -274,9 +274,9 @@ export default function VehiclesManagement() {
                       <td className="p-3 text-gray-300 capitalize">
                         {vehicle.tipo}
                       </td>
-                      <td className="p-3 text-gray-300 capitalize">
+                      {/* <td className="p-3 text-gray-300 capitalize">
                         {vehicle.frota || "—"}
-                      </td>
+                      </td> */}
                       <td className="p-3 text-gray-300 capitalize">
                         {getUserInfosById(vehicle.id_usuario)}
                       </td>
