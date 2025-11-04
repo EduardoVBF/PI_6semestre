@@ -12,3 +12,12 @@ export type TPostVehicle = {
   km_ultimo_abastecimento: number;
   id_usuario: string;
 };
+
+export type VehicleQueryParams = {
+  skip: number;
+  limit: number;
+  search?: string;
+  tipo?: string;
+  frota?: string;
+  manutencao_vencida?: string;
+};

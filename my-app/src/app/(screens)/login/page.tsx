@@ -73,7 +73,7 @@ export default function Login() {
           </Button>
         </form>
 
-        <div className="text-center text-sm">
+        {/* <div className="text-center text-sm">
           <p className="text-gray-500">Não tem uma conta?</p>
           <Link
             href="/register"
@@ -81,7 +81,7 @@ export default function Login() {
           >
             Crie uma conta
           </Link>
-        </div>
+        </div> */}
       </div>
     </div>
   );

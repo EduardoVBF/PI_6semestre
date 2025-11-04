@@ -21,7 +21,7 @@ const FilterPill = ({ label, selected, onClick }: FilterPillProps) => (
 );
 
 interface FiltersProps {
-  statusOptions: string[];
+  statusOptions?: string[];
   typeOptions: { label: string; value: string }[];
   selectedStatus: string | "";
   selectedType: string | "";
@@ -39,22 +39,23 @@ export default function Filters({
 }: FiltersProps) {
   return (
     <div className="flex flex-wrap gap-8 bg-gray-800 my-1">
-      {/* Status Filter */}
-      <div className="flex flex-col col-span-1 lg:col-span-2">
-        <label className="text-sm font-semibold mb-1 text-gray-400">
-          Status
-        </label>
-        <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 text-xs capitalize">
-          {statusOptions.map((s) => (
-            <FilterPill
-              key={s}
-              label={s}
-              selected={selectedStatus === s}
-              onClick={() => onStatusChange(selectedStatus === s ? "" : s)}
-            />
-          ))}
+      {statusOptions && (
+        <div className="flex flex-col col-span-1 lg:col-span-2">
+          <label className="text-sm font-semibold mb-1 text-gray-400">
+            Status
+          </label>
+          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 text-xs capitalize">
+            {statusOptions.map((s) => (
+              <FilterPill
+                key={s}
+                label={s}
+                selected={selectedStatus === s}
+                onClick={() => onStatusChange(selectedStatus === s ? "" : s)}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Type Filter */}
       <div className="flex flex-col col-span-1 lg:col-span-2">
@@ -67,7 +68,9 @@ export default function Filters({
               key={t.value}
               label={t.label}
               selected={selectedType === t.value}
-              onClick={() => onTypeChange(selectedType === t.value ? "" : t.value)}
+              onClick={() =>
+                onTypeChange(selectedType === t.value ? "" : t.value)
+              }
             />
           ))}
         </div>
