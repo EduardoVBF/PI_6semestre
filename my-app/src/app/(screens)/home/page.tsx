@@ -29,6 +29,7 @@ import Header from "@/components/header";
 import Link from "next/link";
 
 import PendingAlerts from "@/components/sections/pendingAlerts";
+import { useSession } from "next-auth/react";
 
 // --- Interfaces de Tipagem ---
 interface Vehicle {
@@ -191,6 +192,8 @@ const getMockedFilteredData = (): FilteredData => {
 };
 
 export default function Home() {
+  const { data: session } = useSession();
+
   // const [showAlerts, setShowAlerts] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const addMaintenanceModal = useAddMaintenanceModal() as {
@@ -466,7 +469,10 @@ export default function Home() {
         <section className="bg-gray-700 rounded-xl shadow-lg p-4 lg:p-6 space-y-4">
           <div className="flex w-full justify-between">
             <h3 className="text-xl font-semibold mb-4">Próximas Manutenções</h3>
-            <Link href="/management#maintenance" className="text-gray-400 hover:underline hover:text-white">
+            <Link
+              href="/management#maintenance"
+              className="text-gray-400 hover:underline hover:text-white"
+            >
               Ver todas
             </Link>
           </div>
