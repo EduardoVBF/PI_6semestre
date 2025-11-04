@@ -6,5 +6,5 @@ export type TUser = {
     cpf: string;
     type: "adm" | "mecanico" | "motorista" | "escritorio";
     status: "ativo" | "inativo" | "pendente";
-    password: string;
+    password?: string;
 };

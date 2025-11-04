@@ -1,19 +1,11 @@
 'use client';
 import { create } from 'zustand';
+import { TUser } from '@/types/TUser';
 
-interface IUserData {
-    id: number;
-    nome: string;
-    sobrenome: string;
-    telefone: string;
-    funcao: string;
-    admin: boolean;
-    status: string;
-}
 interface EditUserModalStore {
     isOpen: boolean;
-    userData: IUserData | null;
-    onOpen: (data: IUserData | null) => void;
+    userData: TUser | null;
+    onOpen: (data: TUser | null) => void;
     onClose: () => void;
 }
 

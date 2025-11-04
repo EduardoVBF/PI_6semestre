@@ -10,7 +10,6 @@ import EditUserModalWrapper from "@/components/EditUserModalWrapper";
 import AddUserModalWrapper from "@/components/AddUserModalWrapper";
 import { SessionProvider } from "next-auth/react";
 
-
 type Props = {
   children: React.ReactNode;
   fontClass?: string;
@@ -19,17 +18,19 @@ type Props = {
 export default function RootClient({ children, fontClass }: Props) {
   return (
     <div className={fontClass}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        {children}
 
-      {/* wrapper client que usa Zustand */}
-      <EditVehicleModalWrapper />
-      <AddVehicleModalWrapper />
-      <AddUserModalWrapper />
-      <AddFuelSupplyModalWrapper />
-      <EditFuelSupplyModalWrapper />
-      <AddMaintenanceModalWrapper />
-      <EditMaintenanceModalWrapper />
-      <EditUserModalWrapper />
+        {/* wrapper client que usa Zustand */}
+        <EditVehicleModalWrapper />
+        <AddVehicleModalWrapper />
+        <AddUserModalWrapper />
+        <AddFuelSupplyModalWrapper />
+        <EditFuelSupplyModalWrapper />
+        <AddMaintenanceModalWrapper />
+        <EditMaintenanceModalWrapper />
+        <EditUserModalWrapper />
+      </SessionProvider>
     </div>
   );
 }
