@@ -52,7 +52,6 @@ export default function VehiclesManagement() {
   const tipoOptions = [
     { label: "Caminhão", value: "caminhao" },
     { label: "Carro", value: "carro" },
-    { label: "Moto", value: "moto" },
     { label: "Van", value: "van" },
   ];
 

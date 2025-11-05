@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { FaUsers, FaPencilAlt, FaPlus } from "react-icons/fa";
+import { FaUsers, FaPencilAlt, FaPlus, FaPhone } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import Loader from "../loader";
@@ -11,6 +11,7 @@ import Pagination from "../pagination";
 import SearchBar from "../searchBar";
 import Filters from "../filters";
 
+import { useUserPhonesModal } from "@/utils/hooks/useUserPhonesModal";
 import { useEditUserModal } from "@/utils/hooks/useEditUserModal";
 import { useAddUserModal } from "@/utils/hooks/useAddUserModal";
 
@@ -61,6 +62,11 @@ export default function UsersManagement() {
 
   const addUserModal = useAddUserModal() as {
     onOpen: () => void;
+    isOpen: boolean;
+  };
+
+  const userPhonesModal = useUserPhonesModal() as {
+    onOpen: (userId: string | null) => void;
     isOpen: boolean;
   };
 
@@ -274,8 +280,19 @@ export default function UsersManagement() {
                           <button
                             onClick={() => editUserModal.onOpen(user)}
                             className="p-2 rounded-lg hover:bg-gray-700"
+                            title="Editar usuário"
                           >
                             <FaPencilAlt
+                              className="text-gray-300 hover:text-primary-purple"
+                              size={16}
+                            />
+                          </button>
+                          <button
+                            onClick={() => userPhonesModal.onOpen(user.id)}
+                            className="p-2 rounded-lg hover:bg-gray-700"
+                            title="Telefones do usuário"
+                          >
+                            <FaPhone
                               className="text-gray-300 hover:text-primary-purple"
                               size={16}
                             />

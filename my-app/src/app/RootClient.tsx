@@ -6,6 +6,7 @@ import AddMaintenanceModalWrapper from "@/components/AddMaintenanceModalWrapper"
 import AddFuelSupplyModalWrapper from "@/components/AddFuelSupplyModalWrapper";
 import EditVehicleModalWrapper from "@/components/EditVehicleModalWrapper";
 import AddVehicleModalWrapper from "@/components/AddVehicleModalWrapper";
+import UserPhonesModalWrapper from "@/components/UserPhonesModalWrapper";
 import EditUserModalWrapper from "@/components/EditUserModalWrapper";
 import AddUserModalWrapper from "@/components/AddUserModalWrapper";
 import { SessionProvider } from "next-auth/react";
@@ -22,6 +23,7 @@ export default function RootClient({ children, fontClass }: Props) {
         {children}
 
         {/* wrapper client que usa Zustand */}
+        <UserPhonesModalWrapper />
         <EditVehicleModalWrapper />
         <AddVehicleModalWrapper />
         <AddUserModalWrapper />
