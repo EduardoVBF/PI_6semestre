@@ -8,12 +8,6 @@ import Loader from "../loader";
 import api from "@/utils/api";
 import { TUser } from "@/types/TUser";
 
-type TPostTelephone = {
-  id: string;
-  user_id: string;
-  number: string;
-};
-
 export type TGetTelephone = {
   id_user: string;
   number: string;
@@ -21,6 +15,12 @@ export type TGetTelephone = {
   id: string;
   created_at: string;
   updated_at: string | null;
+};
+
+type TPostTelephone = {
+  id_user: string;
+  number: string;
+  status: string;
 };
 
 export default function UserPhonesModal({
@@ -37,9 +37,11 @@ export default function UserPhonesModal({
   const [user, setUser] = useState<TUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingPhones, setLoadingPhones] = useState(false);
+  const [addingPhone, setAddingPhone] = useState(false);
 
   const [phoneNumbers, setPhoneNumbers] = useState<TGetTelephone[]>([]);
   const [newPhone, setNewPhone] = useState<string>("");
+  const [newStatus, setNewStatus] = useState<string>("ativo");
 
   // === Busca o usuário completo pelo ID ===
   useEffect(() => {
@@ -62,50 +64,72 @@ export default function UserPhonesModal({
   }, [userId, session, isOpen]);
 
   // === Busca os telefones do usuário ===
+  const fetchPhones = async () => {
+    if (!userId || !session?.accessToken) return;
+    setLoadingPhones(true);
+    try {
+      const res = await api.get<{
+        telephones?: TGetTelephone[];
+        telephone_numbers?: TGetTelephone[];
+      }>(`/api/v1/telephones/`, {
+        headers: { Authorization: `Bearer ${session.accessToken}` },
+        params: { user_id: userId },
+      });
+
+      const phones = Array.isArray(res.data.telephone_numbers)
+        ? res.data.telephone_numbers
+        : res.data.telephones || [];
+
+      setPhoneNumbers(phones);
+    } catch {
+      toast.error("Erro ao carregar telefones do usuário.");
+    } finally {
+      setLoadingPhones(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPhones = async () => {
-      if (!userId || !session?.accessToken) return;
-      setLoadingPhones(true);
-      try {
-        const res = await api.get<{ telephones?: TGetTelephone[]; telephone_numbers?: TGetTelephone[] }>(
-          `/api/v1/telephones/`,
-          {
-            headers: { Authorization: `Bearer ${session.accessToken}` },
-            params: { user_id: userId },
-          }
-        );
-        // console.log("response phones:", res);
-
-        // Ajusta se a resposta for um array simples
-        const phones = Array.isArray(res.data.telephone_numbers)
-          ? res.data.telephone_numbers
-          : res.data.telephones || [];
-
-        setPhoneNumbers(phones);
-      } catch {
-        toast.error("Erro ao carregar telefones do usuário.");
-      } finally {
-        setLoadingPhones(false);
-      }
-    };
-
     if (isOpen) fetchPhones();
   }, [userId, session, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleAddPhone = () => {
-    if (newPhone.trim() !== "") {
-      const newPhoneObj: TPostTelephone = {
-        id: crypto.randomUUID(),
-        user_id: userId || "",
+  // === Adicionar telefone ===
+  const handleAddPhone = async () => {
+    if (!newPhone.trim()) {
+      toast.error("Informe um número de telefone.");
+      return;
+    }
+
+    if (!userId) {
+      toast.error("Usuário inválido.");
+      return;
+    }
+
+    setAddingPhone(true);
+    try {
+      const payload: TPostTelephone = {
+        id_user: userId,
         number: newPhone.trim(),
+        status: newStatus,
       };
-    //   setPhoneNumbers([...phoneNumbers, newPhoneObj]);
+
+      await api.post("/api/v1/telephones/", payload, {
+        headers: { Authorization: `Bearer ${session?.accessToken}` },
+      });
+
+      toast.success("Telefone adicionado com sucesso!");
       setNewPhone("");
+      setNewStatus("ativo");
+      await fetchPhones();
+    } catch {
+      toast.error("Erro ao adicionar telefone.");
+    } finally {
+      setAddingPhone(false);
     }
   };
 
+  // === Remover telefone da lista local (sem DELETE ainda) ===
   const handleRemovePhone = (index: number) => {
     setPhoneNumbers(phoneNumbers.filter((_, i) => i !== index));
   };
@@ -139,34 +163,13 @@ export default function UserPhonesModal({
           </div>
         ) : (
           <>
-            {/* Info do usuário */}
             {user && (
-              <div className="space-y-2 text-gray-200 mb-6 border-b border-gray-700 pb-4">
+              <div className="text-gray-200 mb-4 border-b border-gray-700 pb-1 text-center">
                 <p className="capitalize">
-                  <span className="font-semibold text-gray-300">Nome:</span>{" "}
                   {user.name} {user.lastName}
                 </p>
               </div>
             )}
-
-            {/* Campo para adicionar telefone */}
-            <div className="flex gap-2 mb-6">
-              <Input
-                type="text"
-                value={newPhone}
-                onChange={(e) => setNewPhone(e.target.value)}
-                placeholder="Adicionar novo telefone"
-                className="flex-1 h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 
-                           focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-              />
-              <button
-                onClick={handleAddPhone}
-                className="flex items-center justify-center gap-2 h-12 px-4 bg-primary-purple hover:bg-fuchsia-800 text-white font-semibold rounded-lg transition-all duration-200"
-              >
-                <PlusCircle size={20} />
-                Adicionar
-              </button>
-            </div>
 
             {/* Lista de telefones */}
             {loadingPhones ? (
@@ -185,7 +188,21 @@ export default function UserPhonesModal({
                       key={phone.id || index}
                       className="flex justify-between items-center bg-gray-700 border border-gray-600 rounded-lg p-3 text-white"
                     >
-                      <span className="text-base">{phone.number}</span>
+                      <div className="flex items-center gap-3">
+                        <Phone className="text-primary-purple" size={16} />
+                        <span className="text-base font-medium">
+                          {phone.number}
+                        </span>
+                        <span
+                          className={`text-sm ${
+                            phone.status === "ativo"
+                              ? "text-green-400"
+                              : "text-red-400"
+                          }`}
+                        >
+                          {phone.status}
+                        </span>
+                      </div>
                       <button
                         onClick={() => handleRemovePhone(index)}
                         className="text-red-400 hover:text-red-600 transition-colors duration-200"
@@ -197,18 +214,41 @@ export default function UserPhonesModal({
                 )}
               </div>
             )}
+
+            {/* Campo para adicionar telefone */}
+            <div className="flex flex-col gap-3 mt-6">
+              <p className="text-sm text-gray-200 pb-1 border-b border-gray-700">
+                Adicionar Novo Telefone
+              </p>
+              <Input
+                type="text"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                placeholder="Novo telefone"
+                className="h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 
+                           focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
+              />
+
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                className="h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple"
+              >
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
+
+              <button
+                onClick={handleAddPhone}
+                disabled={addingPhone}
+                className="flex items-center justify-center gap-2 h-12 px-4 bg-primary-purple hover:bg-fuchsia-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-60"
+              >
+                {addingPhone ? "" : <PlusCircle size={20} />}
+                {addingPhone ? "Adicionando..." : "Adicionar"}
+              </button>
+            </div>
           </>
         )}
-
-        {/* Rodapé */}
-        <div className="flex justify-end pt-6">
-          <button
-            onClick={onClose}
-            className="w-full h-12 text-lg bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors duration-200"
-          >
-            Fechar
-          </button>
-        </div>
       </div>
     </div>
   );
