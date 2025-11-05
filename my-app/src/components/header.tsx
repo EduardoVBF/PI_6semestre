@@ -1,5 +1,5 @@
 "use client";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import Image from "next/image";
@@ -40,7 +40,9 @@ function Header() {
         </div>
         <Button
           className="w-1/4 h-8 bg-[#cccccc] hover:bg-[#ffffff] text-black cursor-pointer shadow-md rounded-xl hover:shadow-xl px-8 py-3"
-          onClick={() => router.push("/")}
+          onClick={async () => {
+            await signOut({ callbackUrl: "/" });
+          }}
         >
           Sair
         </Button>
