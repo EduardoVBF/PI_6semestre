@@ -218,13 +218,13 @@ export default function VehicleDetails() {
   const editMaintenanceModal = useEditMaintenanceModal() as {
     onOpen: (maintenanceData: IPreventiveMaintenance) => void;
   };
-  const editFuelSupplyModal = useEditFuelSupplyModal() as {
+  const editFuelSupplyModal = useEditFuelSupplyModal() as unknown as {
     onOpen: (fuelSupplyData: IFuelSupply) => void;
   };
   const addMaintenanceModal = useAddMaintenanceModal() as {
     onOpen: () => void;
   };
-  const editVehicleModal = useEditVehicleModal() as {
+  const editVehicleModal = useEditVehicleModal() as unknown as {
     onOpen: (vehicleId: Vehicle) => void;
   };
 
