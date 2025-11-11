@@ -1,11 +1,14 @@
 "use client";
 import { useSession } from "next-auth/react";
+import type { Session } from "next-auth";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Loader from "@/components/loader"; // use o seu loader
-
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { status, data: session } = useSession();
+  const { status, data: session } = useSession() as {
+    status: "authenticated" | "unauthenticated" | "loading";
+    data: (Session & { accessToken?: string }) | null;
+  };
   const router = useRouter();
   const pathname = usePathname();
 
@@ -18,7 +21,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (
-      (status === "unauthenticated" || !session?.accessToken) &&
+      (status === "unauthenticated" && !session?.accessToken) &&
       !isLoginPage &&
       !isRegisterPage &&
       !isHomePage
