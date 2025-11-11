@@ -2,9 +2,7 @@
 import {
   FaExclamationTriangle,
   FaUser,
-  FaChevronDown,
   FaPencilAlt,
-  FaChevronUp,
   FaWrench,
   FaPlus,
 } from "react-icons/fa";
@@ -14,12 +12,19 @@ import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import { useEditVehicleModal } from "@/utils/hooks/useEditVehicleModal";
 import { IoSpeedometerOutline, IoWaterOutline } from "react-icons/io5";
+import PendingAlerts from "@/components/sections/pendingAlerts";
 import Breadcrumb from "@/components/sections/breabcrumb";
 import { FaGear, FaTruck } from "react-icons/fa6";
+import React, { useState, useEffect, use } from "react";
+import { TGetVehicle } from "@/types/TVehicle";
+import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
+import { TUserData } from "@/types/TUser";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import React from "react";
-import PendingAlerts from "@/components/sections/pendingAlerts";
+import Loader from "@/components/loader";
+import api from "@/utils/api";
+import { set } from "react-hook-form";
 
 interface IFuelSupply {
   id: number;
@@ -181,6 +186,66 @@ const mockAlerts: Alert[] = [
   },
 ];
 
+// Mock de manutenções
+const mockMaintenance: IPreventiveMaintenance[] = [
+  {
+    id: 1,
+    placa: "ABC-1234",
+    kmAtual: 45600,
+    manutencoes: {
+      oleo: true,
+      filtroOleo: true,
+      filtroCombustivel: false,
+      filtroAr: false,
+      engraxamento: true,
+    },
+    data: "15/10/2025",
+    status: "Concluída",
+  },
+  {
+    id: 2,
+    placa: "DEF-5678",
+    kmAtual: 87200,
+    manutencoes: {
+      oleo: false,
+      filtroOleo: false,
+      filtroCombustivel: true,
+      filtroAr: true,
+      engraxamento: false,
+    },
+    data: "02/09/2025",
+    status: "Atrasado",
+  },
+  {
+    id: 3,
+    placa: "GHI-9012",
+    kmAtual: 132000,
+    manutencoes: {
+      oleo: true,
+      filtroOleo: true,
+      filtroCombustivel: true,
+      filtroAr: true,
+      engraxamento: true,
+    },
+    data: "01/08/2025",
+    status: "Próximo",
+  },
+  {
+    id: 4,
+    placa: "JKL-3456",
+    kmAtual: 54000,
+    manutencoes: {
+      oleo: false,
+      filtroOleo: true,
+      filtroCombustivel: false,
+      filtroAr: true,
+      engraxamento: false,
+    },
+    data: "20/11/2025",
+    status: "Regular",
+  },
+];
+
 // Função para calcular a média de consumo dos últimos X abastecimentos
 const calculateAverageConsumption = (data: IFuelSupply[], count: number) => {
   if (data.length < 2) return 0;
@@ -200,20 +265,6 @@ const calculateAverageConsumption = (data: IFuelSupply[], count: number) => {
   return totalLitros > 0 ? totalKm / totalLitros : 0;
 };
 
-// Função para calcular o consumo em relação ao abastecimento anterior
-// const calculateLastConsumption = (
-//   abastecimentoAtual: any,
-//   abastecimentoAnterior: any
-// ) => {
-//   if (!abastecimentoAnterior || !abastecimentoAtual) return 0;
-//   const kmTravelled =
-//     abastecimentoAtual.km_abastecimento -
-//     abastecimentoAnterior.km_abastecimento;
-//   return abastecimentoAnterior.litros > 0
-//     ? kmTravelled / abastecimentoAnterior.litros
-//     : 0;
-// };
-
 export default function VehicleDetails() {
   const editMaintenanceModal = useEditMaintenanceModal() as {
     onOpen: (maintenanceData: IPreventiveMaintenance) => void;
@@ -225,74 +276,20 @@ export default function VehicleDetails() {
     onOpen: () => void;
   };
   const editVehicleModal = useEditVehicleModal() as unknown as {
-    onOpen: (vehicleId: Vehicle) => void;
+    onOpen: (vehicleId: TGetVehicle) => void;
   };
 
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
-  const [showAlerts, setShowAlerts] = React.useState(false);
+  const [vehicleData, setVehicleData] = useState<TGetVehicle | null>(null);
+  const [userData, setUserData] = useState<TUserData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+  const params = useParams();
+
+  const [showAlerts, setShowAlerts] = useState(false);
   const abastecimentos = mockAbastecimentos;
   const vehicle = mockVehicleDetails;
   const alerts = mockAlerts;
-
-  // Mock de manutenções
-  const mockMaintenance: IPreventiveMaintenance[] = [
-    {
-      id: 1,
-      placa: "ABC-1234",
-      kmAtual: 45600,
-      manutencoes: {
-        oleo: true,
-        filtroOleo: true,
-        filtroCombustivel: false,
-        filtroAr: false,
-        engraxamento: true,
-      },
-      data: "15/10/2025",
-      status: "Concluída",
-    },
-    {
-      id: 2,
-      placa: "DEF-5678",
-      kmAtual: 87200,
-      manutencoes: {
-        oleo: false,
-        filtroOleo: false,
-        filtroCombustivel: true,
-        filtroAr: true,
-        engraxamento: false,
-      },
-      data: "02/09/2025",
-      status: "Atrasado",
-    },
-    {
-      id: 3,
-      placa: "GHI-9012",
-      kmAtual: 132000,
-      manutencoes: {
-        oleo: true,
-        filtroOleo: true,
-        filtroCombustivel: true,
-        filtroAr: true,
-        engraxamento: true,
-      },
-      data: "01/08/2025",
-      status: "Próximo",
-    },
-    {
-      id: 4,
-      placa: "JKL-3456",
-      kmAtual: 54000,
-      manutencoes: {
-        oleo: false,
-        filtroOleo: true,
-        filtroCombustivel: false,
-        filtroAr: true,
-        engraxamento: false,
-      },
-      data: "20/11/2025",
-      status: "Regular",
-    },
-  ];
 
   const labelMap: Record<string, string> = {
     oleo: "Troca de óleo",
@@ -301,12 +298,6 @@ export default function VehicleDetails() {
     filtroAr: "Filtro de ar",
     engraxamento: "Engraxamento",
   };
-
-  // const totalMaintenance = mockMaintenance.length;
-  // const totalCost = mockMaintenance.reduce((acc, curr) => acc + curr.custo, 0);
-  // const urgentMaintenance = mockMaintenance.filter(
-  //   (m) => m.proximaTroca <= 1000 || m.proximaTroca < 0
-  // ).length;
 
   // Função para cor do status
   const getStatusColor = (status: string) => {
@@ -329,6 +320,65 @@ export default function VehicleDetails() {
   // Ordenando os abastecimentos por ID para garantir a ordem correta na tabela
   const sortedAbastecimentos = [...abastecimentos].sort((a, b) => b.id - a.id);
 
+  useEffect(() => {
+    const fetchVehicleData = async () => {
+      if (!params?.id) return;
+      if (!session?.accessToken) return;
+      setLoading(true);
+
+      try {
+        const response = await api.get<TGetVehicle>(
+          `/api/v1/vehicles/placa/${params.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+          }
+        );
+        setVehicleData(response.data);
+      } catch (error) {
+        console.error("Error fetching vehicle data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicleData();
+  }, [params?.id, session?.accessToken]);
+
+  useEffect(() => {
+    const fetchVehicleUserData = async () => {
+      if (!params?.id) return;
+      if (!session?.accessToken) return;
+      setLoading(true);
+
+      try {
+        const response = await api.get<TUserData>(
+          `/api/v1/users/${vehicleData?.id_usuario}`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+          }
+        );
+        setUserData(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicleUserData();
+  }, [params?.id, session?.accessToken, vehicleData?.id_usuario]);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  console.log("vehicleData:", vehicleData);
+  console.log("userData:", userData);
+  console.log("session:", session);
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <Header />
@@ -360,16 +410,16 @@ export default function VehicleDetails() {
             {/* <FaTruck size={48} className="text-primary-purple" /> */}
             <div>
               <h1 className="text-3xl font-bold text-primary-purple">
-                {vehicle.modelo} - {vehicle.placa}
+                {vehicleData?.modelo} - {vehicleData?.placa}
               </h1>
               <p className="text-xl text-gray-400">
-                {vehicle.marca}, {vehicle.ano}
+                {vehicleData?.marca}, {vehicleData?.ano}
               </p>
             </div>
             <div>
               <button
                 className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                onClick={() => editVehicleModal.onOpen(vehicle)}
+                onClick={() => editVehicleModal.onOpen(vehicleData as TGetVehicle)}
               >
                 <FaPencilAlt
                   className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
@@ -383,21 +433,25 @@ export default function VehicleDetails() {
               <FaUser size={20} className="text-white/70" />
               <div>
                 <p className="text-sm text-white/60">Motorista</p>
-                <p className="font-semibold">{vehicle.motorista}</p>
+                <p className="font-semibold">
+                  {userData?.name} {userData?.lastName}
+                </p>
               </div>
             </div>
             <div className="bg-gray-700 p-4 rounded-lg flex items-center space-x-3">
               <IoSpeedometerOutline size={30} className="text-white/70" />
               <div>
                 <p className="text-sm text-white/60">Última quilometragem</p>
-                <p className="font-semibold">{vehicle.odometro}</p>
+                <p className="font-semibold">{vehicleData?.km_atual} km</p>
               </div>
             </div>
             <div className="bg-gray-700 p-4 rounded-lg flex items-center space-x-3">
               <FaWrench size={30} className="text-white/70" />
               <div>
                 <p className="text-sm text-white/60">Próxima manutenção</p>
-                <p className="font-semibold">{vehicle.proximaManutencao}</p>
+                <p className="font-semibold">
+                  {vehicleData?.km_prox_manutencao}
+                </p>
               </div>
             </div>
             {/* Novo card de média de consumo */}

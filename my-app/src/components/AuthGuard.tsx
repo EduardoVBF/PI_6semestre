@@ -16,12 +16,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const isRegisterPage = pathname === "/register";
   const isHomePage = pathname === "/";
 
-  console.log("AuthGuard - status:", status, "pathname:", pathname);
-  console.log("AuthGuard - session:", session);
-
   useEffect(() => {
     if (
-      (status === "unauthenticated" && !session?.accessToken) &&
+      status === "unauthenticated" &&
+      session &&
+      !session?.accessToken &&
       !isLoginPage &&
       !isRegisterPage &&
       !isHomePage

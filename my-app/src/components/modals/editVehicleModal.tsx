@@ -17,7 +17,7 @@ export default function EditVehicleModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  vehicle: TGetVehicle | null;
+  vehicle: TGetVehicle;
 }) {
   const { data: session } = useSession();
   const [users, setUsers] = useState<TUser[]>([]);
