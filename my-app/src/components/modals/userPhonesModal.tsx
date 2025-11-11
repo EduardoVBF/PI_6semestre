@@ -1,6 +1,7 @@
 "use client";
+import { MdOutlinePhoneDisabled, MdOutlinePhoneEnabled } from "react-icons/md";
+import { X, Phone, PlusCircle, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { X, Phone, PlusCircle, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -42,6 +43,7 @@ export default function UserPhonesModal({
   const [phoneNumbers, setPhoneNumbers] = useState<TGetTelephone[]>([]);
   const [newPhone, setNewPhone] = useState<string>("");
   const [newStatus, setNewStatus] = useState<string>("ativo");
+  const [showAddPhoneForm, setShowAddPhoneForm] = useState<boolean>(false);
 
   // === Busca o usuário completo pelo ID ===
   useEffect(() => {
@@ -88,9 +90,34 @@ export default function UserPhonesModal({
     }
   };
 
+  // alteração de status
+  const handleStatusChange = async (
+    id: string,
+    newStatus: string,
+    number: string
+  ) => {
+    if (!userId || !session?.accessToken) return;
+    setLoading(true);
+    try {
+      await api.patch(
+        `/api/v1/telephones/${id}`,
+        { number: number, status: newStatus },
+        {
+          headers: { Authorization: `Bearer ${session.accessToken}` },
+        }
+      );
+      toast.success("Status do telefone atualizado com sucesso!");
+    } catch {
+      toast.error("Erro ao atualizar status do telefone.");
+    } finally {
+      await fetchPhones();
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isOpen) fetchPhones();
-  }, [userId, session, isOpen]);
+  }, [isOpen, userId, session]);
 
   if (!isOpen) return null;
 
@@ -127,11 +154,6 @@ export default function UserPhonesModal({
     } finally {
       setAddingPhone(false);
     }
-  };
-
-  // === Remover telefone da lista local (sem DELETE ainda) ===
-  const handleRemovePhone = (index: number) => {
-    setPhoneNumbers(phoneNumbers.filter((_, i) => i !== index));
   };
 
   return (
@@ -203,12 +225,45 @@ export default function UserPhonesModal({
                           {phone.status}
                         </span>
                       </div>
-                      <button
-                        onClick={() => handleRemovePhone(index)}
-                        className="text-red-400 hover:text-red-600 transition-colors duration-200"
-                      >
-                        <Trash2 size={20} />
-                      </button>
+                      {phone.status === "ativo" ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(
+                              phone.id,
+                              phone.status === "ativo" ? "inativo" : "ativo",
+                              phone.number
+                            );
+                          }}
+                          title="Desativar"
+                          className="p-1 rounded-lg hover:bg-gray-700"
+                          aria-label="Desativar telefone"
+                        >
+                          <MdOutlinePhoneDisabled
+                            className="text-gray-300 hover:text-red-500"
+                            size={16}
+                          />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(
+                              phone.id,
+                              phone.status === "ativo" ? "inativo" : "ativo",
+                              phone.number
+                            );
+                          }}
+                          title="Ativar"
+                          className="p-1 rounded-lg hover:bg-gray-700"
+                          aria-label="Ativar telefone"
+                        >
+                          <MdOutlinePhoneEnabled
+                            className="text-gray-300 hover:text-green-500"
+                            size={16}
+                          />
+                        </button>
+                      )}
                     </div>
                   ))
                 )}
@@ -217,35 +272,56 @@ export default function UserPhonesModal({
 
             {/* Campo para adicionar telefone */}
             <div className="flex flex-col gap-3 mt-6">
-              <p className="text-sm text-gray-200 pb-1 border-b border-gray-700">
-                Adicionar Novo Telefone
-              </p>
-              <Input
-                type="text"
-                value={newPhone}
-                onChange={(e) => setNewPhone(e.target.value)}
-                placeholder="Novo telefone"
-                className="h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 
-                           focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-              />
+              <div className="flex items-center justify-between pb-1 border-b border-gray-700">
+                <p className="text-sm text-gray-200">
+                  Adicionar Novo Telefone
+                </p>
+                {showAddPhoneForm ? (
+                  <button
+                    onClick={() => setShowAddPhoneForm(false)}
+                    className="flex items-center gap-2 text-white hover:text-primary-purple font-semibold transition-all duration-200 cursor-pointer"
+                  >
+                    <ChevronUp size={20} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowAddPhoneForm(true)}
+                    className="flex items-center gap-2 text-white hover:text-primary-purple font-semibold transition-all duration-200 cursor-pointer"
+                  >
+                    <ChevronDown size={20} />
+                  </button>
+                )}
+              </div>
+              {showAddPhoneForm && (
+                <>
+                  <Input
+                    type="text"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="Novo telefone"
+                    className="h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 
+                focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
+                  />
 
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                className="h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple"
-              >
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
-              </select>
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
+                    className="h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple"
+                  >
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                  </select>
 
-              <button
-                onClick={handleAddPhone}
-                disabled={addingPhone}
-                className="flex items-center justify-center gap-2 h-12 px-4 bg-primary-purple hover:bg-fuchsia-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-60"
-              >
-                {addingPhone ? "" : <PlusCircle size={20} />}
-                {addingPhone ? "Adicionando..." : "Adicionar"}
-              </button>
+                  <button
+                    onClick={handleAddPhone}
+                    disabled={addingPhone}
+                    className="flex items-center justify-center gap-2 h-12 px-4 bg-primary-purple hover:bg-fuchsia-800 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-60"
+                  >
+                    {addingPhone ? "" : <PlusCircle size={20} />}
+                    {addingPhone ? "Adicionando..." : "Adicionar"}
+                  </button>
+                </>
+              )}
             </div>
           </>
         )}
