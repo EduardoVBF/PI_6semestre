@@ -26,7 +26,8 @@ import Loader from "@/components/loader";
 import api from "@/utils/api";
 import { set } from "react-hook-form";
 import { TMaintenance, TGetAllMaintenances } from "@/types/TMaintenance";
-import { TRefuel } from "@/types/TFuel";
+import { TRefuel, TGetAllRefuels } from "@/types/TFuel";
+import Pagination from "@/components/pagination";
 
 interface IFuelSupply {
   id: number;
@@ -207,6 +208,11 @@ export default function VehicleDetails() {
   };
 
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
+  const [maintenanceData, setMaintenanceData] = useState<TMaintenance[]>([]);
+  const [fuelSupplyData, setFuelSupplyData] = useState<TRefuel[]>([]);
+  const [fueltotal, setFuelTotal] = useState<number>(0);
+  const [fuelpage, setFuelPage] = useState<number>(1);
+  const [fuellimit, setFuelLimit] = useState<number>(3);
   const [vehicleData, setVehicleData] = useState<TGetVehicle | null>(null);
   const [userData, setUserData] = useState<TUserData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -220,22 +226,22 @@ export default function VehicleDetails() {
 
   const labelMap: Record<string, string> = {
     oleo: "Troca de óleo",
-    filtroOleo: "Filtro de óleo",
-    filtroCombustivel: "Filtro de combustível",
-    filtroAr: "Filtro de ar",
+    filtro_oleo: "Filtro de óleo",
+    filtro_combustivel: "Filtro de combustível",
+    filtro_ar: "Filtro de ar",
     engraxamento: "Engraxamento",
   };
 
   // Função para cor do status
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status?: string) => {
     switch (status) {
-      case "Atrasado":
+      case "cancelada":
         return "bg-red-500";
-      case "Próximo":
+      case "pendente":
         return "bg-yellow-500";
-      case "Regular":
+      case "concluida":
         return "bg-green-500";
-      case "Concluída":
+      case "em_andamento":
         return "bg-blue-500";
       default:
         return "bg-gray-500";
@@ -247,6 +253,7 @@ export default function VehicleDetails() {
   // Ordenando os abastecimentos por ID para garantir a ordem correta na tabela
   const sortedAbastecimentos = [...abastecimentos].sort((a, b) => b.id - a.id);
 
+  // Fetch vehicle data
   useEffect(() => {
     const fetchVehicleData = async () => {
       if (!params?.id) return;
@@ -273,10 +280,12 @@ export default function VehicleDetails() {
     fetchVehicleData();
   }, [params?.id, session?.accessToken]);
 
+  // Buscar dados do usuário associado ao veículo
   useEffect(() => {
     const fetchVehicleUserData = async () => {
       if (!params?.id) return;
       if (!session?.accessToken) return;
+      if (!vehicleData?.id_usuario) return;
       setLoading(true);
 
       try {
@@ -299,13 +308,76 @@ export default function VehicleDetails() {
     fetchVehicleUserData();
   }, [params?.id, session?.accessToken, vehicleData?.id_usuario]);
 
+  // Fetch maintenance data pelo id do veículo
+  useEffect(() => {
+    const fetchMaintenanceData = async () => {
+      if (!params?.id) return;
+      if (!session?.accessToken) return;
+      setLoading(true);
+
+      try {
+        const response = await api.get<TGetAllMaintenances>(
+          `/api/v1/maintenances/placa/${params.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+          }
+        );
+        // console.log("Maintenance data:", response.data);
+        setMaintenanceData(response.data);
+      } catch (error) {
+        console.error("Error fetching maintenance data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMaintenanceData();
+  }, [params?.id, session?.accessToken]);
+
+  // Fetch dos abastecimentos do veículo
+  useEffect(() => {
+    const fetchFuelSupplies = async () => {
+      if (!params?.id) return;
+      if (!session?.accessToken) return;
+      setLoading(true);
+
+      try {
+        const response = await api.get<TGetAllRefuels>(
+          `/api/v1/refuels`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+            params: {
+              placa: params.id,
+            },
+          }
+        );
+        console.log("Fuel supplies data:", response.data);
+        setFuelSupplyData(response.data.refuels);
+        setFuelTotal(response.data.total);
+        setFuelPage(response.data.page);
+        setFuelLimit(response.data.per_page);
+      } catch (error) {
+        console.error("Error fetching fuel supplies data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFuelSupplies();
+  }, [params?.id, session?.accessToken]);
+
   if (loading) {
     return <Loader />;
   }
 
-  console.log("vehicleData:", vehicleData);
-  console.log("userData:", userData);
-  console.log("session:", session);
+  // console.log("vehicleData:", vehicleData);
+  console.log("fuelSupplyData:", fuelSupplyData);
+  // console.log("userData:", userData);
+  // console.log("session:", session);
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <Header />
@@ -395,7 +467,7 @@ export default function VehicleDetails() {
         </section>
 
         {/* Tabela de Abastecimentos */}
-        {/* <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 relative">
+        <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 relative">
           <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2 max-w-[80%]">
             Histórico de Abastecimentos
           </h3>
@@ -431,15 +503,15 @@ export default function VehicleDetails() {
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {sortedAbastecimentos.map((abastecimento) => (
+                {fuelSupplyData.map((abastecimento) => (
                   <tr
                     key={abastecimento.id}
                     className={`${
-                      abastecimento.media < 5.6 ? "bg-yellow-800/50" : ""
+                      1 !== 1 ? "bg-yellow-800/50" : ""
                     }`}
                   >
                     <td className="px-3 md:px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
-                      {abastecimento.media < 5.6 && (
+                      {1 !== 1 && (
                         <FaExclamationTriangle
                           size={18}
                           className="text-yellow-400"
@@ -447,10 +519,10 @@ export default function VehicleDetails() {
                       )}
                       <div>
                         <div className="font-semibold text-white">
-                          {abastecimento.data_hora}
+                          {abastecimento.data} {abastecimento.hora}
                         </div>
                         <div>
-                          {abastecimento.km_abastecimento.toLocaleString(
+                          {abastecimento.km.toLocaleString(
                             "pt-BR"
                           )}{" "}
                           km
@@ -459,14 +531,14 @@ export default function VehicleDetails() {
                     </td>
                     <td className="px-3 md:px-6 py-4 text-xs">
                       <div className="font-bold text-white">
-                        R$ {abastecimento.total_abastecimento.toFixed(2)}
+                        R$ {abastecimento.valor_total?.replace(".", ",")}
                       </div>
                       <div className="text-gray-400">
-                        {abastecimento.litros.toFixed(2)} L × R$
-                        {abastecimento.preco_litro.toFixed(2)}
+                        {abastecimento.litros.replace(".", ",")} L × R$
+                        {abastecimento.valor_litro.replace(".", ",")}
                       </div>
                     </td>
-                    <td className="px-3 md:px-6 py-4 text-xs text-gray-400">
+                    <td className="px-3 md:px-6 py-4 text-xs text-gray-400 capitalize">
                       <div className="font-semibold text-white">
                         {abastecimento.posto}
                       </div>
@@ -476,12 +548,17 @@ export default function VehicleDetails() {
                       <div className="font-semibold text-white">
                         {abastecimento.placa}
                       </div>
-                      <div>{abastecimento.motorista}</div>
+                      <div>{abastecimento.id_usuario || "N/A"}</div>
                     </td>
                     <td className="px-3 md:px-6 py-4 text-xs font-medium">
+                      {abastecimento.media ? (
+
                       <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white truncate">
                         {abastecimento.media} km/L
                       </span>
+                      ) : (
+                        <span className="text-gray-500 italic">—</span>
+                      )}
                     </td>
                     <td className="px-3 md:px-6 py-4 text-xs">
                       <button
@@ -503,10 +580,10 @@ export default function VehicleDetails() {
               </tbody>
             </table>
           </div>
-        </section> */}
+        </section>
 
         {/* Tabela de Manutenções */}
-        {/* <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 mb-8">
+        <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
             <div className="flex flex-col md:flex-row md:items-center space-x-4 m-2">
               <h3 className="text-2xl font-semibold text-primary-purple">
@@ -515,7 +592,7 @@ export default function VehicleDetails() {
               <div className="flex space-x-1 items-center">
                 <IoSpeedometerOutline size={25} className="text-gray-400" />
                 <h3 className="text-md font-medium text-gray-400">
-                  {vehicle.odometro}
+                  {vehicleData?.km_atual} km
                 </h3>
               </div>
             </div>
@@ -552,31 +629,44 @@ export default function VehicleDetails() {
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-600">
-                {mockMaintenance.map((maintenance) => (
+                {maintenanceData.map((maintenance) => (
                   <tr key={maintenance.id}>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                       {maintenance.placa}
                     </td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      {maintenance.data}
+                    <td className="p-3 text-sm text-gray-300">
+                      {maintenance.created_at
+                        ? new Date(maintenance.created_at).toLocaleDateString("pt-BR")
+                        : "—"}
                     </td>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      {maintenance.kmAtual.toLocaleString()} km
+                      {maintenance.km_atual.toLocaleString()} km
                     </td>
-                    <td className="px-3 md:px-6 py-4 text-sm text-gray-300">
+                    <td className="p-3 text-sm text-gray-300">
                       <div className="flex flex-wrap gap-2">
-                        {Object.entries(maintenance.manutencoes)
+                        {Object.entries({
+                          oleo: maintenance.oleo,
+                          filtro_oleo: maintenance.filtro_oleo,
+                          filtro_combustivel: maintenance.filtro_combustivel,
+                          filtro_ar: maintenance.filtro_ar,
+                          engraxamento: maintenance.engraxamento,
+                        })
                           .filter(([_, v]) => v)
                           .map(([k]) => (
                             <span
                               key={k}
-                              className="px-2 py-1 bg-primary-purple/40 text-white rounded-lg text-xs text-center w-fit truncate"
+                              className="px-2 py-1 bg-primary-purple/40 text-white rounded-lg text-xs"
                             >
                               {labelMap[k]}
                             </span>
                           ))}
-                        {Object.values(maintenance.manutencoes).every(
-                          (v) => !v
+
+                        {!(
+                          maintenance.oleo ||
+                          maintenance.filtro_oleo ||
+                          maintenance.filtro_combustivel ||
+                          maintenance.filtro_ar ||
+                          maintenance.engraxamento
                         ) && (
                           <span className="text-gray-500 italic text-xs">
                             Nenhuma realizada
@@ -586,7 +676,7 @@ export default function VehicleDetails() {
                     </td>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(
                           maintenance.status
                         )}`}
                       >
@@ -609,7 +699,7 @@ export default function VehicleDetails() {
               </tbody>
             </table>
           </div>
-        </section> */}
+        </section>
       </main>
       <Footer />
     </div>
