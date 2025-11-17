@@ -1,25 +1,11 @@
 'use client';
 import { create } from 'zustand';
-
-interface IPreventiveMaintenance {
-  id: number;
-  placa: string;
-  kmAtual: number;
-  manutencoes: {
-    oleo: boolean;
-    filtroOleo: boolean;
-    filtroCombustivel: boolean;
-    filtroAr: boolean;
-    engraxamento: boolean;
-  };
-  data: string;
-  status: string;
-}
+import { TMaintenance } from '@/types/TMaintenance';
 
 interface EditMaintenanceModalStore {
     isOpen: boolean;
-    maintenanceData: IPreventiveMaintenance | null;
-    onOpen: (data: IPreventiveMaintenance) => void;
+    maintenanceData: TMaintenance | null;
+    onOpen: (data: TMaintenance) => void;
     onClose: () => void;
 }
 

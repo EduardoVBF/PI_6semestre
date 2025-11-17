@@ -1,23 +1,26 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { usePathname } from "next/navigation";
 
-interface IPreventiveMaintenance {
-  id: number;
+import { Input } from "@/components/ui/input";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import Loader from "../loader";
+import toast from "react-hot-toast";
+import api from "@/utils/api";
+import { usePathname } from "next/navigation";
+import { TGetVehicle } from "@/types/TVehicle";
+import { TMaintenance } from "@/types/TMaintenance";
+
+type TMaintenanceForm = {
   placa: string;
-  kmAtual: number;
-  manutencoes: {
-    oleo: boolean;
-    filtroOleo: boolean;
-    filtroCombustivel: boolean;
-    filtroAr: boolean;
-    engraxamento: boolean;
-  };
-  data: string;
-  status: string;
-}
+  kmAtual: string;
+  oleo: boolean;
+  filtroOleo: boolean;
+  filtroCombustivel: boolean;
+  filtroAr: boolean;
+  engraxamento: boolean;
+  status: "pendente" | "em_andamento" | "concluida" | "cancelada" | string;
+};
 
 export default function EditPreventiveMaintenanceModal({
   isOpen,
@@ -26,120 +29,160 @@ export default function EditPreventiveMaintenanceModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  maintenanceData: IPreventiveMaintenance | null;
+  maintenanceData: TMaintenance | null;
 }) {
+  const { data: session } = useSession();
   const pathname = usePathname();
-  const [placaDisabled, setPlacaDisabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const initialFormData = {
+  const [vehicles, setVehicles] = useState<TGetVehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [placaDisabled, setPlacaDisabled] = useState(false);
+
+  const [formData, setFormData] = useState<TMaintenanceForm>({
     placa: "",
     kmAtual: "",
-    manutencoes: {
-      oleo: false,
-      filtroOleo: false,
-      filtroCombustivel: false,
-      filtroAr: false,
-      engraxamento: false,
-    },
-  };
+    oleo: false,
+    filtroOleo: false,
+    filtroCombustivel: false,
+    filtroAr: false,
+    engraxamento: false,
+    status: "pendente",
+  });
 
-  const [formData, setFormData] = useState(initialFormData);
-
-  // Mock de veículos para dropdown
-  const mockVehicles = [
-    { placa: "ABC-1234", modelo: "Onix", marca: "Chevrolet" },
-    { placa: "DEF-5678", modelo: "HR-V", marca: "Honda" },
-    { placa: "GHI-9012", modelo: "S10", marca: "Chevrolet" },
-    { placa: "JKL-3456", modelo: "Actros", marca: "Mercedes-Benz" },
-  ];
-
+  // ============================
+  // LOAD VEHICLES
+  // ============================
   useEffect(() => {
-    if (isOpen && maintenanceData) {
-      // Garante que o objeto manutencoes sempre existe e tem as chaves corretas
-      // setFormData({
-      //   ...initialFormData,
-      //   ...maintenanceData,
-      //   manutencoes: {
-      //     ...initialFormData.manutencoes,
-      //     ...(maintenanceData.manutencoes || {}),
-      //   },
-      // });
-      setFormData({
-        placa: maintenanceData.placa,
-        kmAtual: maintenanceData.kmAtual.toString(),
-        manutencoes: {
-          oleo: false,
-          filtroOleo: false,
-          filtroCombustivel: false,
-          filtroAr: false,
-          engraxamento: false,
-        },
-      });
-    }
+    if (!isOpen) return;
+
+    const fetchVehicles = async () => {
+      try {
+        const response = await api.get("/api/v1/vehicles", {
+          headers: { Authorization: `Bearer ${session?.accessToken}` },
+          params: { limit: 1000 },
+        });
+
+        const list = response.data.vehicles ?? response.data;
+        setVehicles(list);
+      } catch (error) {
+        console.error("Erro ao carregar veículos:", error);
+        toast.error("Erro ao carregar veículos.");
+      }
+    };
+
+    fetchVehicles();
+  }, [isOpen, session?.accessToken]);
+
+  // ============================
+  // LOAD DATA IN MODAL
+  // ============================
+  useEffect(() => {
+    if (!isOpen || !maintenanceData) return;
+
+    setFormData({
+      placa: maintenanceData.placa,
+      kmAtual: String(maintenanceData.km_atual ?? ""),
+      oleo: !!maintenanceData.oleo,
+      filtroOleo: !!maintenanceData.filtro_oleo,
+      filtroCombustivel: !!maintenanceData.filtro_combustivel,
+      filtroAr: !!maintenanceData.filtro_ar,
+      engraxamento: !!maintenanceData.engraxamento,
+      status: maintenanceData.status ?? "pendente",
+    });
   }, [isOpen, maintenanceData]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const target = e.target as HTMLInputElement | HTMLSelectElement;
-    const { name, value, type } = target;
-    const checked = (target as HTMLInputElement).checked;
-
-    if (type === "checkbox") {
-      setFormData((prev) => ({
-        ...prev,
-        manutencoes: { ...prev.manutencoes, [name]: checked },
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleCloseModal = () => {
-    setFormData(initialFormData);
-    setIsLoading(false);
-    onClose();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // TODO: Integrar com backend (PUT / PATCH)
-    console.log("Dados atualizados:", formData);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      handleCloseModal();
-    }, 1000);
-  };
-
-  React.useEffect(() => {
+  // trava placa se estiver em /vehicle/:placa
+  useEffect(() => {
     if (!isOpen) return;
 
     if (pathname.includes("/vehicle/")) {
+      const p = pathname.split("/vehicle/")[1];
+      setFormData((prev) => ({ ...prev, placa: p }));
       setPlacaDisabled(true);
-      setFormData((prev) => ({
-        ...prev,
-        placa: pathname.split("/vehicle/")[1],
-      }));
     } else {
       setPlacaDisabled(false);
     }
   }, [isOpen, pathname]);
 
+  // ============================
+  // HANDLE CHANGES
+  // ============================
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, type } = e.target;
+
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+      return;
+    }
+
+    const value = (e.target as HTMLInputElement).value;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // ============================
+  // CLOSE MODAL
+  // ============================
+  const handleClose = () => {
+    setIsLoading(false);
+    onClose();
+  };
+
+  // ============================
+  // SUBMIT (PUT/PATCH)
+  // ============================
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!session?.accessToken) return toast.error("Sessão expirada.");
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        placa: formData.placa,
+        km_atual: Number(formData.kmAtual),
+
+        oleo: !!formData.oleo,
+        filtro_oleo: !!formData.filtroOleo,
+        filtro_combustivel: !!formData.filtroCombustivel,
+        filtro_ar: !!formData.filtroAr,
+        engraxamento: !!formData.engraxamento,
+
+        status: formData.status,
+      };
+
+      await api.patch(`/api/v1/maintenances/${maintenanceData?.id || ""}`, payload, {
+        headers: { Authorization: `Bearer ${session.accessToken}` },
+      });
+
+      toast.success("Manutenção atualizada!");
+      handleClose();
+    } catch (error) {
+      console.error("Erro ao atualizar manutenção:", error);
+      toast.error("Erro ao atualizar.");
+      setIsLoading(false);
+    }
+  };
+
+  // ============================
+  // RENDER
+  // ============================
   if (!isOpen) return null;
+
+  const selectedVehicle = vehicles.find((v) => v.placa === formData.placa);
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-500/60 backdrop-blur-sm flex justify-center items-center p-4">
       <div
-        className="w-full max-w-md flex flex-col bg-gray-800 p-8 rounded-xl shadow-2xl relative max-h-[90vh]"
+        className="w-full max-w-md bg-gray-800 p-8 rounded-xl shadow-xl relative max-h-[98vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200"
-          onClick={handleCloseModal}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+          onClick={handleClose}
         >
           <X size={28} />
         </button>
@@ -149,8 +192,8 @@ export default function EditPreventiveMaintenanceModal({
         </h1>
 
         {isLoading ? (
-          <div className="flex justify-center items-center py-20 px-10">
-            Salvando alterações...
+          <div className="flex justify-center py-20">
+            <Loader />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -163,85 +206,102 @@ export default function EditPreventiveMaintenanceModal({
                 name="placa"
                 value={formData.placa}
                 onChange={handleChange}
-                required
                 disabled={placaDisabled}
-                className="w-full h-12 text-sm px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple transition-all duration-200"
+                required
+                className="w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white"
               >
                 <option value="">Selecione o veículo</option>
-                {mockVehicles.map((v) => (
-                  <option key={v.placa} value={v.placa}>
-                    {v.marca} {v.modelo} - {v.placa}
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.placa}>
+                    {v.placa} - {v.marca} {v.modelo}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* KM Atual */}
+            {/* KM */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                KM Atual
-              </label>
+              <div className="flex items-center gap-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  KM Atual
+                </label>
+
+                {selectedVehicle && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Último KM:{" "}
+                    <span className="text-gray-200">
+                      {selectedVehicle.km_atual}
+                    </span>
+                  </p>
+                )}
+              </div>
+
               <Input
                 type="number"
                 name="kmAtual"
                 value={formData.kmAtual}
                 onChange={handleChange}
-                placeholder="Informe o KM atual"
+                className="w-full h-12 text-lg px-4 bg-gray-700 border-gray-600 text-white"
                 required
-                className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-purple transition-all duration-200"
               />
             </div>
 
-            {/* Manutenções realizadas */}
+            {/* Status */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Status
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                required
+                className="w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white"
+              >
+                <option value="pendente">Pendente</option>
+                <option value="em_andamento">Em andamento</option>
+                <option value="concluida">Concluída</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
+
+            {/* Checkboxes */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Manutenções Realizadas
               </label>
+
               <div className="space-y-2">
                 {[
-                  { name: "oleo", label: "Troca de óleo" },
-                  {
-                    name: "filtroOleo",
-                    label: "Troca de filtro de óleo lubrificante",
-                  },
-                  {
-                    name: "filtroCombustivel",
-                    label: "Troca de filtro de combustível",
-                  },
-                  { name: "filtroAr", label: "Troca de filtro de ar" },
-                  { name: "engraxamento", label: "Engraxamento" },
-                ].map((item) => (
+                  ["oleo", "Troca de óleo"],
+                  ["filtroOleo", "Troca do filtro de óleo lubrificante"],
+                  ["filtroCombustivel", "Troca do filtro de combustível"],
+                  ["filtroAr", "Troca do filtro de ar"],
+                  ["engraxamento", "Engraxamento"],
+                ].map(([name, label]) => (
                   <label
-                    key={item.name}
+                    key={name}
                     className="flex items-center gap-2 text-gray-300"
                   >
                     <input
                       type="checkbox"
-                      name={item.name}
-                      checked={
-                        formData.manutencoes[
-                          item.name as keyof typeof formData.manutencoes
-                        ]
-                      }
+                      name={name}
+                      checked={!!formData[name as keyof TMaintenanceForm]}
                       onChange={handleChange}
-                      className="w-5 h-5 text-primary-purple bg-gray-700 border-gray-600 rounded focus:ring-primary-purple"
+                      className="w-5 h-5 text-primary-purple bg-gray-700 border-gray-600 rounded"
                     />
-                    {item.label}
+                    {label}
                   </label>
                 ))}
               </div>
             </div>
 
-            {/* Botão de salvar */}
-            <div className="flex justify-end pt-4">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-12 text-lg bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 text-white rounded-lg font-semibold disabled:opacity-50"
-              >
-                {isLoading ? "Salvando..." : "Salvar Alterações"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="w-full h-12 bg-primary-purple hover:bg-fuchsia-800 rounded-lg text-white font-semibold transition disabled:opacity-50"
+            >
+              Salvar Alterações
+            </button>
           </form>
         )}
       </div>

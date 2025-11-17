@@ -22,9 +22,9 @@ const FilterPill = ({ label, selected, onClick }: FilterPillProps) => (
 
 interface FiltersProps {
   statusOptions?: string[];
-  typeOptions: { label: string; value: string }[];
-  selectedStatus: string | "";
-  selectedType: string | "";
+  typeOptions?: { label: string; value: string }[];
+  selectedStatus?: string | "";
+  selectedType?: string | "";
   onStatusChange: (status: string) => void;
   onTypeChange: (type: string) => void;
 }
@@ -58,23 +58,25 @@ export default function Filters({
       )}
 
       {/* Type Filter */}
-      <div className="flex flex-col col-span-1 lg:col-span-2">
-        <label className="text-sm font-semibold mb-1 text-gray-400">
-          Tipo
-        </label>
-        <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 text-xs capitalize">
-          {typeOptions?.map((t) => (
-            <FilterPill
-              key={t.value}
-              label={t.label}
-              selected={selectedType === t.value}
-              onClick={() =>
-                onTypeChange(selectedType === t.value ? "" : t.value)
-              }
-            />
-          ))}
+      {typeOptions && (
+        <div className="flex flex-col col-span-1 lg:col-span-2">
+          <label className="text-sm font-semibold mb-1 text-gray-400">
+            Tipo
+          </label>
+          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 text-xs capitalize">
+            {typeOptions?.map((t) => (
+              <FilterPill
+                key={t.value}
+                label={t.label}
+                selected={selectedType === t.value}
+                onClick={() =>
+                  onTypeChange(selectedType === t.value ? "" : t.value)
+                }
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

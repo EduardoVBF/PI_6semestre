@@ -233,6 +233,7 @@ export default function AddFuelSupplyModal({
                 type="number"
                 required
                 className="w-full h-12 text-lg px-4 bg-gray-700 border-gray-600 text-white"
+                disabled={!watch("placa")}
               />
             </div>
 
