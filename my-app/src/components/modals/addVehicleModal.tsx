@@ -235,7 +235,7 @@ export default function AddVehicleModal({
                     Selecione um motorista
                   </option>
                   {users
-                    .filter((user) => user.type === "motorista")
+                    .filter((user) => user.type === "motorista" && user.status === "ativo")
                     .map((motorista) => (
                       <option
                         key={motorista.id}
