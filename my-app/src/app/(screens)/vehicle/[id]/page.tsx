@@ -52,21 +52,6 @@ interface Alert {
   status?: "pendente";
 }
 
-interface IPreventiveMaintenance {
-  id: number;
-  placa: string;
-  kmAtual: number;
-  manutencoes: {
-    oleo: boolean;
-    filtroOleo: boolean;
-    filtroCombustivel: boolean;
-    filtroAr: boolean;
-    engraxamento: boolean;
-  };
-  data: string;
-  status: string;
-}
-
 interface Vehicle {
   placa: string;
   modelo: string;
@@ -184,66 +169,6 @@ const mockAlerts: Alert[] = [
     placa: "BSR9401",
     veiculo: "Carro FIAT",
     user: "João Silva",
-  },
-];
-
-// Mock de manutenções
-const mockMaintenance: IPreventiveMaintenance[] = [
-  {
-    id: 1,
-    placa: "ABC-1234",
-    kmAtual: 45600,
-    manutencoes: {
-      oleo: true,
-      filtroOleo: true,
-      filtroCombustivel: false,
-      filtroAr: false,
-      engraxamento: true,
-    },
-    data: "15/10/2025",
-    status: "Concluída",
-  },
-  {
-    id: 2,
-    placa: "DEF-5678",
-    kmAtual: 87200,
-    manutencoes: {
-      oleo: false,
-      filtroOleo: false,
-      filtroCombustivel: true,
-      filtroAr: true,
-      engraxamento: false,
-    },
-    data: "02/09/2025",
-    status: "Atrasado",
-  },
-  {
-    id: 3,
-    placa: "GHI-9012",
-    kmAtual: 132000,
-    manutencoes: {
-      oleo: true,
-      filtroOleo: true,
-      filtroCombustivel: true,
-      filtroAr: true,
-      engraxamento: true,
-    },
-    data: "01/08/2025",
-    status: "Próximo",
-  },
-  {
-    id: 4,
-    placa: "JKL-3456",
-    kmAtual: 54000,
-    manutencoes: {
-      oleo: false,
-      filtroOleo: true,
-      filtroCombustivel: false,
-      filtroAr: true,
-      engraxamento: false,
-    },
-    data: "20/11/2025",
-    status: "Regular",
   },
 ];
 
@@ -581,7 +506,7 @@ export default function VehicleDetails() {
         </section>
 
         {/* Tabela de Manutenções */}
-        <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 mb-8">
+        {/* <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 mb-8">
           <div className="flex justify-between items-center mb-4">
             <div className="flex flex-col md:flex-row md:items-center space-x-4 m-2">
               <h3 className="text-2xl font-semibold text-primary-purple">
@@ -594,7 +519,6 @@ export default function VehicleDetails() {
                 </h3>
               </div>
             </div>
-            {/* Botão de adicionar manutenção no canto superior direito */}
             <button
               className="ml-4 p-2 rounded-full bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 flex items-center justify-center"
               title="Adicionar Manutenção"
@@ -685,7 +609,7 @@ export default function VehicleDetails() {
               </tbody>
             </table>
           </div>
-        </section>
+        </section> */}
       </main>
       <Footer />
     </div>
