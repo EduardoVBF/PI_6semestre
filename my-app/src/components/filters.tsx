@@ -60,10 +60,10 @@ export default function Filters({
       {/* Type Filter */}
       <div className="flex flex-col col-span-1 lg:col-span-2">
         <label className="text-sm font-semibold mb-1 text-gray-400">
-          Tipo de Usuário
+          Tipo
         </label>
         <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 text-xs capitalize">
-          {typeOptions.map((t) => (
+          {typeOptions?.map((t) => (
             <FilterPill
               key={t.value}
               label={t.label}
