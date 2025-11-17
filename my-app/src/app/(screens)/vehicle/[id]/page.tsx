@@ -26,6 +26,7 @@ import Loader from "@/components/loader";
 import api from "@/utils/api";
 import { set } from "react-hook-form";
 import { TMaintenance, TGetAllMaintenances } from "@/types/TMaintenance";
+import { TRefuel } from "@/types/TFuel";
 
 interface IFuelSupply {
   id: number;
@@ -196,7 +197,7 @@ export default function VehicleDetails() {
     onOpen: (maintenanceData: TMaintenance) => void;
   };
   const editFuelSupplyModal = useEditFuelSupplyModal() as unknown as {
-    onOpen: (fuelSupplyData: IFuelSupply) => void;
+    onOpen: (fuelSupplyData: TRefuel) => void;
   };
   const addMaintenanceModal = useAddMaintenanceModal() as {
     onOpen: () => void;
@@ -394,11 +395,10 @@ export default function VehicleDetails() {
         </section>
 
         {/* Tabela de Abastecimentos */}
-        <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 relative">
+        {/* <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 relative">
           <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2 max-w-[80%]">
             Histórico de Abastecimentos
           </h3>
-          {/* Botão de adicionar abastecimento no canto superior direito */}
           <button
             className="absolute top-6 right-6 p-2 rounded-full bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 flex items-center justify-center"
             title="Cadastrar Abastecimento"
@@ -488,7 +488,7 @@ export default function VehicleDetails() {
                         className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
                         onClick={() =>
                           editFuelSupplyModal.onOpen(
-                            abastecimento as IFuelSupply
+                            abastecimento as TRefuel
                           )
                         }
                       >
@@ -503,7 +503,7 @@ export default function VehicleDetails() {
               </tbody>
             </table>
           </div>
-        </section>
+        </section> */}
 
         {/* Tabela de Manutenções */}
         {/* <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 mb-8">

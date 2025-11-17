@@ -6,7 +6,7 @@ export type TGetAllRefuels = {
 };
 
 export type TRefuel = {
-  id: number;
+  id: string;
   data: string;
   hora: string;
   km: number;

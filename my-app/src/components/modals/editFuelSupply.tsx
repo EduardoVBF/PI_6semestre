@@ -10,19 +10,20 @@ import Loader from "@/components/loader";
 import api from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { TGetVehicle } from "@/types/TVehicle";
+import { TRefuel } from "@/types/TFuel";
 
 interface IFuelSupply {
-  id: number;
+  id: string;
   km: number;
-  litros: number;
-  valor_litro: number;
+  litros: string;
+  valor_litro: string;
   data: string; // formato: YYYY-MM-DD
   hora: string; // formato: HH:MM
   posto: string;
   tipo_combustivel: string;
   placa: string;
   tanque_cheio: boolean;
-  valor_total: number;
+  valor_total: string;
 }
 
 type TRefuelForm = {
@@ -44,7 +45,7 @@ export default function EditFuelSupplyModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  fuelSupply: IFuelSupply | null;
+  fuelSupply: TRefuel | null;
 }) {
   const { data: session } = useSession();
   const pathname = usePathname();
