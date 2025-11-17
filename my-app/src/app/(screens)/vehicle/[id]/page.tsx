@@ -394,7 +394,7 @@ export default function VehicleDetails() {
               href: "/management#vehicles",
               icon: <FaTruck size={16} />,
             },
-            { label: `${vehicle.modelo} - ${vehicle.placa}` },
+            { label: `${vehicleData?.modelo} - ${vehicleData?.placa}` },
           ]}
         />
         {/* <h1 className="text-3xl font-bold text-primary-purple">Veículo</h1> */}
@@ -548,7 +548,7 @@ export default function VehicleDetails() {
                       <div className="font-semibold text-white">
                         {abastecimento.placa}
                       </div>
-                      <div>{abastecimento.id_usuario || "N/A"}</div>
+                      <p>{userData?.name} {userData?.lastName}</p>
                     </td>
                     <td className="px-3 md:px-6 py-4 text-xs font-medium">
                       {abastecimento.media ? (

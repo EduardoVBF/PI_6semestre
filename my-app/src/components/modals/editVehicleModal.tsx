@@ -134,6 +134,7 @@ export default function EditVehicleModal({
                   className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 
                              focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
                   required
+                  disabled
                 />
               </div>
 
