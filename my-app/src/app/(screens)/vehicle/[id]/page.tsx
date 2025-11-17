@@ -25,6 +25,7 @@ import Footer from "@/components/footer";
 import Loader from "@/components/loader";
 import api from "@/utils/api";
 import { set } from "react-hook-form";
+import { TMaintenance, TGetAllMaintenances } from "@/types/TMaintenance";
 
 interface IFuelSupply {
   id: number;
@@ -267,7 +268,7 @@ const calculateAverageConsumption = (data: IFuelSupply[], count: number) => {
 
 export default function VehicleDetails() {
   const editMaintenanceModal = useEditMaintenanceModal() as {
-    onOpen: (maintenanceData: IPreventiveMaintenance) => void;
+    onOpen: (maintenanceData: TMaintenance) => void;
   };
   const editFuelSupplyModal = useEditFuelSupplyModal() as unknown as {
     onOpen: (fuelSupplyData: IFuelSupply) => void;
