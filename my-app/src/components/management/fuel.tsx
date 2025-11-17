@@ -267,6 +267,45 @@ export default function FuelManagement() {
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
 
+  // Retorna o primeiro dia e último dia do mês atual
+  const getMonthRange = () => {
+    const now = dayjs();
+    return {
+      start: now.startOf("month").format("YYYY-MM-DD"),
+      end: now.endOf("month").format("YYYY-MM-DD"),
+    };
+  };
+
+  const { start, end } = useMemo(() => getMonthRange(), []);
+
+  // Filtrar abastecimentos do mês corrente
+  const monthlyRefuels = useMemo(() => {
+    return refuels.filter((r) => {
+      const date = dayjs(r.data);
+      return date.isAfter(start) && date.isBefore(end);
+    });
+  }, [refuels, start, end]);
+
+  // ---------- CUSTO MENSAL ----------
+  const monthlyCost = useMemo(() => {
+    return monthlyRefuels.reduce((acc, r) => {
+      const v = Number(r.valor_total || 0);
+      return acc + v;
+    }, 0);
+  }, [monthlyRefuels]);
+
+  // ---------- LITROS NO MÊS ----------
+  const monthlyLiters = useMemo(() => {
+    return monthlyRefuels.reduce((acc, r) => {
+      return acc + parseFloat(r.litros || "0");
+    }, 0);
+  }, [monthlyRefuels]);
+
+  // ---------- NÚMERO DE ABASTECIMENTOS NO MÊS ----------
+  const monthlyCount = useMemo(() => {
+    return monthlyRefuels.length;
+  }, [monthlyRefuels]);
+
   /* --------------------------
      RENDER
      -------------------------- */
@@ -291,7 +330,7 @@ export default function FuelManagement() {
             <p className="text-base text-white/80">Custo Mensal</p>
             {/* Se quiser, substitua as métricas de exemplo por cálculos reais */}
             <h2 className="text-4xl font-bold">
-              R$ {(Math.random() * 1000).toFixed(2)}
+              R$ {monthlyCost.toFixed(2).replace(".", ",")}
             </h2>
           </div>
         </div>
@@ -300,7 +339,7 @@ export default function FuelManagement() {
           <div>
             <p className="text-base text-white/80">Litros no mês</p>
             <h2 className="text-4xl font-bold">
-              {(Math.random() * 1000).toFixed(2)} L
+              {monthlyLiters.toFixed(2).replace(".", ",")} L
             </h2>
           </div>
         </div>
@@ -308,9 +347,7 @@ export default function FuelManagement() {
           <FaGasPump size={40} className="text-white opacity-75" />
           <div>
             <p className="text-base text-white/80">Abastecimentos no mês</p>
-            <h2 className="text-4xl font-bold">
-              {(Math.random() * 100).toFixed(0)}
-            </h2>
+            <h2 className="text-4xl font-bold">{monthlyCount}</h2>
           </div>
         </div>
       </section>
@@ -322,8 +359,7 @@ export default function FuelManagement() {
             Histórico de Abastecimentos
           </h3>
 
-          <div className="flex gap-4 w-full lg:w-auto flex-col md:flex-row">
-            {/* SearchBar: assumi props value/onChange/placeholder */}
+          {/* <div className="flex gap-4 w-full lg:w-auto flex-col md:flex-row">
             <div className="w-full md:w-60">
               <SearchBar
                 value={search}
@@ -331,7 +367,7 @@ export default function FuelManagement() {
                 placeholder="Buscar placa / termo..."
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* TABELA */}
@@ -358,66 +394,83 @@ export default function FuelManagement() {
                       Veículo / Motorista
                     </th>
                     <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      Média
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
                       Ações
                     </th>
                   </tr>
                 </thead>
 
                 <tbody className="bg-gray-800 divide-y divide-gray-700">
-                  {refuels.map((r) => (
-                    <tr key={String(r.id)} className="text-sm">
-                      <td className="p-3 text-gray-300">
-                        <div className="font-semibold">
-                          {dayjs(`${r.data} ${r.hora}`).format(
-                            "DD/MM/YYYY HH:mm"
-                          )}
-                        </div>
-                        <div>{r.km.toLocaleString("pt-BR")} km</div>
-                      </td>
-
-                      <td className="p-3 text-gray-300">
-                        <div className="font-bold">
-                          R${" "}
-                          {r.valor_total
-                            ? Number(r.valor_total).toFixed(2)
-                            : "—"}
-                        </div>
-                        <div className="text-gray-400">
-                          {parseFloat(r.litros).toFixed(2)} L × R${" "}
-                          {parseFloat(r.valor_litro).toFixed(2)}
-                        </div>
-                      </td>
-
-                      <td className="p-3 text-gray-300 capitalize">
-                        <div className="font-semibold">{r.posto}</div>
-                        <div className="text-gray-400">
-                          {r.tipo_combustivel}
-                        </div>
-                      </td>
-
-                      <td className="p-3 text-gray-300">
-                        <div className="flex items-center gap-1">
-                          <div className="font-semibold">{r.placa}</div>
-                          <div className="text-gray-400">
-                            {getVehicleInfosByPlate(r.placa)}
+                  {refuels
+                    .sort((a, b) => (a.data < b.data ? -1 : 1))
+                    .map((r) => (
+                      <tr key={String(r.id)} className="text-sm">
+                        <td className="p-3 text-gray-300">
+                          <div className="font-semibold">
+                            {dayjs(`${r.data} ${r.hora}`).format(
+                              "DD/MM/YYYY HH:mm"
+                            )}
                           </div>
-                        </div>
+                          <div>{r.km.toLocaleString("pt-BR")} km</div>
+                        </td>
 
-                        <div className="mt-1 text-sm">
-                          {getUserInfosById(r.id_usuario)}
-                        </div>
-                      </td>
+                        <td className="p-3 text-gray-300">
+                          <div className="font-bold">
+                            R${" "}
+                            {r.valor_total
+                              ? Number(r.valor_total).toFixed(2)
+                              : "—"}
+                          </div>
+                          <div className="text-gray-400">
+                            {parseFloat(r.litros).toFixed(2)} L × R${" "}
+                            {parseFloat(r.valor_litro).toFixed(2)}
+                          </div>
+                        </td>
 
-                      <td className="p-3 text-gray-300">
-                        <button
-                          onClick={() => editFuelSupplyModal.onOpen(r)}
-                          className="p-2 rounded-lg hover:bg-gray-700"
-                        >
-                          <FaPencilAlt size={16} className="text-gray-300" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="p-3 text-gray-300 capitalize">
+                          <div className="font-semibold">{r.posto}</div>
+                          <div className="text-gray-400">
+                            {r.tipo_combustivel}
+                          </div>
+                        </td>
+
+                        <td className="p-3 text-gray-300">
+                          <div className="flex items-center gap-1">
+                            <div className="font-semibold">{r.placa}</div>
+                            <div className="text-gray-400">
+                              {getVehicleInfosByPlate(r.placa)}
+                            </div>
+                          </div>
+
+                          <div className="mt-1 text-sm">
+                            {getUserInfosById(r.id_usuario)}
+                          </div>
+                        </td>
+
+                        <td className="p-3 text-gray-300">
+                          <p
+                            className={`${
+                              r.media
+                                ? "bg-primary-purple text-white rounded-full px-2 py-1 w-fit"
+                                : ""
+                            } font-semibold text-sm`}
+                          >
+                            {r.media ? `${r.media} km/L` : "—"}
+                          </p>
+                        </td>
+
+                        <td className="p-3 text-gray-300">
+                          <button
+                            onClick={() => editFuelSupplyModal.onOpen(r)}
+                            className="p-2 rounded-lg hover:bg-gray-700"
+                          >
+                            <FaPencilAlt size={16} className="text-gray-300" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
 
                   {refuels.length === 0 && (
                     <tr>

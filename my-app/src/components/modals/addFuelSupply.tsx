@@ -1,13 +1,28 @@
 "use client";
-import { toast, Bounce } from "react-toastify";
-import { CircleLoader } from "react-spinners";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { Input } from "../ui/input";
-import { useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import toast from "react-hot-toast";
 import Loader from "../loader";
-import React from "react";
+import api from "@/utils/api";
+import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+
+import { TGetVehicle } from "@/types/TVehicle";
+
+type TRefuelForm = {
+  date: string;
+  time: string;
+  km: string;
+  litros: string;
+  tipo_combustivel: string;
+  valor_litro: string;
+  posto: string;
+  tanque_cheio: boolean;
+  placa: string;
+};
 
 export default function AddFuelSupplyModal({
   isOpen,
@@ -16,117 +31,148 @@ export default function AddFuelSupplyModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [placaDisabled, setPlacaDisabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = useSession();
   const pathname = usePathname();
-  const [formData, setFormData] = useState({
-    date: "",
-    time: "",
-    kilometers: "",
-    liters: "",
-    fuelType: "",
-    pricePerLiter: "",
-    gasStation: "",
-    totalValue: "",
-    userId: "", // This will need to be populated from the logged user
-    licensePlate: "", // This will need to be selected from available vehicles
-    isFullTank: false,
-  });
-  const router = useRouter();
 
-  const mockVehicles = [
-    {
-      placa: "ABC-1234",
-      modelo: "Onix",
-      marca: "Chevrolet",
-    },
-    {
-      placa: "DEF-5678",
-      modelo: "HR-V",
-      marca: "Honda",
-    },
-    {
-      placa: "GHI-9012",
-      modelo: "S10",
-      marca: "Chevrolet",
-    },
-    {
-      placa: "JKL-3456",
-      modelo: "Actros",
-      marca: "Mercedes-Benz",
-    },
-  ];
+  const [vehicles, setVehicles] = useState<TGetVehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [placaDisabled, setPlacaDisabled] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  // Calculate total value when liters or price per liter changes
-  const calculateTotalValue = () => {
-    const liters = parseFloat(formData.liters);
-    const pricePerLiter = parseFloat(formData.pricePerLiter);
-
-    if (!isNaN(liters) && !isNaN(pricePerLiter)) {
-      const total = (liters * pricePerLiter).toFixed(2);
-      setFormData((prev) => ({
-        ...prev,
-        totalValue: total,
-      }));
-    }
-  };
-
-  // Update total value whenever liters or price changes
-  React.useEffect(() => {
-    calculateTotalValue();
-  }, [formData.liters, formData.pricePerLiter]);
-
-  const handleCloseModal = () => {
-    setFormData({
-      date: "",
-      time: "",
-      kilometers: "",
-      liters: "",
-      fuelType: "",
-      pricePerLiter: "",
-      gasStation: "",
-      totalValue: "",
-      userId: "",
-      licensePlate: "",
-      isFullTank: false,
+  const { register, handleSubmit, reset, setValue, watch } =
+    useForm<TRefuelForm>({
+      defaultValues: {
+        date: "",
+        time: "",
+        km: "",
+        litros: "",
+        tipo_combustivel: "",
+        valor_litro: "",
+        posto: "",
+        tanque_cheio: false,
+        placa: "",
+      },
     });
-    onClose();
-    setPlacaDisabled(false);
-    setIsLoading(false);
-  };
 
-  React.useEffect(() => {
+  const litros = watch("litros");
+  const valor_litro = watch("valor_litro");
+
+  // ================================
+  // 🔥 Carregar veículos da API
+  // ================================
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchVehicles = async () => {
+      try {
+        const response = await api.get("/api/v1/vehicles", {
+          headers: { Authorization: `Bearer ${session?.accessToken}` },
+          params: { limit: 1000 },
+        });
+
+        setVehicles(response.data.vehicles);
+      } catch (error) {
+        console.error("Erro ao buscar veículos:", error);
+        toast.error("Erro ao carregar veículos.");
+      }
+    };
+
+    fetchVehicles();
+  }, [isOpen]);
+
+  // ========================================
+  // 🔒 Travar placa se estiver em /vehicle/ABC-1234
+  // ========================================
+  useEffect(() => {
     if (!isOpen) return;
 
     if (pathname.includes("/vehicle/")) {
+      const placaFromUrl = pathname.split("/vehicle/")[1];
+
+      setValue("placa", placaFromUrl);
       setPlacaDisabled(true);
-      setFormData((prev) => ({
-        ...prev,
-        licensePlate: pathname.split("/vehicle/")[1],
-      }));
     } else {
       setPlacaDisabled(false);
     }
-  }, [isOpen, pathname]);
+  }, [isOpen, pathname, setValue]);
+
+  // ========================================
+  // 🧮 Calcular total automático
+  // ========================================
+  const totalValue = (() => {
+    const l = parseFloat(litros);
+    const v = parseFloat(valor_litro);
+
+    if (isNaN(l) || isNaN(v)) return "0.00";
+    return (l * v).toFixed(2);
+  })();
+
+  // ========================================
+  // ❌ Fechar modal
+  // ========================================
+  const handleCloseModal = () => {
+    reset();
+    setIsLoading(false);
+    setPlacaDisabled(false);
+    onClose();
+  };
+
+  // ========================================
+  // 🚀 Enviar POST
+  // ========================================
+  const handleCreateRefuel = async (data: TRefuelForm) => {
+    if (!session?.accessToken) {
+      toast.error("Sessão expirada.");
+      return;
+    }
+
+    if (!session?.user?.id) {
+      toast.error("ID do usuário não encontrado na sessão.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        data: data.date,
+        hora: data.time, // <-- CORRIGIDO: backend espera apenas HH:MM
+        km: Number(data.km),
+        litros: Number(data.litros),
+        tipo_combustivel: data.tipo_combustivel,
+        valor_litro: Number(data.valor_litro),
+        posto: data.posto,
+        tanque_cheio: data.tanque_cheio,
+        media: 0,
+        id_usuario: vehicles.filter((v) => v.placa === data.placa)[0]
+          ?.id_usuario,
+        placa: data.placa,
+        valor_total: Number(totalValue),
+      };
+
+      await api.post("/api/v1/refuels", payload, {
+        headers: { Authorization: `Bearer ${session.accessToken}` },
+      });
+
+      toast.success("Abastecimento registrado com sucesso!");
+      handleCloseModal();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao registrar abastecimento.");
+      setIsLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
+  console.log("vehicles:", vehicles);
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-500/60 backdrop-blur-sm flex justify-center items-center p-4">
       <div
-        className="w-full max-w-lg flex flex-col bg-gray-800 p-8 rounded-xl shadow-2xl relative"
+        className="w-full max-w-lg flex flex-col bg-gray-800 p-8 rounded-xl shadow-2xl relative max-h-[95dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white"
           onClick={handleCloseModal}
         >
           <X size={28} />
@@ -137,198 +183,180 @@ export default function AddFuelSupplyModal({
         </h1>
 
         {isLoading ? (
-          <div
-            className="flex justify-center items-center py-20 px-10"
-            onClick={() => {
-              handleCloseModal();
-              toast.success("Abastecimento registrado com sucesso!", {
-                position: "top-right",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-              });
-              router.push("/home");
-            }}
-          >
+          <div className="flex justify-center items-center py-20">
             <Loader />
           </div>
         ) : (
-          <form className="space-y-4">
-            {isLoading ? (
-              <div className="flex justify-center items-center py-20">
-                <CircleLoader color="#a055ff" size={50} />
+          <form
+            onSubmit={handleSubmit(handleCreateRefuel)}
+            className="space-y-4"
+          >
+            {/* Placa */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Veículo
+              </label>
+
+              <select
+                {...register("placa")}
+                disabled={placaDisabled}
+                className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                required
+              >
+                <option value="">Selecione o veículo</option>
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.placa}>
+                    {v.placa} - {v.marca} {v.modelo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* KM */}
+            <div>
+              <div className="flex items-center gap-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Quilometragem
+                </label>
+                {vehicles.map(
+                  (v) =>
+                    v.placa === watch("placa") && (
+                      <span
+                        key={v.id}
+                        className="text-gray-400 text-xs font-medium"
+                      >{`último km: ${v.km_atual}`}</span>
+                    )
+                )}
               </div>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Veículo
-                  </label>
-                  <select
-                    name="vehicle"
-                    value={formData.licensePlate}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        licensePlate: e.target.value,
-                      }))
-                    }
-                    className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                    required
-                    disabled={placaDisabled}
-                  >
-                    <option value="">Selecione o veículo</option>
-                    {mockVehicles.map((vehicle) => (
-                      <option key={vehicle.placa} value={vehicle.placa}>
-                        {vehicle.placa} - {vehicle.marca} {vehicle.modelo}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Quilometragem
-                  </label>
-                  <Input
-                    type="number"
-                    name="kilometers"
-                    value={formData.kilometers}
-                    onChange={handleChange}
-                    placeholder="Quilometragem atual"
-                    className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                    required
-                  />
-                </div>
+              <Input
+                {...register("km")}
+                type="number"
+                required
+                className="w-full h-12 text-lg px-4 bg-gray-700 border-gray-600 text-white"
+              />
+            </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Litros
-                    </label>
-                    <Input
-                      type="number"
-                      name="liters"
-                      value={formData.liters}
-                      onChange={handleChange}
-                      placeholder="Quantidade de litros"
-                      step="0.01"
-                      className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                      required
-                    />
-                  </div>
+            {/* Litros + Tipo */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Litros
+                </label>
+                <Input
+                  {...register("litros")}
+                  type="number"
+                  step="0.01"
+                  required
+                  className="w-full h-12 text-lg px-4 bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Tipo de Combustível
-                    </label>
-                    <select
-                      name="fuelType"
-                      value={formData.fuelType}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          fuelType: e.target.value,
-                        }))
-                      }
-                      className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                      required
-                    >
-                      <option value="">Selecione o combustível</option>
-                      <option value="gasolina">Gasolina</option>
-                      <option value="etanol">Etanol</option>
-                      <option value="diesel">Diesel</option>
-                    </select>
-                  </div>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Tipo de Combustível
+                </label>
+                <select
+                  {...register("tipo_combustivel")}
+                  required
+                  className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                >
+                  <option value="">Selecione</option>
+                  <option value="gasolina">Gasolina</option>
+                  <option value="etanol">Etanol</option>
+                  <option value="diesel">Diesel</option>
+                </select>
+              </div>
+            </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Posto
-                  </label>
-                  <select
-                    name="gasStation"
-                    value={formData.gasStation}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        gasStation: e.target.value,
-                      }))
-                    }
-                    className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                    required
-                  >
-                    <option value="">Selecione o posto</option>
-                    <option value="posto1">Depósito Mirim</option>
-                    <option value="posto2">Posto Externo</option>
-                    <option value="posto3">Posto Alvorada</option>
-                    <option value="posto4">Posto Central</option>
-                  </select>
-                </div>
+            {/* Posto */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Posto
+              </label>
+              <select
+                {...register("posto")}
+                required
+                className="text-sm w-full h-12 px-4 bg-gray-700 border border-gray-600 rounded-lg text-white"
+              >
+                <option value="">Selecione</option>
+                <option value="interno">Depósito Interno</option>
+                <option value="externo">Posto Externo</option>
+                <option value="alvorada">Posto Alvorada</option>
+                <option value="central">Posto Central</option>
+              </select>
+            </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Valor por Litro
-                    </label>
-                    <Input
-                      type="number"
-                      name="pricePerLiter"
-                      value={formData.pricePerLiter}
-                      onChange={handleChange}
-                      placeholder="Preço por litro"
-                      step="0.01"
-                      className="w-full h-12 text-lg px-4 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                      required
-                    />
-                  </div>
+            {/* Date + Time */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Data
+                </label>
+                <Input
+                  {...register("date")}
+                  type="date"
+                  required
+                  className="w-full h-12 px-4 bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1">
-                      Valor Total
-                    </label>
-                    <Input
-                      type="number"
-                      name="totalValue"
-                      value={formData.totalValue}
-                      readOnly
-                      className="w-full h-12 text-lg px-4 bg-gray-600 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-purple focus:border-primary-purple transition-all duration-200"
-                    />
-                  </div>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Hora
+                </label>
+                <Input
+                  {...register("time")}
+                  type="time"
+                  required
+                  className="w-full h-12 px-4 bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+            </div>
 
-                <div className="flex items-center space-x-2">
-                  <Input
-                    type="checkbox"
-                    name="isFullTank"
-                    checked={formData.isFullTank}
-                    onChange={handleChange}
-                    className="w-4 h-4 text-primary-purple bg-gray-700 border-gray-600 rounded focus:ring-primary-purple"
-                  />
-                  <label className="text-sm font-medium text-gray-300">
-                    Tanque Cheio
-                  </label>
-                </div>
-              </>
-            )}
+            {/* Valor por litro + total */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Valor por Litro
+                </label>
+                <Input
+                  {...register("valor_litro")}
+                  type="number"
+                  step="0.01"
+                  required
+                  className="w-full h-12 px-4 bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Total
+                </label>
+                <Input
+                  value={totalValue}
+                  readOnly
+                  className="w-full h-12 px-4 bg-gray-600 border-gray-500 text-white"
+                />
+              </div>
+            </div>
+
+            {/* Tanque cheio */}
+            <div className="flex items-center space-x-2">
+              <input
+                {...register("tanque_cheio")}
+                type="checkbox"
+                className="w-4 h-4"
+              />
+              <label className="text-gray-300 text-sm">Tanque Cheio</label>
+            </div>
 
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 text-lg bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 text-white rounded-lg font-semibold disabled:opacity-50"
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log(
-                    "Botão de registro de abastecimento clicado!",
-                    formData
-                  );
-                  setIsLoading(true);
-                }}
+                className="w-full h-12 text-lg bg-primary-purple hover:bg-fuchsia-800 text-white rounded-lg font-semibold disabled:opacity-50"
               >
-                {isLoading ? "Registrando..." : "Registrar Abastecimento"}
+                Registrar Abastecimento
               </button>
             </div>
           </form>

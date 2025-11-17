@@ -1,25 +1,11 @@
 'use client';
+import { TRefuel } from '@/types/TFuel';
 import { create } from 'zustand';
 
-interface IFuelSupply {
-  id: number;
-  km_abastecimento: number;
-  litros: number;
-  preco_litro: number;
-  data_hora: string;
-  posto: string;
-  tipo_combustivel: string;
-  motorista: string;
-  placa: string;
-  marca: string;
-  modelo: string;
-  total_abastecimento: number;
-  media: number;
-}
 interface EditFuelSupplyModalStore {
     isOpen: boolean;
-    fuelSupply: IFuelSupply | null;
-    onOpen: (fuelSupply: IFuelSupply) => void;
+    fuelSupply: TRefuel | null;
+    onOpen: (fuelSupply: TRefuel) => void;
     onClose: () => void;
 }
 
