@@ -10,9 +10,10 @@ const handler = NextAuth({
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
+        console.log("🔑 Authorize called with credentials:", credentials);
         try {
           const res = await fetch(
-            "http://frotinix.eastus2.cloudapp.azure.com:3030/api/v1/auth/login",
+            "http://frotinix.eastus2.cloudapp.azure.com/api/v1/auth/login",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -63,6 +64,7 @@ const handler = NextAuth({
         id: token.email || "no-id",
         email: token.email || "",
       };
+      session.expiresAt = token.expiresAt;
       return session;
     },
   },
