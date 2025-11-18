@@ -49,8 +49,9 @@ export const VehicleRefuelTable: React.FC<{
         type UsersQueryParams = {
           skip: number;
           limit: number;
+          placa: string;
         };
-        const params: UsersQueryParams = { skip, limit: fuellimit };
+        const params: UsersQueryParams = { skip, limit: fuellimit, placa: vehicleData?.placa as string };
 
         const response = await api.get<TGetAllRefuels>(`/api/v1/refuels`, {
           headers: {
@@ -77,6 +78,7 @@ export const VehicleRefuelTable: React.FC<{
     addFuelSupplyModal.isOpen,
     page,
     fuellimit,
+    vehicleData?.placa,
   ]);
 
   if (loading) {

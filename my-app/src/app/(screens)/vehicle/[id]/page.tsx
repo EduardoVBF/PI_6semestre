@@ -190,7 +190,7 @@ export default function VehicleDetails() {
               <IoSpeedometerOutline size={30} className="text-white/70" />
               <div>
                 <p className="text-sm text-white/60">Última quilometragem</p>
-                <p className="font-semibold">{vehicleData?.km_atual} km</p>
+                <p className="font-semibold">{vehicleData?.km_atual.toLocaleString("pt-BR")} km</p>
               </div>
             </div>
             <div className="bg-gray-700 p-4 rounded-lg flex items-center space-x-3">
