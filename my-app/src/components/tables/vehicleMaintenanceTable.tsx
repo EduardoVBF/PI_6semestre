@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { FaPencilAlt } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { toast } from "react-hot-toast";
+import Pagination from "../pagination";
 import Loader from "../loader";
 import api from "@/utils/api";
 
@@ -15,6 +16,9 @@ export const VehicleMaintenanceTable: React.FC<{
   vehicleData: TGetVehicle;
 }> = ({ vehicleData }) => {
   const [maintenanceData, setMaintenanceData] = useState<TMaintenance[]>([]);
+  const [maintenanceTotal, setMaintenanceTotal] = useState<number>(0);
+  const [maintenancelimit] = useState<number>(5);
+  const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
 
   const { data: session } = useSession();
@@ -50,6 +54,21 @@ export const VehicleMaintenanceTable: React.FC<{
         return "bg-blue-500";
       default:
         return "bg-gray-500";
+    }
+  };
+
+  const getStatusLabel = (status?: string) => {
+    switch (status) {
+      case "cancelada":
+        return "Cancelada";
+      case "pendente":
+        return "Pendente";
+      case "concluida":
+        return "Concluída";
+      case "em_andamento":
+        return "Em andamento";
+      default:
+        return "Desconhecido";
     }
   };
 
@@ -190,7 +209,7 @@ export const VehicleMaintenanceTable: React.FC<{
                       maintenance.status
                     )}`}
                   >
-                    {maintenance.status}
+                    {getStatusLabel(maintenance.status)}
                   </span>
                 </td>
                 <td className="px-3 md:px-6 py-4 text-xs">
@@ -206,6 +225,11 @@ export const VehicleMaintenanceTable: React.FC<{
             ))}
           </tbody>
         </table>
+        <Pagination
+          page={page}
+          totalPages={Math.ceil(maintenanceTotal / maintenancelimit)}
+          onPageChange={setPage}
+        />
       </div>
     </section>
   );
