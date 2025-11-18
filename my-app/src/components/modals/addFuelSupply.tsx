@@ -9,6 +9,7 @@ import Loader from "../loader";
 import api from "@/utils/api";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { TError } from "@/types/TError";
 
 import { TGetVehicle } from "@/types/TVehicle";
 
@@ -38,7 +39,7 @@ export default function AddFuelSupplyModal({
   const [isLoading, setIsLoading] = useState(false);
   const [placaDisabled, setPlacaDisabled] = useState(false);
 
-  const { register, handleSubmit, reset, setValue, watch } =
+  const { register, handleSubmit, reset, setValue, watch, getValues } =
     useForm<TRefuelForm>({
       defaultValues: {
         date: "",
@@ -61,15 +62,16 @@ export default function AddFuelSupplyModal({
   // ================================
   useEffect(() => {
     if (!isOpen) return;
+    if (!session?.accessToken) return;
 
     const fetchVehicles = async () => {
       try {
         const response = await api.get("/api/v1/vehicles", {
-          headers: { Authorization: `Bearer ${session?.accessToken}` },
+          headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 },
         });
 
-        setVehicles(response.data.vehicles);
+        setVehicles(response.data.vehicles || []);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
         toast.error("Erro ao carregar veículos.");
@@ -77,7 +79,7 @@ export default function AddFuelSupplyModal({
     };
 
     fetchVehicles();
-  }, [isOpen]);
+  }, [isOpen, session?.accessToken]);
 
   // ========================================
   // 🔒 Travar placa se estiver em /vehicle/ABC-1234
@@ -85,15 +87,28 @@ export default function AddFuelSupplyModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    if (pathname.includes("/vehicle/")) {
-      const placaFromUrl = pathname.split("/vehicle/")[1];
+    if (pathname && pathname.includes("/vehicle/")) {
+      // pega só a parte da placa, sem segmentos adicionais ou query
+      const placaFromUrl = pathname.split("/vehicle/")[1].split(/[/?#]/)[0];
 
-      setValue("placa", placaFromUrl);
-      setPlacaDisabled(true);
+      if (placaFromUrl) {
+        // atualiza o valor do form imediatamente (útil para watch)
+        setValue("placa", placaFromUrl);
+
+        // garante que o form tenha esse valor como default (evita "desaparecer"
+        // antes das options chegarem)
+        const current = getValues();
+        reset({ ...current, placa: placaFromUrl });
+
+        setPlacaDisabled(true);
+      } else {
+        setPlacaDisabled(false);
+      }
     } else {
       setPlacaDisabled(false);
     }
-  }, [isOpen, pathname, setValue]);
+    // intentionally include functions we use from hook
+  }, [isOpen, pathname, setValue, reset, getValues]);
 
   // ========================================
   // 🧮 Calcular total automático
@@ -135,7 +150,7 @@ export default function AddFuelSupplyModal({
     try {
       const payload = {
         data: data.date,
-        hora: data.time, // <-- CORRIGIDO: backend espera apenas HH:MM
+        hora: data.time,
         km: Number(data.km),
         litros: Number(data.litros),
         tipo_combustivel: data.tipo_combustivel,
@@ -155,15 +170,16 @@ export default function AddFuelSupplyModal({
 
       toast.success("Abastecimento registrado com sucesso!");
       handleCloseModal();
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao registrar abastecimento.");
+    } catch (error: unknown) {
+      const err = error as TError;
+      toast.error(`${err.response?.data?.message}` || "Erro ao registrar abastecimento.");
       setIsLoading(false);
     }
   };
 
   if (!isOpen) return null;
-  console.log("vehicles:", vehicles);
+
+  const selectedPlaca = watch("placa");
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-500/60 backdrop-blur-sm flex justify-center items-center p-4">
@@ -204,12 +220,28 @@ export default function AddFuelSupplyModal({
                 required
               >
                 <option value="">Selecione o veículo</option>
+
+                {/* Se trancada e a placa não estiver na lista de vehicles, mostra fallback */}
+                {placaDisabled &&
+                  selectedPlaca &&
+                  !vehicles.some((v) => v.placa === selectedPlaca) && (
+                    <option value={selectedPlaca}>
+                      {selectedPlaca} - carregando veículo...
+                    </option>
+                  )}
+
                 {vehicles.map((v) => (
                   <option key={v.id} value={v.placa}>
                     {v.placa} - {v.marca} {v.modelo}
                   </option>
                 ))}
               </select>
+
+              {/* Se estiver disabled, inputs desabilitados não são enviados no form HTML.
+                  Para garantir envio, mantemos um hidden input com o mesmo valor. */}
+              {placaDisabled && selectedPlaca && (
+                <input type="hidden" value={selectedPlaca} {...register("placa")} />
+              )}
             </div>
 
             {/* KM */}
@@ -220,7 +252,7 @@ export default function AddFuelSupplyModal({
                 </label>
                 {vehicles.map(
                   (v) =>
-                    v.placa === watch("placa") && (
+                    v.placa === selectedPlaca && (
                       <span
                         key={v.id}
                         className="text-gray-400 text-xs font-medium"
@@ -233,7 +265,7 @@ export default function AddFuelSupplyModal({
                 type="number"
                 required
                 className="w-full h-12 text-lg px-4 bg-gray-700 border-gray-600 text-white"
-                disabled={!watch("placa")}
+                disabled={!selectedPlaca}
               />
             </div>
 
