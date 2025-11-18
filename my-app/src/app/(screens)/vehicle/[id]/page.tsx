@@ -28,6 +28,7 @@ import { set } from "react-hook-form";
 import { TMaintenance, TGetAllMaintenances } from "@/types/TMaintenance";
 import { TRefuel, TGetAllRefuels } from "@/types/TFuel";
 import Pagination from "@/components/pagination";
+import { useVehicleAlerts } from "@/utils/hooks/useFetchVehiclesAlerts";
 
 interface IFuelSupply {
   id: number;
@@ -218,11 +219,13 @@ export default function VehicleDetails() {
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
   const params = useParams();
+  const { data: alerts } = useVehicleAlerts(vehicleData?.id?.toString());
 
   const [showAlerts, setShowAlerts] = useState(false);
   const abastecimentos = mockAbastecimentos;
   const vehicle = mockVehicleDetails;
-  const alerts = mockAlerts;
+  const alertsMock = mockAlerts;
+
 
   const labelMap: Record<string, string> = {
     oleo: "Troca de óleo",
@@ -374,10 +377,11 @@ export default function VehicleDetails() {
     return <Loader />;
   }
 
-  // console.log("vehicleData:", vehicleData);
-  console.log("fuelSupplyData:", fuelSupplyData);
+  console.log("vehicleData:", vehicleData);
+  // console.log("fuelSupplyData:", fuelSupplyData);
   // console.log("userData:", userData);
   // console.log("session:", session);
+  console.log("alertas do veículo:", alerts);
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
       <Header />
@@ -399,7 +403,7 @@ export default function VehicleDetails() {
         />
         {/* <h1 className="text-3xl font-bold text-primary-purple">Veículo</h1> */}
         {/* Seção de Alertas Colapsável */}
-        {alerts.length > 0 && (
+        {alertsMock.length > 0 && (
           <PendingAlerts filteredData={{ alertas: mockAlerts }} />
         )}
 

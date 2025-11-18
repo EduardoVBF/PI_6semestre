@@ -1,5 +1,6 @@
 "use client";
 import { FaExclamationTriangle, FaPencilAlt, FaCheck } from "react-icons/fa";
+import { useAlerts } from "@/utils/hooks/useFetchAlerts";
 import Link from "next/link";
 import React from "react";
 
@@ -61,6 +62,8 @@ export default function AlertsManagement() {
   const [monthCount, setMonthCount] = React.useState<number | null>(null);
   const [todayCount, setTodayCount] = React.useState<number | null>(null);
 
+  const { data: alerts, isLoading } = useAlerts();
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "aberto":
@@ -79,6 +82,7 @@ export default function AlertsManagement() {
     setMonthCount(Math.floor(Math.random() * 10));
     setTodayCount(Math.floor(Math.random() * 5));
   }, []);
+  console.log("Alerts data:", alerts);
 
   return (
     <div className="space-y-6 mt-6">
@@ -115,92 +119,96 @@ export default function AlertsManagement() {
       </section>
 
       <div className="bg-gray-800 rounded-xl shadow-lg p-2 md:p-6">
-      <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
-        Alertas Recentes
-      </h3>
+        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
+          Alertas Recentes
+        </h3>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-600">
-          <thead className="bg-gray-600">
-            <tr>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Usuário
-              </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Placa
-              </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Veículo
-              </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Mensagem
-              </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Ações
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="bg-gray-800 divide-y divide-gray-600">
-            {mockAlerts.map((alert) => (
-              <tr key={alert.id}>
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                  {alert.usuario}
-                </td>
-
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                  <Link href={`/vehicle/${alert.placa}`} className="hover:underline hover:text-white">
-                  {alert.placa}
-                  </Link>
-                </td>
-
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                  {alert.veiculo}
-                </td>
-
-                <td className="px-3 md:px-6 py-4 text-sm text-gray-300 flex items-center gap-2 min-w-[200px]">
-                  {alert.mensagem}
-                </td>
-
-                <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                      alert.status
-                    )}`}
-                  >
-                    {alert.status.charAt(0).toUpperCase() + alert.status.slice(1)}
-                  </span>
-                </td>
-
-                <td className="px-3 md:px-6 py-4 text-sm space-x-2">
-                  <button
-                    className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                    onClick={() => console.log("Concluir alerta:", alert)}
-                  >
-                    <FaCheck
-                      className="text-gray-300 hover:text-green-500 transition-colors duration-200"
-                      size={16}
-                    />
-                  </button>
-                  <button
-                    className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                    onClick={() => console.log("Editar alerta:", alert)}
-                  >
-                    <FaPencilAlt
-                      className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
-                      size={16}
-                    />
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-600">
+            <thead className="bg-gray-600">
+              <tr>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Usuário
+                </th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Placa
+                </th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Veículo
+                </th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Mensagem
+                </th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Ações
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody className="bg-gray-800 divide-y divide-gray-600">
+              {mockAlerts.map((alert) => (
+                <tr key={alert.id}>
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                    {alert.usuario}
+                  </td>
+
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    <Link
+                      href={`/vehicle/${alert.placa}`}
+                      className="hover:underline hover:text-white"
+                    >
+                      {alert.placa}
+                    </Link>
+                  </td>
+
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                    {alert.veiculo}
+                  </td>
+
+                  <td className="px-3 md:px-6 py-4 text-sm text-gray-300 flex items-center gap-2 min-w-[200px]">
+                    {alert.mensagem}
+                  </td>
+
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+                        alert.status
+                      )}`}
+                    >
+                      {alert.status.charAt(0).toUpperCase() +
+                        alert.status.slice(1)}
+                    </span>
+                  </td>
+
+                  <td className="px-3 md:px-6 py-4 text-sm space-x-2">
+                    <button
+                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                      onClick={() => console.log("Concluir alerta:", alert)}
+                    >
+                      <FaCheck
+                        className="text-gray-300 hover:text-green-500 transition-colors duration-200"
+                        size={16}
+                      />
+                    </button>
+                    <button
+                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                      onClick={() => console.log("Editar alerta:", alert)}
+                    >
+                      <FaPencilAlt
+                        className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
+                        size={16}
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
     </div>
   );
 }

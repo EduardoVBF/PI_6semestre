@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { SessionProvider } from "next-auth/react";
 import AuthGuard from "@/components/AuthGuard";
+import React from "react";
 
 import EditMaintenanceModalWrapper from "@/components/EditMaintenanceModalWrapper";
 import EditFuelSupplyModalWrapper from "@/components/EditFuelSupplyModalWrapper";
@@ -22,6 +23,7 @@ export default function RootClient({ children, fontClass }: Props) {
   return (
     <div className={fontClass}>
       <SessionProvider>
+      <ReactQueryProvider>
         <AuthGuard>
           {children}
           {/* wrappers client que usam Zustand */}
@@ -35,6 +37,7 @@ export default function RootClient({ children, fontClass }: Props) {
           <EditMaintenanceModalWrapper />
           <EditUserModalWrapper />
         </AuthGuard>
+      </ReactQueryProvider>
       </SessionProvider>
     </div>
   );

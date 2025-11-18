@@ -30,6 +30,7 @@ import Link from "next/link";
 
 import PendingAlerts from "@/components/sections/pendingAlerts";
 import { useSession } from "next-auth/react";
+import { useAlerts } from "@/utils/hooks/useFetchAlerts";
 
 // --- Interfaces de Tipagem ---
 interface Vehicle {
@@ -212,6 +213,9 @@ export default function Home() {
   };
 
   const allVehiclePlacas: string[] = mockData.vehicles.map((v) => v.placa);
+
+  const { data: alerts, isLoading } = useAlerts();
+  console.log("Alerts data DASH:", alerts);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
