@@ -18,6 +18,8 @@ import Filters from "../filters";
 export default function MaintenanceManagement() {
   const { data: session } = useSession();
 
+  // lista de placas completa (req separada, sem filtro de placa)
+  const [allPlacas, setAllPlacas] = useState<string[]>([]);
   const [maintenances, setMaintenances] = useState<TMaintenance[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -47,13 +49,32 @@ export default function MaintenanceManagement() {
     isOpen: boolean;
   };
 
-  const getAllPlacas = () => {
-    const placas = maintenances
-      .map((v) => v.placa?.toUpperCase() || "")
-      .filter((p) => p);
+  // retorna a lista de placas obtida pela requisição "sem filtro de placa"
+  const getAllPlacas = () => allPlacas;
 
-    return [...new Set(placas)];
-  };
+  // REQ ADICIONAL: buscar todas as manutenções (sem params.placa) para popular o filtro de placas
+  useEffect(() => {
+    const fetchAllPlacas = async () => {
+      if (!session?.accessToken) return;
+      try {
+        const res = await api.get<TGetAllMaintenances>("/api/v1/maintenances", {
+          headers: { Authorization: `Bearer ${session.accessToken}` },
+          params: { limit: 1000 }, // busca ampla, sem placa
+        });
+
+        const list = res.data.maintenances || [];
+        const placas = list
+          .map((v) => v.placa?.toUpperCase() || "")
+          .filter((p) => p);
+        setAllPlacas(Array.from(new Set(placas)));
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao carregar placas para filtro.");
+      }
+    };
+
+    fetchAllPlacas();
+  }, [session, addMaintenanceModal.isOpen, editMaintenanceModal.isOpen]);
 
   /* --------------------------
         FETCH PRINCIPAL
