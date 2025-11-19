@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { FaUsers, FaPencilAlt, FaPlus, FaPhone } from "react-icons/fa";
+import { FaUsers, FaPencilAlt, FaPlus, FaPhone, FaFilter } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import Loader from "../loader";
@@ -34,6 +34,7 @@ export default function UsersManagement() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   const statusOptions = ["ativo", "inativo", "pendente"];
   const typeOptions = [
@@ -199,6 +200,21 @@ export default function UsersManagement() {
           </h3>
 
           <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
+            <div
+              className="flex items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <button className="text-sm">
+                <FaFilter />
+              </button>
+              <p className="text-sm">{showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* area colapsável de filtros */}
+        {showFilters && (
+          <div className="mb-4">
             <Filters
               groups={[
                 {
@@ -208,10 +224,18 @@ export default function UsersManagement() {
                   selected: status,
                   onChange: setStatus,
                 },
+                {
+                  key: "type",
+                  label: "Função",
+                  options: typeOptions,
+                  selected: type,
+                  onChange: setType,
+                },
               ]}
             />
           </div>
-        </div>
+        )}
+
         <div className="w-full">
           <SearchBar
             value={search}

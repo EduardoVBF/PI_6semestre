@@ -39,9 +39,20 @@ interface FiltersProps {
 
 export default function Filters({ groups }: FiltersProps) {
   return (
-    <div className="flex flex-col gap-4 bg-gray-800 my-1 p-2">
-      {groups.map((g) => (
-        <div key={g.key} className="flex flex-col">
+    <div
+      className={`flex gap-4 bg-gray-800 my-1 p-2 ${
+        groups.length > 2 ? "flex-wrap" : ""
+      }`}
+    >
+      {groups.map((g, index) => (
+        <div
+          key={g.key}
+          className={`flex flex-col ${
+            groups.length > 1 && index !== groups.length - 1
+              ? "border-r-2 border-gray-600 pr-4"
+              : ""
+          }`}
+        >
           <label className="text-sm font-semibold mb-1 text-gray-400">
             {g.label}
           </label>

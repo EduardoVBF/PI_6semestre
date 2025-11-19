@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { FaTruck, FaPencilAlt, FaPlus } from "react-icons/fa";
+import { FaTruck, FaPencilAlt, FaPlus, FaFilter } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -40,6 +40,8 @@ export default function VehiclesManagement() {
   });
   const [loading, setLoading] = useState(false);
 
+  // estado para mostrar/ocultar filtros (colapsável)
+  const [showFilters, setShowFilters] = useState(false);
   // Filtros e paginação
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -196,21 +198,36 @@ export default function VehiclesManagement() {
             Veículos
           </h3>
 
-          <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
-            {/* Filtros personalizados */}
-            <Filters
-              groups={[
-                {
-                  key: "tipo",
-                  label: "Tipo",
-                  options: tipoOptions,
-                  selected: tipo,
-                  onChange: setTipo,
-                }
-              ]}
-            />
+          <div className="flex gap-4 w-full lg:w-auto flex-col md:flex-row items-start md:items-center">
+            <div
+              className="flex items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <button className="text-sm">
+                <FaFilter />
+              </button>
+              <p className="text-sm">
+                {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* area colapsável de filtros */}
+
+        {showFilters && (
+          <Filters
+            groups={[
+              {
+                key: "tipo",
+                label: "Tipo",
+                options: tipoOptions,
+                selected: tipo,
+                onChange: setTipo,
+              },
+            ]}
+          />
+        )}
 
         <div className="w-full">
           <SearchBar

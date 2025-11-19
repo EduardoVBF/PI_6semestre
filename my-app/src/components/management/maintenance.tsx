@@ -21,6 +21,7 @@ export default function MaintenanceManagement() {
   const [maintenances, setMaintenances] = useState<TMaintenance[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [placaFilter, setPlacaFilter] = useState<string>("");
 
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -46,6 +47,14 @@ export default function MaintenanceManagement() {
     isOpen: boolean;
   };
 
+  const getAllPlacas = () => {
+    const placas = maintenances
+      .map((v) => v.placa?.toUpperCase() || "")
+      .filter((p) => p);
+
+    return [...new Set(placas)];
+  };
+
   /* --------------------------
         FETCH PRINCIPAL
   ---------------------------*/
@@ -61,11 +70,13 @@ export default function MaintenanceManagement() {
           skip: number;
           limit: number;
           status?: string;
+          placa?: string;
         };
 
         const params: MaintQueryParams = {
           skip,
           limit: perPage,
+          placa: placaFilter || undefined,
         };
 
         if (status) params.status = status;
@@ -92,6 +103,7 @@ export default function MaintenanceManagement() {
     status, // 🔥 Necessário para refazer chamada ao trocar o filtro
     editMaintenanceModal.isOpen,
     addMaintenanceModal.isOpen,
+    placaFilter,
   ]);
 
   /* --------------------------
@@ -219,6 +231,13 @@ export default function MaintenanceManagement() {
                 options: statusOptions.map((s) => ({ label: s, value: s })),
                 selected: status,
                 onChange: setStatus,
+              },
+              {
+                key: "placa",
+                label: "Placa",
+                options: getAllPlacas().map((p) => ({ label: p, value: p })),
+                selected: placaFilter,
+                onChange: setPlacaFilter,
               },
             ]}
           />
