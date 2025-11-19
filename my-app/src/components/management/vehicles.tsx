@@ -199,12 +199,15 @@ export default function VehiclesManagement() {
           <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
             {/* Filtros personalizados */}
             <Filters
-              // statusOptions={manutencaoOptions}
-              typeOptions={tipoOptions}
-              selectedStatus={manutencaoVencida}
-              selectedType={tipo}
-              onStatusChange={setManutencaoVencida}
-              onTypeChange={setTipo}
+              groups={[
+                {
+                  key: "tipo",
+                  label: "Tipo",
+                  options: tipoOptions,
+                  selected: tipo,
+                  onChange: setTipo,
+                }
+              ]}
             />
           </div>
         </div>

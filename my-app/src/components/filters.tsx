@@ -1,6 +1,19 @@
 "use client";
 import React from "react";
 
+interface Option {
+  label: string;
+  value: string;
+}
+
+interface FilterGroup {
+  key: string;
+  label: string;
+  options: Option[];
+  selected?: string;
+  onChange: (value: string) => void;
+}
+
 interface FilterPillProps {
   label: string;
   selected: boolean;
@@ -21,62 +34,31 @@ const FilterPill = ({ label, selected, onClick }: FilterPillProps) => (
 );
 
 interface FiltersProps {
-  statusOptions?: string[];
-  typeOptions?: { label: string; value: string }[];
-  selectedStatus?: string | "";
-  selectedType?: string | "";
-  onStatusChange: (status: string) => void;
-  onTypeChange: (type: string) => void;
+  groups: FilterGroup[];
 }
 
-export default function Filters({
-  statusOptions,
-  typeOptions,
-  selectedStatus,
-  selectedType,
-  onStatusChange,
-  onTypeChange,
-}: FiltersProps) {
+export default function Filters({ groups }: FiltersProps) {
   return (
-    <div className="flex flex-wrap gap-8 bg-gray-800 my-1">
-      {statusOptions && (
-        <div className="flex flex-col col-span-1 lg:col-span-2">
+    <div className="flex flex-col gap-4 bg-gray-800 my-1 p-2">
+      {groups.map((g) => (
+        <div key={g.key} className="flex flex-col">
           <label className="text-sm font-semibold mb-1 text-gray-400">
-            Status
+            {g.label}
           </label>
           <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 text-xs capitalize">
-            {statusOptions.map((s) => (
+            {g.options.map((opt) => (
               <FilterPill
-                key={s}
-                label={s}
-                selected={selectedStatus === s}
-                onClick={() => onStatusChange(selectedStatus === s ? "" : s)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Type Filter */}
-      {typeOptions && (
-        <div className="flex flex-col col-span-1 lg:col-span-2">
-          <label className="text-sm font-semibold mb-1 text-gray-400">
-            Tipo
-          </label>
-          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 text-xs capitalize">
-            {typeOptions?.map((t) => (
-              <FilterPill
-                key={t.value}
-                label={t.label}
-                selected={selectedType === t.value}
+                key={opt.value}
+                label={opt.label}
+                selected={g.selected === opt.value}
                 onClick={() =>
-                  onTypeChange(selectedType === t.value ? "" : t.value)
+                  g.onChange(g.selected === opt.value ? "" : opt.value)
                 }
               />
             ))}
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }

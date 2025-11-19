@@ -188,43 +188,41 @@ export default function MaintenanceManagement() {
       </section>
 
       {/* Tabela */}
-      <div className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6">
-        {/* --- Seção de Filtros e Ações --- */}
-        <section className="w-full justify-end space-y-4">
-          <div className="w-full justify-end flex">
+      <div className="bg-gray-800 rounded-xl shadow-lg p-5">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-2">
+          <h3 className="text-2xl font-semibold text-primary-purple">
+            Manutenções Preventivas
+          </h3>
+
+          <div className="flex gap-4 w-full lg:w-auto flex-col md:flex-row items-start md:items-center">
             <div
-              className="flex justify-end items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <button className="text-sm transition-colors">
-                {showFilters ? <FaFilter /> : <FaFilter />}
+              <button className="text-sm">
+                <FaFilter />
               </button>
               <p className="text-sm">
                 {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
               </p>
             </div>
           </div>
-          <div className="w-full flex justify-end">
-            {showFilters && (
-              <Filters
-                statusOptions={statusOptions}
-                selectedStatus={status}
-                onStatusChange={setStatus}
-                onTypeChange={() => {}}
-              />
-            )}
-          </div>
-        </section>
+        </div>
 
-        {/* <Filters
-          statusOptions={statusOptions}
-          selectedStatus={status}
-          onStatusChange={setStatus}
-          onTypeChange={() => {}}
-        /> */}
-        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
-          Manutenções Preventivas
-        </h3>
+        {/* area colapsável de filtros */}
+        {showFilters && (
+          <Filters
+            groups={[
+              {
+                key: "status",
+                label: "Status",
+                options: statusOptions.map((s) => ({ label: s, value: s })),
+                selected: status,
+                onChange: setStatus,
+              },
+            ]}
+          />
+        )}
 
         {loading ? (
           <div className="flex justify-center py-20">

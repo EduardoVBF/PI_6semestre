@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FaGasPump, FaPlus, FaPencilAlt } from "react-icons/fa";
+import { FaGasPump, FaPlus, FaPencilAlt, FaFilter } from "react-icons/fa";
 import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import { TUserData, TUsersResponse } from "@/types/TUser";
@@ -48,6 +48,9 @@ export default function FuelManagement() {
 
   // filtros / busca (integração SearchBar + Filters)
   const [search, setSearch] = useState<string>(""); // usaremos para pesquisa geral (Placa / termo)
+  // colapsável e filtro de placa
+  const [showFilters, setShowFilters] = useState(false);
+  const [placaFilter, setPlacaFilter] = useState<string>("");
   // filtros extras controlados por Filters component
   const [filterTipo, setFilterTipo] = useState<string>("");
   const [filterFrota, setFilterFrota] = useState<string>("");
@@ -96,6 +99,8 @@ export default function FuelManagement() {
 
         // Usamos 'search' para buscar por placa ou outro termo no backend (se suportado)
         if (search) params.search = search;
+        // filtro de placa aplicado via UI colapsável
+        if (placaFilter) params.placa = placaFilter;
         // if (filterTipo) params["tipo"] = filterTipo;
         // if (filterFrota) params["frota"] = filterFrota;
         // if (filterManutencaoVencida) params["manutencao_vencida"] = filterManutencaoVencida;
@@ -125,6 +130,7 @@ export default function FuelManagement() {
     filterTipo,
     filterFrota,
     filterManutencaoVencida,
+    placaFilter,
     addFuelSupplyModal.isOpen,
     editFuelSupplyModal.isOpen,
   ]);
@@ -276,6 +282,10 @@ export default function FuelManagement() {
     };
   };
 
+  const getAllPlacas = () => {
+    return vehicles.map((v) => v.placa?.toUpperCase() || "").filter((p) => p);
+  }
+
   const { start, end } = useMemo(() => getMonthRange(), []);
 
   // Filtrar abastecimentos do mês corrente
@@ -352,23 +362,42 @@ export default function FuelManagement() {
         </div>
       </section>
 
-      {/* FILTROS + SEARCH */}
+      {/* FILTROS */}
       <div className="bg-gray-800 rounded-xl shadow-lg p-5">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <h3 className="text-2xl font-semibold text-primary-purple">
             Histórico de Abastecimentos
           </h3>
 
-          {/* <div className="flex gap-4 w-full lg:w-auto flex-col md:flex-row">
-            <div className="w-full md:w-60">
-              <SearchBar
-                value={search}
-                onChange={handleSearchChange}
-                placeholder="Buscar placa / termo..."
-              />
+          <div className="flex gap-4 w-full lg:w-auto flex-col md:flex-row items-start md:items-center">
+            <div
+              className="flex items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <button className="text-sm">
+                <FaFilter />
+              </button>
+              <p className="text-sm">{showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}</p>
             </div>
-          </div> */}
+          </div>
         </div>
+
+        {/* area colapsável de filtros */}
+        {showFilters && (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Filters
+              groups={[
+                {
+                  key: "placa",
+                  label: "Placa",
+                  options: getAllPlacas().map((p) => ({ label: p, value: p })),
+                  selected: placaFilter,
+                  onChange: setPlacaFilter,
+                },
+              ]}
+            />
+          </div>
+        )}
 
         {/* TABELA */}
         <section className="bg-gray-800 rounded-xl shadow-lg py-3 md:py-6 mt-4">

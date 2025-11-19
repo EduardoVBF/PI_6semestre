@@ -200,12 +200,15 @@ export default function UsersManagement() {
 
           <div className="flex flex-col lg:flex-row items-center gap-4 w-full lg:w-auto">
             <Filters
-              statusOptions={statusOptions}
-              typeOptions={typeOptions}
-              selectedStatus={status}
-              selectedType={type}
-              onStatusChange={setStatus}
-              onTypeChange={setType}
+              groups={[
+                {
+                  key: "status",
+                  label: "Status",
+                  options: statusOptions.map((s) => ({ label: s, value: s })),
+                  selected: status,
+                  onChange: setStatus,
+                },
+              ]}
             />
           </div>
         </div>
