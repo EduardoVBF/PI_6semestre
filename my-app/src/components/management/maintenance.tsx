@@ -11,6 +11,7 @@ import api from "@/utils/api";
 import { useEditMaintenanceModal } from "@/utils/hooks/useEditMaintenanceModal";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { TMaintenance, TGetAllMaintenances } from "@/types/TMaintenance";
+import { FaFilter } from "react-icons/fa";
 import Pagination from "../pagination";
 import Filters from "../filters";
 
@@ -18,6 +19,7 @@ export default function MaintenanceManagement() {
   const { data: session } = useSession();
 
   const [maintenances, setMaintenances] = useState<TMaintenance[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [page, setPage] = useState(1);
@@ -187,18 +189,42 @@ export default function MaintenanceManagement() {
 
       {/* Tabela */}
       <div className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
-            Manutenções Preventivas
-          </h3>
+        {/* --- Seção de Filtros e Ações --- */}
+        <section className="w-full justify-end space-y-4">
+          <div className="w-full justify-end flex">
+            <div
+              className="flex justify-end items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <button className="text-sm transition-colors">
+                {showFilters ? <FaFilter /> : <FaFilter />}
+              </button>
+              <p className="text-sm">
+                {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+              </p>
+            </div>
+          </div>
+          <div className="w-full flex justify-end">
+            {showFilters && (
+              <Filters
+                statusOptions={statusOptions}
+                selectedStatus={status}
+                onStatusChange={setStatus}
+                onTypeChange={() => {}}
+              />
+            )}
+          </div>
+        </section>
 
-          <Filters
-            statusOptions={statusOptions}
-            selectedStatus={status}
-            onStatusChange={setStatus}
-            onTypeChange={() => {}}
-          />
-        </div>
+        {/* <Filters
+          statusOptions={statusOptions}
+          selectedStatus={status}
+          onStatusChange={setStatus}
+          onTypeChange={() => {}}
+        /> */}
+        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
+          Manutenções Preventivas
+        </h3>
 
         {loading ? (
           <div className="flex justify-center py-20">
