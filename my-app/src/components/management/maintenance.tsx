@@ -189,7 +189,7 @@ export default function MaintenanceManagement() {
 
       {/* Tabela */}
       <div className="bg-gray-800 rounded-xl shadow-lg p-5">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-2">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
           <h3 className="text-2xl font-semibold text-primary-purple">
             Manutenções Preventivas
           </h3>

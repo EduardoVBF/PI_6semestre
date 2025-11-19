@@ -384,7 +384,6 @@ export default function FuelManagement() {
 
         {/* area colapsável de filtros */}
         {showFilters && (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
             <Filters
               groups={[
                 {
@@ -396,11 +395,10 @@ export default function FuelManagement() {
                 },
               ]}
             />
-          </div>
         )}
 
         {/* TABELA */}
-        <section className="bg-gray-800 rounded-xl shadow-lg py-3 md:py-6 mt-4">
+        <section className="bg-gray-800 rounded-xl shadow-lg py-3 md:py-6">
           {loading ? (
             <div className="flex justify-center py-20">
               <Loader />
