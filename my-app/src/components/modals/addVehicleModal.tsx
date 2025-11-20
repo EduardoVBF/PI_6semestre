@@ -42,7 +42,7 @@ export default function AddVehicleModal({
     try {
       const payload: TPostVehicle = { ...data };
 
-      await api.post("/api/v1/vehicles", payload, {
+      await api.post("/api/v1/vehicles/", payload, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 
