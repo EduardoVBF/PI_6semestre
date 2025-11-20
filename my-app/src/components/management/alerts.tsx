@@ -10,7 +10,7 @@ import { TGetVehicle } from "@/types/TVehicle";
 import { useSession } from "next-auth/react";
 import { TUserData } from "@/types/TUser";
 import React, { useEffect, useMemo, useState } from "react";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import api from "@/utils/api";
 import Link from "next/link";
 import Filters from "../filters"; // ajuste o caminho conforme necessário
@@ -119,6 +119,7 @@ export default function AlertsManagement() {
 
   return (
     <div className="space-y-6 mt-6">
+      <Toaster position="top-center" />
       {/* Cards principais */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-primary-purple rounded-xl shadow-lg p-6 flex items-center space-x-4">

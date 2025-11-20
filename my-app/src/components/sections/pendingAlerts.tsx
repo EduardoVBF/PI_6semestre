@@ -8,8 +8,9 @@ import dayjs from "dayjs";
 const PendingAlerts: React.FC<{ filteredData: { alertas: TAlert[] } }> = ({ filteredData }) => {
   const [showAlerts, setShowAlerts] = useState(false);
 
+  const notResolvedAlerts = filteredData.alertas.filter((alert) => !alert.resolved);
   // apenas os 3 primeiros alertas para exibição
-  const visibleAlerts = filteredData.alertas.slice(0, 3);
+  const visibleAlerts = notResolvedAlerts.slice(0, 3);
 
   return (
     <div className="w-full flex justify-start">
@@ -30,7 +31,7 @@ const PendingAlerts: React.FC<{ filteredData: { alertas: TAlert[] } }> = ({ filt
                 className="text-yellow-400 animate-pulse"
               />
               <h3 className="text-lg font-bold text-yellow-300">
-                Alertas {showAlerts ? "Pendentes" : ""} ({filteredData.alertas.length})
+                Alertas {showAlerts ? "Pendentes" : ""} ({notResolvedAlerts.length})
               </h3>
             </div>
             {showAlerts ? (
@@ -79,7 +80,7 @@ const PendingAlerts: React.FC<{ filteredData: { alertas: TAlert[] } }> = ({ filt
               {/* Rodapé */}
               <div className="mt-4 flex justify-between items-center">
                 <span className="text-yellow-400 text-sm">
-                  Mostrando {visibleAlerts.length} de {filteredData.alertas.length}
+                  Mostrando {visibleAlerts.length} de {notResolvedAlerts.length}
                 </span>
                 <Link
                   href="/management#alerts"
