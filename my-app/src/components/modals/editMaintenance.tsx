@@ -154,7 +154,7 @@ export default function EditPreventiveMaintenanceModal({
         status: formData.status,
       };
 
-      await api.patch(`/api/v1/maintenances/${maintenanceData?.id || ""}/`, payload, {
+      await api.patch(`/api/v1/maintenances/${maintenanceData?.id || ""}`, payload, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 
