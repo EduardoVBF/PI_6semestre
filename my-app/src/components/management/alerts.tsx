@@ -14,6 +14,7 @@ import { toast } from "react-hot-toast";
 import api from "@/utils/api";
 import Link from "next/link";
 import Filters from "../filters"; // ajuste o caminho conforme necessário
+import dayjs from "dayjs";
 
 export default function AlertsManagement() {
   const [count, setCount] = React.useState<number | null>(null);
@@ -218,6 +219,10 @@ export default function AlertsManagement() {
                   {/* <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Usuário
                 </th> */}
+
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Data
+                  </th>
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Placa
                   </th>
@@ -243,6 +248,12 @@ export default function AlertsManagement() {
                 <tbody className="bg-gray-800 divide-y divide-gray-600">
                   {filteredAlerts.map((alert) => (
                     <tr key={alert.id}>
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        <span className="font-semibold">
+                          {dayjs(alert.created_at).format("DD/MM/YYYY HH:mm")}
+                        </span>
+                      </td>
+
                       <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         <Link
                           href={`/vehicle/${alert.placa}`}

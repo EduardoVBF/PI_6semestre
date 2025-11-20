@@ -3,6 +3,7 @@ import { IoCloseCircle } from "react-icons/io5";
 import React, { useState } from "react";
 import Link from "next/link";
 import { TAlert } from "@/types/TAlerts";
+import dayjs from "dayjs";
 
 const PendingAlerts: React.FC<{ filteredData: { alertas: TAlert[] } }> = ({ filteredData }) => {
   const [showAlerts, setShowAlerts] = useState(false);
@@ -62,7 +63,10 @@ const PendingAlerts: React.FC<{ filteredData: { alertas: TAlert[] } }> = ({ filt
                       {/* <span className="font-semibold text-yellow-200">
                         {alert.user}
                       </span> */}
-                      {/* <span className="text-yellow-500">|</span> */}
+                      <span className="font-semibold text-yellow-200">
+                        {dayjs(alert.created_at).format("DD/MM/YYYY HH:mm")}
+                      </span>
+                      <span className="text-yellow-500">|</span>
                       <span className="font-semibold">{alert.placa}</span>
                       <span className="text-yellow-500">|</span>
                       {/* <span className="font-semibold">{alert.veiculo}</span>
