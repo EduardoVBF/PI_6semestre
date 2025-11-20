@@ -51,7 +51,7 @@ export default function UserPhonesModal({
       if (!userId || !session?.accessToken) return;
       setLoading(true);
       try {
-        const res = await api.get<TUser>(`/api/v1/users/${userId}`, {
+        const res = await api.get<TUser>(`/api/v1/users/${userId}/`, {
           headers: { Authorization: `Bearer ${session.accessToken}` },
         });
         setUser(res.data);

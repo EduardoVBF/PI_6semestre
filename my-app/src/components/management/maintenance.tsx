@@ -57,7 +57,7 @@ export default function MaintenanceManagement() {
     const fetchAllPlacas = async () => {
       if (!session?.accessToken) return;
       try {
-        const res = await api.get<TGetAllMaintenances>("/api/v1/maintenances", {
+        const res = await api.get<TGetAllMaintenances>("/api/v1/maintenances/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 }, // busca ampla, sem placa
         });
@@ -102,7 +102,7 @@ export default function MaintenanceManagement() {
 
         if (status) params.status = status;
 
-        const res = await api.get<TGetAllMaintenances>("/api/v1/maintenances", {
+        const res = await api.get<TGetAllMaintenances>("/api/v1/maintenances/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params,
         });

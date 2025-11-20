@@ -78,7 +78,7 @@ export default function VehiclesManagement() {
         if (frota) params.frota = frota;
         if (manutencaoVencida) params.manutencao_vencida = manutencaoVencida;
 
-        const res = await api.get("/api/v1/vehicles", {
+        const res = await api.get("/api/v1/vehicles/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params,
         });
@@ -111,7 +111,7 @@ export default function VehiclesManagement() {
       if (!session?.accessToken) return;
 
       try {
-        const res = await api.get("/api/v1/vehicles", {
+        const res = await api.get("/api/v1/vehicles/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 },
         });
@@ -136,7 +136,7 @@ export default function VehiclesManagement() {
       if (!session?.accessToken) return;
 
       try {
-        const res = await api.get<TUsersResponse>("/api/v1/users", {
+        const res = await api.get<TUsersResponse>("/api/v1/users/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 },
         });

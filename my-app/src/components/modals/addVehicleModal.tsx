@@ -61,7 +61,7 @@ export default function AddVehicleModal({
       if (!session?.accessToken) return;
 
       try {
-        const res = await api.get<TUsersResponse>("/api/v1/users", {
+        const res = await api.get<TUsersResponse>("/api/v1/users/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 },
         });

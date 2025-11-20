@@ -149,7 +149,7 @@ export default function FuelManagement() {
       if (!session?.accessToken) return;
 
       try {
-        const res = await api.get<TUsersResponse>("/api/v1/users", {
+        const res = await api.get<TUsersResponse>("/api/v1/users/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 },
         });
@@ -176,7 +176,7 @@ export default function FuelManagement() {
           | { vehicles: TGetVehicle[]; total?: number }
           | TGetVehicle[];
 
-        const res = await api.get<VehiclesResp>("/api/v1/vehicles", {
+        const res = await api.get<VehiclesResp>("/api/v1/vehicles/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 },
         });

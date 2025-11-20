@@ -99,7 +99,7 @@ export default function VehicleDetails() {
 
       try {
         const response = await api.get<TUserData>(
-          `/api/v1/users/${vehicleData?.id_usuario}`,
+          `/api/v1/users/${vehicleData?.id_usuario}/`,
           {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
