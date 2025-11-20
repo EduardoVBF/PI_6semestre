@@ -57,7 +57,7 @@ export default function EditPreventiveMaintenanceModal({
 
     const fetchVehicles = async () => {
       try {
-        const response = await api.get("/api/v1/vehicles", {
+        const response = await api.get("/api/v1/vehicles/", {
           headers: { Authorization: `Bearer ${session?.accessToken}` },
           params: { limit: 1000 },
         });
@@ -154,7 +154,7 @@ export default function EditPreventiveMaintenanceModal({
         status: formData.status,
       };
 
-      await api.patch(`/api/v1/maintenances/${maintenanceData?.id || ""}`, payload, {
+      await api.patch(`/api/v1/maintenances/${maintenanceData?.id || ""}/`, payload, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 

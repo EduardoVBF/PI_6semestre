@@ -80,7 +80,7 @@ export default function EditFuelSupplyModal({
 
     const fetchVehicles = async () => {
       try {
-        const response = await api.get("/api/v1/vehicles", {
+        const response = await api.get("/api/v1/vehicles/", {
           headers: { Authorization: `Bearer ${session?.accessToken}` },
           params: { limit: 1000 },
         });
@@ -187,7 +187,7 @@ export default function EditFuelSupplyModal({
         placa: data.placa,
       };
 
-      await api.patch(`/api/v1/refuels/${fuelSupply.id}`, payload, {
+      await api.patch(`/api/v1/refuels/${fuelSupply.id}/`, payload, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 

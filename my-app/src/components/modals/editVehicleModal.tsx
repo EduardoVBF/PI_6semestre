@@ -37,7 +37,7 @@ export default function EditVehicleModal({
 
     setIsLoading(true);
     try {
-      await api.patch(`/api/v1/vehicles/${vehicle.id}`, data, {
+      await api.patch(`/api/v1/vehicles/${vehicle.id}/`, data, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 

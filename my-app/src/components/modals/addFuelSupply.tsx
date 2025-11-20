@@ -66,7 +66,7 @@ export default function AddFuelSupplyModal({
 
     const fetchVehicles = async () => {
       try {
-        const response = await api.get("/api/v1/vehicles", {
+        const response = await api.get("/api/v1/vehicles/", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
           params: { limit: 1000 },
         });
@@ -164,7 +164,7 @@ export default function AddFuelSupplyModal({
         valor_total: Number(totalValue),
       };
 
-      await api.post("/api/v1/refuels", payload, {
+      await api.post("/api/v1/refuels/", payload, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 

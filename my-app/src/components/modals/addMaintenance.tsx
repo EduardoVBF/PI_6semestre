@@ -52,7 +52,7 @@ export default function AddPreventiveMaintenanceModal({
 
     const fetchVehicles = async () => {
       try {
-        const response = await api.get("/api/v1/vehicles", {
+        const response = await api.get("/api/v1/vehicles/", {
           headers: { Authorization: `Bearer ${session?.accessToken}` },
           params: { limit: 1000 },
         });
@@ -140,7 +140,7 @@ export default function AddPreventiveMaintenanceModal({
         status: formData.status || "pendente",
       };
 
-      await api.post("/api/v1/maintenances", payload, {
+      await api.post("/api/v1/maintenances/", payload, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 
