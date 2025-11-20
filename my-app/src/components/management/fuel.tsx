@@ -9,7 +9,7 @@ import { TUserData, TUsersResponse } from "@/types/TUser";
 import { TGetAllRefuels, TRefuel } from "@/types/TFuel";
 import { TGetVehicle } from "@/types/TVehicle";
 import { useSession } from "next-auth/react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import Loader from "../loader";
 import api from "@/utils/api";
 import dayjs from "dayjs";
@@ -23,38 +23,39 @@ import { TAlert } from "@/types/TAlerts";
 /**
  * FuelManagement.tsx
  *
- * Melhorias e decisões tomadas:
- * - Buscas paralelas: refuels (pag), users (limit 1000) e vehicles (limit 1000)
- * - Uso de useMemo para criar mapas (userMap, vehicleMap) para lookup O(1)
- * - Handlers memoizados com useCallback
- * - Integração com seus componentes SearchBar e Filters (assumi interfaces comuns — veja comentários)
- * - Exibição de dados do veículo e do usuário em cada linha
+ * Versão completa:
+ * - fetch paginado (tabela) — igual ao seu comportamento atual
+ * - fetch "completo" com paginação automática para popular os cards (allRefuels)
+ * - cálculos dos cards baseados em allRefuels (não no pageRefuels)
+ * - comparações de data inclusivas para início/fim do mês
+ *
+ * Ajustes possíveis: se tiver muitos registros (> dezenas de milhares),
+ * prefira um endpoint de stats no backend. Este componente traz tudo em memória.
  */
 
-/* ---------- TIPOS LOCAIS (se necessário ajustar, use os tipos reais do seu projeto) ---------- */
-/* 
-  - TGetVehicle foi enviado por você (é a representação retornada pelo backend para veículos)
-  - TUserData e TUsersResponse também foram enviados
-*/
+// Quantos itens pedir por requisição quando buscamos "tudo".
+const ALL_REFUELS_FETCH_LIMIT = 1000;
 
 export default function FuelManagement() {
   const { data: session } = useSession();
 
-  // dados principais
+  // dados principais paginados (tabela)
   const [refuels, setRefuels] = useState<TRefuel[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // paginação para abastecimentos
+  // todos os abastecimentos (usado para os cards/estatísticas)
+  const [allRefuels, setAllRefuels] = useState<TRefuel[]>([]);
+  const [loadingAllRefuels, setLoadingAllRefuels] = useState(false);
+
+  // paginação para abastecimentos (tabela)
   const [page, setPage] = useState<number>(1);
   const [total, setTotal] = useState<number>(0);
   const [perPage] = useState<number>(10);
 
   // filtros / busca (integração SearchBar + Filters)
-  const [search, setSearch] = useState<string>(""); // usaremos para pesquisa geral (Placa / termo)
-  // colapsável e filtro de placa
+  const [search, setSearch] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
   const [placaFilter, setPlacaFilter] = useState<string>("");
-  // filtros extras controlados por Filters component
   const [filterTipo, setFilterTipo] = useState<string>("");
   const [filterFrota, setFilterFrota] = useState<string>("");
   const [filterManutencaoVencida, setFilterManutencaoVencida] =
@@ -78,7 +79,7 @@ export default function FuelManagement() {
   const { data: alerts } = useAlerts();
 
   /* --------------------------
-     FETCH PRINCIPAL: refuels
+     FETCH PRINCIPAL: refuels (paginado para tabela)
      -------------------------- */
   useEffect(() => {
     const fetchRefuels = async () => {
@@ -103,10 +104,9 @@ export default function FuelManagement() {
           limit: perPage,
         };
 
-        // Usamos 'search' para buscar por placa ou outro termo no backend (se suportado)
         if (search) params.search = search;
-        // filtro de placa aplicado via UI colapsável
         if (placaFilter) params.placa = placaFilter;
+        // se quiser enviar os outros filtros para a API, descomente e adapte:
         // if (filterTipo) params["tipo"] = filterTipo;
         // if (filterFrota) params["frota"] = filterFrota;
         // if (filterManutencaoVencida) params["manutencao_vencida"] = filterManutencaoVencida;
@@ -127,7 +127,6 @@ export default function FuelManagement() {
     };
 
     fetchRefuels();
-    // re-fetch quando modais de criar/editar fecharem/abrirem para atualizar lista
   }, [
     session,
     page,
@@ -181,11 +180,9 @@ export default function FuelManagement() {
           params: { limit: 1000 },
         });
 
-        // Dependendo do seu backend, a resposta pode vir em res.data.vehicles ou como um array direto.
-        // Ajuste se preciso.
         const vehiclesList: TGetVehicle[] = Array.isArray(res.data)
           ? res.data
-          : res.data.vehicles ?? [];
+          : (res.data.vehicles ?? []);
 
         setVehicles(vehiclesList);
       } catch (err) {
@@ -196,6 +193,55 @@ export default function FuelManagement() {
 
     fetchVehiclesList();
   }, [session]);
+
+  /* --------------------------
+     FETCH "COMPLETO": traer todos os abastecimentos (paginação automática)
+     usado para calcular os cards
+     -------------------------- */
+  useEffect(() => {
+    const fetchAllRefuels = async () => {
+      if (!session?.accessToken) return;
+      setLoadingAllRefuels(true);
+
+      try {
+        let all: TRefuel[] = [];
+        let skip = 0;
+        const limit = ALL_REFUELS_FETCH_LIMIT;
+
+        while (true) {
+          const res = await api.get<TGetAllRefuels>("/api/v1/refuels/", {
+            headers: { Authorization: `Bearer ${session.accessToken}` },
+            params: { skip, limit },
+          });
+  
+          // res.data can be either an array of TRefuel or an object with a `refuels` array.
+          const items: TRefuel[] =
+            Array.isArray(res.data)
+              ? (res.data as unknown as TRefuel[])
+              : ((res.data as TGetAllRefuels).refuels ?? []);
+          if (!items || items.length === 0) break;
+
+          all = all.concat(items);
+
+          // se retornou menos que o limit, acabou
+          if (items.length < limit) break;
+
+          // senão, incrementa skip e continua
+          skip += limit;
+        }
+
+        setAllRefuels(all);
+      } catch (err) {
+        console.error("Erro ao carregar todos os abastecimentos:", err);
+        // não forçar toast para não poluir UI; ative se preferir
+      } finally {
+        setLoadingAllRefuels(false);
+      }
+    };
+
+    // Re-fetch quando modais que alteram dados fecharem/abrirem
+    fetchAllRefuels();
+  }, [session, addFuelSupplyModal.isOpen, editFuelSupplyModal.isOpen]);
 
   /* --------------------------
      MAPS PARA LOOKUP RÁPIDO
@@ -234,14 +280,10 @@ export default function FuelManagement() {
       const p = placa.toUpperCase();
       const vehicle = vehicleMap.get(p);
       if (!vehicle) return "Não encontrado";
-      // combine marca + modelo + ano se disponível
-      const parts = [];
-      if ((vehicle as TGetVehicle).marca)
-        parts.push((vehicle as TGetVehicle).marca);
-      if ((vehicle as TGetVehicle).modelo)
-        parts.push((vehicle as TGetVehicle).modelo);
-      if ((vehicle as TGetVehicle).ano)
-        parts.push(String((vehicle as TGetVehicle).ano));
+      const parts: string[] = [];
+      if ((vehicle as TGetVehicle).marca) parts.push((vehicle as TGetVehicle).marca);
+      if ((vehicle as TGetVehicle).modelo) parts.push((vehicle as TGetVehicle).modelo);
+      if ((vehicle as TGetVehicle).ano) parts.push(String((vehicle as TGetVehicle).ano));
       return parts.length > 0 ? parts.join(" ") : "Não encontrado";
     },
     [vehicleMap]
@@ -249,9 +291,6 @@ export default function FuelManagement() {
 
   /* --------------------------
      HANDLERS: filtros vindos do componente Filters
-     (Assumi que Filters chama onChange com um objeto semelhante a:
-       { tipo?: string, frota?: string, manutencao_vencida?: string }
-     Ajuste conforme a assinatura real do seu Filters)
      -------------------------- */
   const handleFiltersChange = useCallback(
     (payload: {
@@ -262,16 +301,11 @@ export default function FuelManagement() {
       setFilterTipo(payload.tipo ?? "");
       setFilterFrota(payload.frota ?? "");
       setFilterManutencaoVencida(payload.manutencao_vencida ?? "");
-      // reset page to 1 ao aplicar filtros
       setPage(1);
     },
     []
   );
 
-  /* --------------------------
-     HANDLER Search bar
-     (Assumi SearchBar aceita value/onChange. Se a sua API for diferente, eu adapto)
-     -------------------------- */
   const handleSearchChange = useCallback((value: string) => {
     setSearch(value);
     setPage(1);
@@ -279,7 +313,7 @@ export default function FuelManagement() {
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
 
-  // Retorna o primeiro dia e último dia do mês atual
+  // Retorna o primeiro dia e último dia do mês atual (strings YYYY-MM-DD)
   const getMonthRange = () => {
     const now = dayjs();
     return {
@@ -290,30 +324,37 @@ export default function FuelManagement() {
 
   const getAllPlacas = () => {
     return vehicles.map((v) => v.placa?.toUpperCase() || "").filter((p) => p);
-  }
+  };
 
   const { start, end } = useMemo(() => getMonthRange(), []);
 
-  // Filtrar abastecimentos do mês corrente
+  // Filtrar abastecimentos do mês corrente — USANDO allRefuels (conjunto completo)
   const monthlyRefuels = useMemo(() => {
-    return refuels.filter((r) => {
+    const startDay = dayjs(start);
+    const endDay = dayjs(end);
+
+    return allRefuels.filter((r) => {
+      if (!r || !r.data) return false;
       const date = dayjs(r.data);
-      return date.isAfter(start) && date.isBefore(end);
+      const notBeforeStart = date.isAfter(startDay) || date.isSame(startDay, "day");
+      const notAfterEnd = date.isBefore(endDay) || date.isSame(endDay, "day");
+      return notBeforeStart && notAfterEnd;
     });
-  }, [refuels, start, end]);
+  }, [allRefuels, start, end]);
 
   // ---------- CUSTO MENSAL ----------
   const monthlyCost = useMemo(() => {
     return monthlyRefuels.reduce((acc, r) => {
       const v = Number(r.valor_total || 0);
-      return acc + v;
+      return acc + (isNaN(v) ? 0 : v);
     }, 0);
   }, [monthlyRefuels]);
 
   // ---------- LITROS NO MÊS ----------
   const monthlyLiters = useMemo(() => {
     return monthlyRefuels.reduce((acc, r) => {
-      return acc + parseFloat(r.litros || "0");
+      const l = parseFloat(r.litros || "0");
+      return acc + (isNaN(l) ? 0 : l);
     }, 0);
   }, [monthlyRefuels]);
 
@@ -327,6 +368,7 @@ export default function FuelManagement() {
      -------------------------- */
   return (
     <div className="space-y-6 mt-6">
+      <Toaster position="top-center" />
       {/* BOTÃO ADD */}
       <div className="flex justify-end">
         <button
@@ -344,7 +386,7 @@ export default function FuelManagement() {
           <FaGasPump size={40} className="text-white opacity-75" />
           <div>
             <p className="text-base text-white/80">Custo Mensal</p>
-            {/* Se quiser, substitua as métricas de exemplo por cálculos reais */}
+            {/* Agora baseado em allRefuels */}
             <h2 className="text-4xl font-bold">
               R$ {monthlyCost.toFixed(2).replace(".", ",")}
             </h2>
@@ -390,22 +432,22 @@ export default function FuelManagement() {
 
         {/* area colapsável de filtros */}
         {showFilters && (
-            <Filters
-              groups={[
-                {
-                  key: "placa",
-                  label: "Placa",
-                  options: getAllPlacas().map((p) => ({ label: p, value: p })),
-                  selected: placaFilter,
-                  onChange: setPlacaFilter,
-                },
-              ]}
-            />
+          <Filters
+            groups={[
+              {
+                key: "placa",
+                label: "Placa",
+                options: getAllPlacas().map((p) => ({ label: p, value: p })),
+                selected: placaFilter,
+                onChange: setPlacaFilter,
+              },
+            ]}
+          />
         )}
 
         {/* TABELA */}
         <section className="bg-gray-800 rounded-xl shadow-lg py-3 md:py-6">
-          {loading ? (
+          {(loading || loadingAllRefuels) ? (
             <div className="flex justify-center py-20">
               <Loader />
             </div>
@@ -525,7 +567,7 @@ export default function FuelManagement() {
                   {refuels.length === 0 && (
                     <tr>
                       <td
-                        colSpan={5}
+                        colSpan={6}
                         className="text-center text-gray-400 py-10"
                       >
                         Nenhum abastecimento encontrado.
