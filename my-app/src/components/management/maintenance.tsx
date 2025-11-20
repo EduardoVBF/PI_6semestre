@@ -15,14 +15,18 @@ import { FaFilter } from "react-icons/fa";
 import Pagination from "../pagination";
 import Filters from "../filters";
 
+const ALL_MAINT_FETCH_LIMIT = 1000; // ajuste conforme necessário
+
 export default function MaintenanceManagement() {
   const { data: session } = useSession();
 
   // lista de placas completa (req separada, sem filtro de placa)
   const [allPlacas, setAllPlacas] = useState<string[]>([]);
   const [maintenances, setMaintenances] = useState<TMaintenance[]>([]);
+  const [allMaintenances, setAllMaintenances] = useState<TMaintenance[]>([]); // <-- conjunto completo para cards
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingAll, setLoadingAll] = useState(false);
   const [placaFilter, setPlacaFilter] = useState<string>("");
 
   const [page, setPage] = useState(1);
@@ -77,7 +81,7 @@ export default function MaintenanceManagement() {
   }, [session, addMaintenanceModal.isOpen, editMaintenanceModal.isOpen]);
 
   /* --------------------------
-        FETCH PRINCIPAL
+        FETCH PRINCIPAL (TABELA, PAGINADO)
   ---------------------------*/
   useEffect(() => {
     const fetchMaintenances = async () => {
@@ -107,8 +111,8 @@ export default function MaintenanceManagement() {
           params,
         });
 
-        setMaintenances(res.data.maintenances);
-        setTotal(res.data.total);
+        setMaintenances(res.data.maintenances || []);
+        setTotal(res.data.total || 0);
       } catch (err) {
         console.error(err);
         toast.error("Erro ao carregar manutenções.");
@@ -121,18 +125,66 @@ export default function MaintenanceManagement() {
   }, [
     session,
     page,
-    status, // 🔥 Necessário para refazer chamada ao trocar o filtro
+    status,
     editMaintenanceModal.isOpen,
     addMaintenanceModal.isOpen,
     placaFilter,
   ]);
 
   /* --------------------------
-        Estatísticas
+        FETCH "COMPLETO" (PARA CARDS) - PAGINAÇÃO AUTOMÁTICA
   ---------------------------*/
-  const totalMaintenance = maintenances.length;
+  useEffect(() => {
+    const fetchAllMaintenances = async () => {
+      if (!session?.accessToken) return;
+      setLoadingAll(true);
 
-  const totalCompleted = maintenances.filter((m) =>
+      try {
+        let all: TMaintenance[] = [];
+        let skip = 0;
+        const limit = ALL_MAINT_FETCH_LIMIT;
+
+        while (true) {
+          const res = await api.get<TGetAllMaintenances>(
+            "/api/v1/maintenances/",
+            {
+              headers: { Authorization: `Bearer ${session.accessToken}` },
+              params: { skip, limit },
+            }
+          );
+
+          let items: TMaintenance[] = [];
+          if (Array.isArray(res.data)) {
+            items = res.data as TMaintenance[];
+          } else {
+            items = (res.data as TGetAllMaintenances).maintenances ?? [];
+          }
+          if (!items || items.length === 0) break;
+
+          all = all.concat(items);
+
+          if (items.length < limit) break;
+          skip += limit;
+        }
+
+        setAllMaintenances(all);
+      } catch (err) {
+        console.error("Erro ao carregar todas as manutenções:", err);
+        // não toast para não poluir UI; você pode ativar se preferir
+      } finally {
+        setLoadingAll(false);
+      }
+    };
+
+    fetchAllMaintenances();
+  }, [session, addMaintenanceModal.isOpen, editMaintenanceModal.isOpen]);
+
+  /* --------------------------
+        Estatísticas - AGORA baseadas em allMaintenances (conjunto completo)
+  ---------------------------*/
+  const totalMaintenance = allMaintenances.length;
+
+  const totalCompleted = allMaintenances.filter((m) =>
     [
       m.oleo,
       m.filtro_oleo,
@@ -142,7 +194,7 @@ export default function MaintenanceManagement() {
     ].some((v) => v)
   ).length;
 
-  const fullMaintenance = maintenances.filter((m) =>
+  const fullMaintenance = allMaintenances.filter((m) =>
     [
       m.oleo,
       m.filtro_oleo,
@@ -199,7 +251,9 @@ export default function MaintenanceManagement() {
           <FaWrench size={40} className="text-white opacity-75" />
           <div>
             <p className="text-base text-white/80">Total de Registros</p>
-            <h2 className="text-4xl font-bold">{totalMaintenance}</h2>
+            <h2 className="text-4xl font-bold">
+              {loadingAll ? "..." : totalMaintenance}
+            </h2>
           </div>
         </div>
 
@@ -207,7 +261,9 @@ export default function MaintenanceManagement() {
           <FaWrench size={40} className="text-white opacity-75" />
           <div>
             <p className="text-base text-white/80">Manutenções Realizadas</p>
-            <h2 className="text-4xl font-bold">{totalCompleted}</h2>
+            <h2 className="text-4xl font-bold">
+              {loadingAll ? "..." : totalCompleted}
+            </h2>
           </div>
         </div>
 
@@ -215,7 +271,9 @@ export default function MaintenanceManagement() {
           <FaWrench size={40} className="text-white opacity-75" />
           <div>
             <p className="text-base text-white/80">Revisões Completas</p>
-            <h2 className="text-4xl font-bold">{fullMaintenance}</h2>
+            <h2 className="text-4xl font-bold">
+              {loadingAll ? "..." : fullMaintenance}
+            </h2>
           </div>
         </div>
       </section>
@@ -264,7 +322,7 @@ export default function MaintenanceManagement() {
           />
         )}
 
-        {loading ? (
+        {(loading || loadingAll) ? (
           <div className="flex justify-center py-20">
             <Loader />
           </div>
@@ -355,9 +413,7 @@ export default function MaintenanceManagement() {
                           m.status
                         )}`}
                       >
-                        {m.status === "em_andamento"
-                          ? "Em andamento"
-                          : m.status}
+                        {m.status === "em_andamento" ? "Em andamento" : m.status}
                       </span>
                     </td>
 
