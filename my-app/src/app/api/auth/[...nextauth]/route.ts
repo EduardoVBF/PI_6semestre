@@ -13,7 +13,8 @@ const handler = NextAuth({
         console.log("🔑 Authorize called with credentials:", credentials);
         try {
           const res = await fetch(
-            "http://frotinix.eastus2.cloudapp.azure.com/api/v1/auth/login",
+            // "http://frotinix.eastus2.cloudapp.azure.com/api/v1/auth/login",
+            "https://frotinix.duckdns.org/api/v1/auth/login",
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
