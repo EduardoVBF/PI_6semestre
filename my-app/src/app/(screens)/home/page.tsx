@@ -236,8 +236,8 @@ export default function Home() {
         </div>
 
         {/* --- Seção de Alertas Colapsável --- */}
-        {filteredData.alertas.length > 0 && (
-          <PendingAlerts filteredData={filteredData} />
+        {alerts && alerts.length > 0 && (
+          <PendingAlerts filteredData={{ alertas: alerts  }} />
         )}
 
         <div className="flex justify-start gap-2">

@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaGasPump, FaPlus, FaPencilAlt, FaFilter } from "react-icons/fa";
+import { FaExclamationTriangle } from "react-icons/fa";
 import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import { TUserData, TUsersResponse } from "@/types/TUser";
@@ -16,6 +17,8 @@ import dayjs from "dayjs";
 import Pagination from "../pagination";
 import SearchBar from "../searchBar";
 import Filters from "../filters";
+import { useAlerts } from "@/utils/hooks/useFetchAlerts";
+import { TAlert } from "@/types/TAlerts";
 
 /**
  * FuelManagement.tsx
@@ -70,6 +73,9 @@ export default function FuelManagement() {
     onOpen: () => void;
     isOpen: boolean;
   };
+
+  // alerts globais
+  const { data: alerts } = useAlerts();
 
   /* --------------------------
      FETCH PRINCIPAL: refuels
@@ -431,73 +437,90 @@ export default function FuelManagement() {
 
                 <tbody className="bg-gray-800 divide-y divide-gray-700">
                   {refuels
-                    .sort((a, b) => (a.data < b.data ? -1 : 1))
-                    .map((r) => (
-                      <tr key={String(r.id)} className="text-sm">
-                        <td className="p-3 text-gray-300">
-                          <div className="font-semibold">
-                            {dayjs(`${r.data} ${r.hora}`).format(
-                              "DD/MM/YYYY HH:mm"
-                            )}
-                          </div>
-                          <div>{r.km.toLocaleString("pt-BR")} km</div>
-                        </td>
+                    .sort((a, b) => (a.data > b.data ? -1 : 1))
+                    .map((r) => {
+                      const hasAlert = alerts?.some(
+                        (a: TAlert) => a.id_abastecimento === r.id
+                      );
 
-                        <td className="p-3 text-gray-300">
-                          <div className="font-bold">
-                            R${" "}
-                            {r.valor_total
-                              ? Number(r.valor_total).toFixed(2)
-                              : "—"}
-                          </div>
-                          <div className="text-gray-400">
-                            {parseFloat(r.litros).toFixed(2)} L × R${" "}
-                            {parseFloat(r.valor_litro).toFixed(2)}
-                          </div>
-                        </td>
-
-                        <td className="p-3 text-gray-300 capitalize">
-                          <div className="font-semibold">{r.posto}</div>
-                          <div className="text-gray-400">
-                            {r.tipo_combustivel}
-                          </div>
-                        </td>
-
-                        <td className="p-3 text-gray-300">
-                          <div className="flex items-center gap-1">
-                            <div className="font-semibold">{r.placa}</div>
-                            <div className="text-gray-400">
-                              {getVehicleInfosByPlate(r.placa)}
+                      return (
+                        <tr
+                          key={String(r.id)}
+                          className={`text-sm ${hasAlert ? "bg-yellow-800/50" : ""}`}
+                        >
+                          <td className="p-3 text-gray-300">
+                            <div className="flex items-center gap-2">
+                              {hasAlert && (
+                                <FaExclamationTriangle
+                                  size={18}
+                                  className="text-yellow-400"
+                                />
+                              )}
+                              <div className="font-semibold">
+                                {dayjs(`${r.data} ${r.hora}`).format(
+                                  "DD/MM/YYYY HH:mm"
+                                )}
+                              </div>
                             </div>
-                          </div>
+                            <div>{r.km.toLocaleString("pt-BR")} km</div>
+                          </td>
 
-                          <div className="mt-1 text-sm">
-                            {getUserInfosById(r.id_usuario)}
-                          </div>
-                        </td>
+                          <td className="p-3 text-gray-300">
+                            <div className="font-bold">
+                              R${" "}
+                              {r.valor_total
+                                ? Number(r.valor_total).toFixed(2)
+                                : "—"}
+                            </div>
+                            <div className="text-gray-400">
+                              {parseFloat(r.litros).toFixed(2)} L × R${" "}
+                              {parseFloat(r.valor_litro).toFixed(2)}
+                            </div>
+                          </td>
 
-                        <td className="p-3 text-gray-300">
-                          <p
-                            className={`${
-                              r.media
-                                ? "bg-primary-purple text-white rounded-full px-2 py-1 w-fit"
-                                : ""
-                            } font-semibold text-sm`}
-                          >
-                            {r.media ? `${r.media} km/L` : "—"}
-                          </p>
-                        </td>
+                          <td className="p-3 text-gray-300 capitalize">
+                            <div className="font-semibold">{r.posto}</div>
+                            <div className="text-gray-400">
+                              {r.tipo_combustivel}
+                            </div>
+                          </td>
 
-                        <td className="p-3 text-gray-300">
-                          <button
-                            onClick={() => editFuelSupplyModal.onOpen(r)}
-                            className="p-2 rounded-lg hover:bg-gray-700"
-                          >
-                            <FaPencilAlt size={16} className="text-gray-300" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="p-3 text-gray-300">
+                            <div className="flex items-center gap-1">
+                              <div className="font-semibold">{r.placa}</div>
+                              <div className="text-gray-400">
+                                {getVehicleInfosByPlate(r.placa)}
+                              </div>
+                            </div>
+
+                            <div className="mt-1 text-sm">
+                              {getUserInfosById(r.id_usuario)}
+                            </div>
+                          </td>
+
+                          <td className="p-3 text-gray-300">
+                            <p
+                              className={`${
+                                r.media
+                                  ? "bg-primary-purple text-white rounded-full px-2 py-1 w-fit"
+                                  : ""
+                              } font-semibold text-sm`}
+                            >
+                              {r.media ? `${r.media} km/L` : "—"}
+                            </p>
+                          </td>
+
+                          <td className="p-3 text-gray-300">
+                            <button
+                              onClick={() => editFuelSupplyModal.onOpen(r)}
+                              className="p-2 rounded-lg hover:bg-gray-700"
+                            >
+                              <FaPencilAlt size={16} className="text-gray-300" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
 
                   {refuels.length === 0 && (
                     <tr>

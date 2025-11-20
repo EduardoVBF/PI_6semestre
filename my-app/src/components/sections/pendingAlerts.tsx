@@ -2,22 +2,13 @@ import { FaExclamationTriangle, FaChevronDown } from "react-icons/fa";
 import { IoCloseCircle } from "react-icons/io5";
 import React, { useState } from "react";
 import Link from "next/link";
+import { TAlert } from "@/types/TAlerts";
 
-interface Alert {
-  id: number;
-  user: string;
-  placa: string;
-  veiculo: string;
-  message: string;
-  status?: "pendente";
-}
-
-interface FilteredData {
-  alertas: Alert[];
-}
-
-const PendingAlerts: React.FC<{ filteredData: FilteredData }> = ({ filteredData }) => {
+const PendingAlerts: React.FC<{ filteredData: { alertas: TAlert[] } }> = ({ filteredData }) => {
   const [showAlerts, setShowAlerts] = useState(false);
+
+  // apenas os 3 primeiros alertas para exibição
+  const visibleAlerts = filteredData.alertas.slice(0, 3);
 
   return (
     <div className="w-full flex justify-start">
@@ -38,8 +29,7 @@ const PendingAlerts: React.FC<{ filteredData: FilteredData }> = ({ filteredData 
                 className="text-yellow-400 animate-pulse"
               />
               <h3 className="text-lg font-bold text-yellow-300">
-                Alertas {showAlerts ? "Pendentes" : ""} (
-                {filteredData.alertas.length})
+                Alertas {showAlerts ? "Pendentes" : ""} ({filteredData.alertas.length})
               </h3>
             </div>
             {showAlerts ? (
@@ -59,7 +49,7 @@ const PendingAlerts: React.FC<{ filteredData: FilteredData }> = ({ filteredData 
           {showAlerts && (
             <div className="animate-fadeIn">
               <ul className="divide-y divide-yellow-700 mt-3">
-                {filteredData.alertas.map((alert, index) => (
+                {visibleAlerts.map((alert, index) => (
                   <Link
                     href="/management#alerts"
                     key={alert.id}
@@ -69,21 +59,24 @@ const PendingAlerts: React.FC<{ filteredData: FilteredData }> = ({ filteredData 
                       key={index}
                       className="py-2 text-sm flex flex-wrap items-center gap-2"
                     >
-                      <span className="font-semibold text-yellow-200">
+                      {/* <span className="font-semibold text-yellow-200">
                         {alert.user}
-                      </span>
-                      <span className="text-yellow-500">|</span>
+                      </span> */}
+                      {/* <span className="text-yellow-500">|</span> */}
                       <span className="font-semibold">{alert.placa}</span>
                       <span className="text-yellow-500">|</span>
-                      <span className="font-semibold">{alert.veiculo}</span>
-                      <span className="text-yellow-500">-</span>
+                      {/* <span className="font-semibold">{alert.veiculo}</span>
+                      <span className="text-yellow-500">-</span> */}
                       <span>{alert.message}</span>
                     </li>
                   </Link>
                 ))}
               </ul>
               {/* Rodapé */}
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex justify-between items-center">
+                <span className="text-yellow-400 text-sm">
+                  Mostrando {visibleAlerts.length} de {filteredData.alertas.length}
+                </span>
                 <Link
                   href="/management#alerts"
                   className="text-yellow-300 hover:text-yellow-100 text-sm font-medium underline underline-offset-4 transition cursor-pointer"

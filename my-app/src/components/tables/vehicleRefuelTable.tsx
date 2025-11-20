@@ -4,7 +4,7 @@ import { FaPlus, FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import { FaExclamationTriangle, FaPencilAlt } from "react-icons/fa";
 import { TRefuel, TGetAllRefuels } from "@/types/TFuel";
 import { IoSpeedometerOutline } from "react-icons/io5";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { TGetVehicle } from "@/types/TVehicle";
 import { useSession } from "next-auth/react";
 import { TUserData } from "@/types/TUser";
@@ -13,6 +13,8 @@ import Pagination from "../pagination";
 import Loader from "../loader";
 import api from "@/utils/api";
 import dayjs from "dayjs";
+import { useVehicleAlerts } from "@/utils/hooks/useFetchVehiclesAlerts";
+import { TAlert } from "@/types/TAlerts";
 
 export const VehicleRefuelTable: React.FC<{
   vehicleData: TGetVehicle;
@@ -22,11 +24,12 @@ export const VehicleRefuelTable: React.FC<{
   const [loading, setLoading] = useState<boolean>(false);
   const [fueltotal, setFuelTotal] = useState<number>(0);
   const [fuelpage, setFuelPage] = useState<number>(1);
-  const [fuellimit] = useState<number>(5);
+  const [fuellimit] = useState<number>(10);
   const [page, setPage] = useState(1);
 
   const { data: session } = useSession();
   const params = { id: vehicleData?.id };
+  const { data: alerts } = useVehicleAlerts(vehicleData?.id?.toString());
 
   const addFuelSupplyModal = useAddFuelSupplyModal() as {
     onOpen: () => void;
@@ -51,7 +54,11 @@ export const VehicleRefuelTable: React.FC<{
           limit: number;
           placa: string;
         };
-        const params: UsersQueryParams = { skip, limit: fuellimit, placa: vehicleData?.placa as string };
+        const params: UsersQueryParams = {
+          skip,
+          limit: fuellimit,
+          placa: vehicleData?.placa as string,
+        };
 
         const response = await api.get<TGetAllRefuels>(`/api/v1/refuels`, {
           headers: {
@@ -133,80 +140,86 @@ export const VehicleRefuelTable: React.FC<{
             </tr>
           </thead>
           <tbody className="bg-gray-800 divide-y divide-gray-700">
-            {fuelSupplyData.map((abastecimento) => (
-              <tr
-                key={abastecimento.id}
-                className={`${1 !== 1 ? "bg-yellow-800/50" : ""}`}
-              >
-                <td className="px-3 md:px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
-                  {1 !== 1 && (
-                    <FaExclamationTriangle
-                      size={18}
-                      className="text-yellow-400"
-                    />
-                  )}
-                  <div>
-                    <div className="font-semibold text-white">
-                      {dayjs(abastecimento.data).format("DD/MM/YYYY")}{" "}
-                      {abastecimento.hora}
+            {fuelSupplyData.map((abastecimento) => {
+              const hasAlert = alerts?.some(
+                (alert: TAlert) => alert.id_abastecimento === abastecimento.id
+              );
+
+              return (
+                <tr
+                  key={abastecimento.id}
+                  className={`${hasAlert ? "bg-yellow-800/50" : ""}`}
+                >
+                  <td className="px-3 md:px-6 py-4 text-xs text-gray-400 flex items-center gap-2">
+                    {hasAlert && (
+                      <FaExclamationTriangle
+                        size={18}
+                        className="text-yellow-400"
+                      />
+                    )}
+                    <div>
+                      <div className="font-semibold text-white">
+                        {dayjs(abastecimento.data).format("DD/MM/YYYY")}{" "}
+                        {abastecimento.hora}
+                      </div>
+                      <div>{abastecimento.km.toLocaleString()} km</div>
                     </div>
-                    <div>{abastecimento.km.toLocaleString()} km</div>
-                  </div>
-                </td>
-                <td className="px-3 md:px-6 py-4 text-xs">
-                  <div className="font-bold text-white">
-                    R$ {abastecimento.valor_total?.replace(".", ",")}
-                  </div>
-                  <div className="text-gray-400">
-                    {abastecimento.litros.replace(".", ",")} L × R$
-                    {abastecimento.valor_litro.replace(".", ",")}
-                  </div>
-                </td>
-                <td className="px-3 md:px-6 py-4 text-xs text-gray-400 capitalize">
-                  <div className="font-semibold text-white">
-                    {abastecimento.posto}
-                  </div>
-                  <div>{abastecimento.tipo_combustivel}</div>
-                </td>
-                <td className="px-3 md:px-6 py-4 text-xs text-gray-400">
-                  <div className="font-semibold text-white">
-                    {abastecimento.placa}
-                  </div>
-                  <p className="capitalize">
-                    {vehicleUserData?.name} {vehicleUserData?.lastName}
-                  </p>
-                </td>
-                <td className="px-3 md:px-6 py-4 text-xs font-medium">
-                  {abastecimento.media ? (
-                    <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white truncate">
-                      {abastecimento.media} km/L
-                    </span>
-                  ) : (
-                    <span className="text-gray-500 italic">—</span>
-                  )}
-                </td>
-                <td className="px-3 md:px-6 py-4 text-xs">
-                  {abastecimento.tanque_cheio ? (
-                    <FaCircleCheck className="text-green-500" size={18} />
-                  ) : (
-                    <FaCircleXmark className="text-red-500" size={18} />
-                  )}
-                </td>
-                <td className="px-3 md:px-6 py-4 text-xs">
-                  <button
-                    className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                    onClick={() =>
-                      editFuelSupplyModal.onOpen(abastecimento as TRefuel)
-                    }
-                  >
-                    <FaPencilAlt
-                      className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
-                      size={16}
-                    />
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-3 md:px-6 py-4 text-xs">
+                    <div className="font-bold text-white">
+                      R$ {abastecimento.valor_total?.replace(".", ",")}
+                    </div>
+                    <div className="text-gray-400">
+                      {abastecimento.litros.replace(".", ",")} L × R$
+                      {abastecimento.valor_litro.replace(".", ",")}
+                    </div>
+                  </td>
+                  <td className="px-3 md:px-6 py-4 text-xs text-gray-400 capitalize">
+                    <div className="font-semibold text-white">
+                      {abastecimento.posto}
+                    </div>
+                    <div>{abastecimento.tipo_combustivel}</div>
+                  </td>
+                  <td className="px-3 md:px-6 py-4 text-xs text-gray-400">
+                    <div className="font-semibold text-white">
+                      {abastecimento.placa}
+                    </div>
+                    <p className="capitalize">
+                      {vehicleUserData?.name} {vehicleUserData?.lastName}
+                    </p>
+                  </td>
+                  <td className="px-3 md:px-6 py-4 text-xs font-medium">
+                    {abastecimento.media ? (
+                      <span className="px-3 py-1 rounded-full bg-primary-purple bg-opacity-20 text-white truncate">
+                        {abastecimento.media} km/L
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 italic">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 md:px-6 py-4 text-xs">
+                    {abastecimento.tanque_cheio ? (
+                      <FaCircleCheck className="text-green-500" size={18} />
+                    ) : (
+                      <FaCircleXmark className="text-red-500" size={18} />
+                    )}
+                  </td>
+                  <td className="px-3 md:px-6 py-4 text-xs">
+                    <button
+                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                      onClick={() =>
+                        editFuelSupplyModal.onOpen(abastecimento as TRefuel)
+                      }
+                    >
+                      <FaPencilAlt
+                        className="text-gray-300 hover:text-primary-purple trasition-colors duration-200"
+                        size={16}
+                      />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         <Pagination

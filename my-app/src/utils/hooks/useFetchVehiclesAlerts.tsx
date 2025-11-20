@@ -7,7 +7,7 @@ export function useVehicleAlerts(vehicleId: string | undefined) {
   return useQuery<TAlert[]>({
     queryKey: ["alerts", vehicleId],
     queryFn: async () => {
-      const { data } = await api.get(`/api/v1/alerts/v1/alerts/`, {
+      const { data } = await api.get(`/api/v1/alerts/`, {
         params: { vehicleId },
       });
       return data;

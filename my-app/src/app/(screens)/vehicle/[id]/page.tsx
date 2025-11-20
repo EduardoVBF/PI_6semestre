@@ -146,8 +146,8 @@ export default function VehicleDetails() {
         />
 
         {/* Seção de Alertas Colapsável */}
-        {alertsMock.length > 0 && (
-          <PendingAlerts filteredData={{ alertas: mockAlerts }} />
+        {alerts && alerts?.length > 0 && (
+          <PendingAlerts filteredData={{ alertas: alerts  }} />
         )}
 
         {/* Seção de Dados do Veículo */}

@@ -1,79 +1,79 @@
 "use client";
-import { FaExclamationTriangle, FaPencilAlt, FaCheck } from "react-icons/fa";
+import {
+  FaExclamationTriangle,
+  FaPencilAlt,
+  FaCheck,
+  FaFilter,
+} from "react-icons/fa";
 import { useAlerts } from "@/utils/hooks/useFetchAlerts";
+import { TGetVehicle } from "@/types/TVehicle";
+import { useSession } from "next-auth/react";
+import { TUserData } from "@/types/TUser";
+import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-hot-toast";
+import api from "@/utils/api";
 import Link from "next/link";
-import React from "react";
+import Filters from "../filters"; // ajuste o caminho conforme necessário
 
 export default function AlertsManagement() {
-  interface Alert {
-    id: number;
-    usuario: string;
-    placa: string;
-    veiculo: string;
-    mensagem: string;
-    status: "concluido" | "aberto" | "cancelado";
-  }
-
-  const mockAlerts: Alert[] = [
-    {
-      id: 1,
-      usuario: "Eduardo Freitas",
-      placa: "BQI-0502",
-      veiculo: "Fiat Strada",
-      mensagem: "Consumo maior que o normal no último abastecimento.",
-      status: "aberto",
-    },
-    {
-      id: 2,
-      usuario: "Ana Souza",
-      placa: "BSR-9401",
-      veiculo: "Volkswagen Gol",
-      mensagem: "Abastecimento suspeito detectado.",
-      status: "aberto",
-    },
-    {
-      id: 3,
-      usuario: "Carlos Lima",
-      placa: "QWE-1287",
-      veiculo: "Chevrolet Onix",
-      mensagem: "Manutenção preventiva recomendada em breve.",
-      status: "concluido",
-    },
-    {
-      id: 4,
-      usuario: "Fernanda Alves",
-      placa: "XYZ-4521",
-      veiculo: "Toyota Corolla",
-      mensagem: "Última média de consumo abaixo do esperado.",
-      status: "concluido",
-    },
-    {
-      id: 5,
-      usuario: "Marcos Pereira",
-      placa: "JKT-7812",
-      veiculo: "Renault Duster",
-      mensagem: "Sensor de combustível apresentou leitura inconsistente.",
-      status: "cancelado",
-    },
-  ];
-
-  //   essa parte feita por erro de hidratação, talvez quando integrar a api nao vai precisar
   const [count, setCount] = React.useState<number | null>(null);
   const [monthCount, setMonthCount] = React.useState<number | null>(null);
   const [todayCount, setTodayCount] = React.useState<number | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [vehicleData, setVehicleData] = React.useState<TGetVehicle | null>(
+    null
+  );
+  const [userData, setUserData] = React.useState<TUserData | null>(null);
 
-  const { data: alerts, isLoading } = useAlerts();
+  // filtros colapsáveis
+  const [showFilters, setShowFilters] = useState(false);
+  const [placaFilter, setPlacaFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [severityFilter, setSeverityFilter] = useState<string>("");
+
+  const { data: alerts, isLoading, refetch } = useAlerts();
+  const { data: session } = useSession();
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "aberto":
-        return "bg-yellow-700 text-white";
-      case "concluido":
-        return "bg-green-700 text-white";
-      case "cancelado":
-        return "bg-red-700 text-white";
+      case "MEDIUM":
+        return {
+          style: "bg-yellow-700 text-white",
+          label: "Médio",
+        };
+      case "HIGH":
+        return {
+          style: "bg-green-700 text-white",
+          label: "Alto",
+        };
+      case "LOW":
+        return {
+          style: "bg-red-700 text-white",
+          label: "Baixo",
+        };
       default:
-        return "bg-gray-700 text-white";
+        return {
+          style: "bg-gray-700 text-white",
+          label: "Desconhecido",
+        };
+    }
+  };
+
+  const resolveAlert = async (alertId: string) => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      await api.patch(`/api/v1/alerts/${alertId}/resolve`, {
+        resolved: true,
+      });
+      toast.success("Alerta resolvido com sucesso!");
+      refetch();
+    } catch (error) {
+      console.error("Erro ao resolver o alerta:", error);
+      toast.error("Erro ao resolver o alerta. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,7 +82,39 @@ export default function AlertsManagement() {
     setMonthCount(Math.floor(Math.random() * 10));
     setTodayCount(Math.floor(Math.random() * 5));
   }, []);
-  console.log("Alerts data:", alerts);
+
+  // opções únicas de placa (a partir dos alerts)
+  const placaOptions = useMemo(() => {
+    if (!alerts) return [];
+    return Array.from(
+      new Set(
+        alerts
+          .map((a) => (a.placa ? a.placa.toUpperCase() : ""))
+          .filter(Boolean)
+      )
+    );
+  }, [alerts]);
+
+  // opções únicas de gravidade (a partir dos alerts)
+  const severityOptions = useMemo(() => {
+    if (!alerts) return [];
+    return Array.from(new Set(alerts.map((a) => a.severity).filter(Boolean)));
+  }, [alerts]);
+
+  // alerts filtrados por placa / status / gravidade (cliente)
+  const filteredAlerts = useMemo(() => {
+    if (!alerts) return [];
+    return alerts.filter((a) => {
+      if (placaFilter && a.placa?.toUpperCase() !== placaFilter.toUpperCase())
+        return false;
+      if (statusFilter) {
+        if (statusFilter === "resolved" && !a.resolved) return false;
+        if (statusFilter === "pending" && a.resolved) return false;
+      }
+      if (severityFilter && a.severity !== severityFilter) return false;
+      return true;
+    });
+  }, [alerts, placaFilter, statusFilter, severityFilter]);
 
   return (
     <div className="space-y-6 mt-6">
@@ -119,94 +151,170 @@ export default function AlertsManagement() {
       </section>
 
       <div className="bg-gray-800 rounded-xl shadow-lg p-2 md:p-6">
-        <h3 className="text-2xl font-semibold mb-4 text-primary-purple m-2">
-          Alertas Recentes
-        </h3>
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <FaExclamationTriangle size={30} className="text-yellow-400" />
+              <h3 className="text-2xl font-semibold text-primary-purple">
+                Alertas Recentes
+              </h3>
+            </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-600">
-            <thead className="bg-gray-600">
-              <tr>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+            <div className="flex items-center gap-4 mb-4">
+              <div
+                className="flex items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <button className="text-sm">
+                  <FaFilter />
+                </button>
+                <p className="text-sm">
+                  {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="">
+              <Filters
+                groups={[
+                  {
+                    key: "status",
+                    label: "Status",
+                    options: [
+                      { label: "Pendente", value: "pending" },
+                      { label: "Resolvido", value: "resolved" },
+                    ],
+                    selected: statusFilter,
+                    onChange: setStatusFilter,
+                  },
+                  {
+                    key: "gravidade",
+                    label: "Gravidade",
+                    options: severityOptions.map((s) => ({
+                      label: s,
+                      value: s,
+                    })),
+                    selected: severityFilter,
+                    onChange: setSeverityFilter,
+                  },
+                  {
+                    key: "placa",
+                    label: "Placa",
+                    options: placaOptions.map((p) => ({ label: p, value: p })),
+                    selected: placaFilter,
+                    onChange: setPlacaFilter,
+                  },
+                ]}
+              />
+            </div>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-600">
+              <thead className="bg-gray-600">
+                <tr>
+                  {/* <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Usuário
-                </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Placa
-                </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                </th> */}
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Placa
+                  </th>
+                  {/* <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Veículo
-                </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Mensagem
-                </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-
-            <tbody className="bg-gray-800 divide-y divide-gray-600">
-              {mockAlerts.map((alert) => (
-                <tr key={alert.id}>
-                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                    {alert.usuario}
-                  </td>
-
-                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                    <Link
-                      href={`/vehicle/${alert.placa}`}
-                      className="hover:underline hover:text-white"
-                    >
-                      {alert.placa}
-                    </Link>
-                  </td>
-
-                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                    {alert.veiculo}
-                  </td>
-
-                  <td className="px-3 md:px-6 py-4 text-sm text-gray-300 flex items-center gap-2 min-w-[200px]">
-                    {alert.mensagem}
-                  </td>
-
-                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                        alert.status
-                      )}`}
-                    >
-                      {alert.status.charAt(0).toUpperCase() +
-                        alert.status.slice(1)}
-                    </span>
-                  </td>
-
-                  <td className="px-3 md:px-6 py-4 text-sm space-x-2">
-                    <button
-                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                      onClick={() => console.log("Concluir alerta:", alert)}
-                    >
-                      <FaCheck
-                        className="text-gray-300 hover:text-green-500 transition-colors duration-200"
-                        size={16}
-                      />
-                    </button>
-                    <button
-                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                      onClick={() => console.log("Editar alerta:", alert)}
-                    >
-                      <FaPencilAlt
-                        className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
-                        size={16}
-                      />
-                    </button>
-                  </td>
+                </th> */}
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Mensagem
+                  </th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Gravidade
+                  </th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Ações
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              {filteredAlerts && filteredAlerts.length > 0 ? (
+                <tbody className="bg-gray-800 divide-y divide-gray-600">
+                  {filteredAlerts.map((alert) => (
+                    <tr key={alert.id}>
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        <Link
+                          href={`/vehicle/${alert.placa}`}
+                          className="hover:underline hover:text-white"
+                        >
+                          {alert.placa}
+                        </Link>
+                      </td>
+
+                      {/* <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      asdhgasda
+                    </td> */}
+
+                      <td className="px-3 md:px-6 py-4 text-sm text-gray-300 flex items-center gap-2 min-w-[200px]">
+                        {alert.message}
+                      </td>
+
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            getStatusColor(alert.severity).style
+                          }`}
+                        >
+                          {getStatusColor(alert.severity).label}
+                        </span>
+                      </td>
+
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        {alert.resolved ? "Resolvido" : "Pendente"}
+                      </td>
+
+                      <td className="px-3 md:px-6 py-4 text-sm space-x-2">
+                        {!alert.resolved && (
+                          <button
+                            className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                            onClick={() => resolveAlert(alert.id)}
+                          >
+                            <FaCheck
+                              className="text-gray-300 hover:text-green-500 transition-colors duration-200"
+                              size={16}
+                            />
+                          </button>
+                        )}
+                        {/* <button
+                        className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                        onClick={() => console.log("Editar alerta:", alert)}
+                      >
+                        <FaPencilAlt
+                          className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
+                          size={16}
+                        />
+                      </button> */}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              ) : (
+                <tbody>
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-6 py-4 text-center text-gray-400"
+                    >
+                      {isLoading
+                        ? "Carregando alertas..."
+                        : "Nenhum alerta encontrado."}
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@ export function useAlerts() {
   return useQuery<TAlert[]>({
     queryKey: ["alerts"],
     queryFn: async () => {
-      const { data } = await api.get("/api/v1/alerts/v1/alerts/");
+      const { data } = await api.get("/api/v1/alerts/");
       return data;
     },
     staleTime: 20_000,        // evita refetch desnecessário
