@@ -60,7 +60,7 @@ export const VehicleRefuelTable: React.FC<{
           placa: vehicleData?.placa as string,
         };
 
-        const response = await api.get<TGetAllRefuels>(`/api/v1/refuels`, {
+        const response = await api.get<TGetAllRefuels>(`/api/v1/refuels/`, {
           headers: {
             Authorization: `Bearer ${session.accessToken}`,
           },
