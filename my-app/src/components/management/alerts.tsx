@@ -220,7 +220,14 @@ export default function AlertsManagement() {
                     key: "gravidade",
                     label: "Gravidade",
                     options: severityOptions.map((s) => ({
-                      label: s,
+                      label:
+                        s == "HIGH"
+                          ? "Alto"
+                          : s == "MEDIUM"
+                          ? "Médio"
+                          : s == "LOW"
+                          ? "Baixo"
+                          : s,
                       value: s,
                     })),
                     selected: severityFilter,
@@ -335,7 +342,9 @@ export default function AlertsManagement() {
                       colSpan={6}
                       className="px-6 py-4 text-center text-gray-400"
                     >
-                      {isLoading ? "Carregando alertas..." : "Nenhum alerta encontrado."}
+                      {isLoading
+                        ? "Carregando alertas..."
+                        : "Nenhum alerta encontrado."}
                     </td>
                   </tr>
                 </tbody>

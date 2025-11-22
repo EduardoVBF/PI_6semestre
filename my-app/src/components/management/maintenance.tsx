@@ -39,7 +39,12 @@ export default function MaintenanceManagement() {
   const [status, setStatus] = useState("");
 
   const statusOptions = useMemo(
-    () => ["pendente", "em_andamento", "concluida", "cancelada"],
+    () => [
+      { label: "Pendente", value: "pendente" },
+      { label: "Em Andamento", value: "em_andamento" },
+      { label: "Concluída", value: "concluida" },
+      { label: "Cancelada", value: "cancelada" },
+    ],
     []
   );
 
@@ -307,7 +312,7 @@ export default function MaintenanceManagement() {
               {
                 key: "status",
                 label: "Status",
-                options: statusOptions.map((s) => ({ label: s, value: s })),
+                options: statusOptions.map((s) => ({ label: s.label, value: s.value })),
                 selected: status,
                 onChange: setStatus,
               },
