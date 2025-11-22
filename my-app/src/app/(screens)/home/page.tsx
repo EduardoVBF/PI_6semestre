@@ -135,13 +135,19 @@ export default function Home() {
 
         setDashboard(normalized);
       } catch (err: unknown) {
-        if (
-          typeof err === "object" &&
-          err !== null &&
-          "name" in err &&
-          (err as { name?: unknown }).name === "AbortError"
-        ) {
-          return;
+        // Ignore AbortController / Axios cancel errors which can appear as:
+        // - name === 'AbortError' (fetch)
+        // - name === 'CanceledError' (axios)
+        // - code === 'ERR_CANCELED' (axios)
+        if (typeof err === "object" && err !== null) {
+          const e = err as { name?: string; code?: string };
+          if (
+            e.name === "AbortError" ||
+            e.name === "CanceledError" ||
+            e.code === "ERR_CANCELED"
+          ) {
+            return;
+          }
         }
 
         console.error("Erro fetch dashboard:", err);
@@ -165,6 +171,8 @@ export default function Home() {
         const msg = getErrorMessage(err);
         setError(msg);
       } finally {
+        // If this call was aborted, avoid updating state (prevents updates after unmount)
+        if (signal && signal.aborted) return;
         setLoading(false);
       }
     },
