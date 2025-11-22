@@ -75,7 +75,7 @@ export default function EditUserModal({
         delete payload.password;
       }
 
-      await api.patch(`/api/v1/users/${userId}/`, payload, {
+      await api.patch(`/api/v1/users/${userId}`, payload, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
       });
 
