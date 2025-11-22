@@ -78,11 +78,32 @@ export default function AlertsManagement() {
     }
   };
 
-  React.useEffect(() => {
-    setCount(Math.floor(Math.random() * 20));
-    setMonthCount(Math.floor(Math.random() * 10));
-    setTodayCount(Math.floor(Math.random() * 5));
-  }, []);
+  // --- UPDATED: calcular counts reais a partir de alerts usando dayjs ---
+  useEffect(() => {
+    if (!alerts) {
+      setCount(null);
+      setMonthCount(null);
+      setTodayCount(null);
+      return;
+    }
+
+    const now = dayjs();
+
+    const openAlerts = alerts.filter((a) => !a.resolved).length;
+
+    const monthAlerts = alerts.filter((a) =>
+      dayjs(a.created_at).isSame(now, "month")
+    ).length;
+
+    const todayAlerts = alerts.filter((a) =>
+      dayjs(a.created_at).isSame(now, "day")
+    ).length;
+
+    setCount(openAlerts);
+    setMonthCount(monthAlerts);
+    setTodayCount(todayAlerts);
+  }, [alerts]);
+  // ---------------------------------------------------------------------
 
   // opções únicas de placa (a partir dos alerts)
   const placaOptions = useMemo(() => {
@@ -127,7 +148,6 @@ export default function AlertsManagement() {
           <div>
             <p className="text-base text-white/80">Alertas em aberto</p>
             <h2 className="text-4xl font-bold">
-              {/* {(Math.random() * 100).toFixed(0)} */}
               {count !== null ? count : "—"}
             </h2>
           </div>
@@ -217,19 +237,12 @@ export default function AlertsManagement() {
             <table className="min-w-full divide-y divide-gray-600">
               <thead className="bg-gray-600">
                 <tr>
-                  {/* <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Usuário
-                </th> */}
-
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Data
                   </th>
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Placa
                   </th>
-                  {/* <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Veículo
-                </th> */}
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Mensagem
                   </th>
@@ -264,10 +277,6 @@ export default function AlertsManagement() {
                         </Link>
                       </td>
 
-                      {/* <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      asdhgasda
-                    </td> */}
-
                       <td className="px-3 md:px-6 py-4 text-sm text-gray-300 flex items-center gap-2 min-w-[200px]">
                         {alert.message}
                       </td>
@@ -298,15 +307,6 @@ export default function AlertsManagement() {
                             />
                           </button>
                         )}
-                        {/* <button
-                        className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                        onClick={() => console.log("Editar alerta:", alert)}
-                      >
-                        <FaPencilAlt
-                          className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
-                          size={16}
-                        />
-                      </button> */}
                       </td>
                     </tr>
                   ))}
@@ -318,9 +318,7 @@ export default function AlertsManagement() {
                       colSpan={6}
                       className="px-6 py-4 text-center text-gray-400"
                     >
-                      {isLoading
-                        ? "Carregando alertas..."
-                        : "Nenhum alerta encontrado."}
+                      {isLoading ? "Carregando alertas..." : "Nenhum alerta encontrado."}
                     </td>
                   </tr>
                 </tbody>
