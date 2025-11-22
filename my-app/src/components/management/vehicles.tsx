@@ -270,6 +270,9 @@ export default function VehiclesManagement() {
                       Motorista
                     </th>
                     <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
+                      KM Atual
+                    </th>
+                    <th className="p-3 text-left text-xs font-medium text-gray-300 uppercase">
                       Ações
                     </th>
                   </tr>
@@ -299,6 +302,10 @@ export default function VehiclesManagement() {
                       </td> */}
                         <td className="p-3 text-gray-300 capitalize">
                           {getUserInfosById(vehicle.id_usuario)}
+                        </td>
+
+                        <td className="p-3 text-gray-300">
+                          {vehicle.km_atual?.toLocaleString("pt-BR") || "—"}
                         </td>
 
                         <td className="p-3">
