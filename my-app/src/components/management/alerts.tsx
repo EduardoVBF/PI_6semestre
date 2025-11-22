@@ -4,6 +4,7 @@ import {
   FaPencilAlt,
   FaCheck,
   FaFilter,
+  FaTimes, // <-- adicionado
 } from "react-icons/fa";
 import { useAlerts } from "@/utils/hooks/useFetchAlerts";
 import { TGetVehicle } from "@/types/TVehicle";
@@ -60,19 +61,23 @@ export default function AlertsManagement() {
     }
   };
 
-  const resolveAlert = async (alertId: string) => {
+  // agora aceita resolved: boolean (true = resolver, false = desresolver)
+  const setAlertResolved = async (alertId: string, resolved: boolean) => {
     if (loading) return;
     setLoading(true);
 
     try {
       await api.patch(`/api/v1/alerts/${alertId}/resolve`, {
-        resolved: true,
+        resolved,
       });
-      toast.success("Alerta resolvido com sucesso!");
+
+      if (resolved) toast.success("Alerta resolvido com sucesso!");
+      else toast.success("Alerta marcado como pendente.");
+
       refetch();
     } catch (error) {
-      console.error("Erro ao resolver o alerta:", error);
-      toast.error("Erro ao resolver o alerta. Tente novamente.");
+      console.error("Erro ao atualizar o alerta:", error);
+      toast.error("Erro ao atualizar o alerta. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -296,13 +301,25 @@ export default function AlertsManagement() {
                       </td>
 
                       <td className="px-3 md:px-6 py-4 text-sm space-x-2">
-                        {!alert.resolved && (
+                        {!alert.resolved ? (
                           <button
+                            title="Marcar como resolvido"
                             className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
-                            onClick={() => resolveAlert(alert.id)}
+                            onClick={() => setAlertResolved(alert.id, true)}
                           >
                             <FaCheck
                               className="text-gray-300 hover:text-green-500 transition-colors duration-200"
+                              size={16}
+                            />
+                          </button>
+                        ) : (
+                          <button
+                            title="Marcar como pendente"
+                            className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                            onClick={() => setAlertResolved(alert.id, false)}
+                          >
+                            <FaTimes
+                              className="text-gray-300 hover:text-red-500 transition-colors duration-200"
                               size={16}
                             />
                           </button>
