@@ -1,14 +1,17 @@
+"use client";
+
 import { useEditMaintenanceModal } from "@/utils/hooks/useEditMaintenanceModal";
 import { useAddMaintenanceModal } from "@/utils/hooks/useAddMaintenanceModal";
 import { TMaintenance, TGetAllMaintenances } from "@/types/TMaintenance";
 import { IoSpeedometerOutline } from "react-icons/io5";
-import React, { useState, useEffect } from "react";
+import { FaPencilAlt, FaFilter } from "react-icons/fa";
+import React, { useState, useEffect, useMemo } from "react";
 import { TGetVehicle } from "@/types/TVehicle";
 import { useSession } from "next-auth/react";
-import { FaPencilAlt } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa6";
 import { toast } from "react-hot-toast";
 import Pagination from "../pagination";
+import Filters from "../filters";
 import Loader from "../loader";
 import api from "@/utils/api";
 
@@ -17,9 +20,10 @@ export const VehicleMaintenanceTable: React.FC<{
 }> = ({ vehicleData }) => {
   const [maintenanceData, setMaintenanceData] = useState<TMaintenance[]>([]);
   const [maintenanceTotal, setMaintenanceTotal] = useState<number>(0);
-  const [maintenancelimit] = useState<number>(5);
+  const [maintenancelimit] = useState<number>(10);
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const { data: session } = useSession();
   const params = { id: vehicleData?.placa };
@@ -72,7 +76,19 @@ export const VehicleMaintenanceTable: React.FC<{
     }
   };
 
-  // Fetch maintenance data pelo id do veículo
+  const [status, setStatus] = useState("");
+
+  const statusOptions = useMemo(
+    () => [
+      { label: "Pendente", value: "pendente" },
+      { label: "Em Andamento", value: "em_andamento" },
+      { label: "Concluída", value: "concluida" },
+      { label: "Cancelada", value: "cancelada" },
+    ],
+    []
+  );
+
+  // Fetch maintenance data pelo id do veículo (com paginação e filtros)
   useEffect(() => {
     const fetchMaintenanceData = async () => {
       if (!params?.id) return;
@@ -80,15 +96,42 @@ export const VehicleMaintenanceTable: React.FC<{
       setLoading(true);
 
       try {
-        const response = await api.get<TGetAllMaintenances>(
-          `/api/v1/maintenances/placa/${params.id}`,
+        const skip = (page - 1) * maintenancelimit;
+
+        type MaintQueryParams = {
+          skip: number;
+          limit: number;
+          placa: string;
+          status?: string;
+        };
+
+        const query: MaintQueryParams = {
+          skip,
+          limit: maintenancelimit,
+          placa: params.id,
+        };
+
+        if (status) query.status = status;
+
+        const response = await api.get<TGetAllMaintenances | TMaintenance[]>(
+          `/api/v1/maintenances/`,
           {
             headers: {
               Authorization: `Bearer ${session.accessToken}`,
             },
+            params: query,
           }
         );
-        setMaintenanceData(response.data);
+
+        // API pode retornar um array ou um objeto com { maintenances, total }
+        if (Array.isArray(response.data)) {
+          setMaintenanceData(response.data as TMaintenance[]);
+          setMaintenanceTotal((response.data as TMaintenance[]).length);
+        } else {
+          const data = response.data as TGetAllMaintenances;
+          setMaintenanceData(data.maintenances || []);
+          setMaintenanceTotal(data.total ?? (data.maintenances || []).length);
+        }
       } catch (error) {
         console.error("Error fetching maintenance data:", error);
         toast.error("Erro ao buscar dados de manutenção.");
@@ -98,16 +141,30 @@ export const VehicleMaintenanceTable: React.FC<{
     };
 
     fetchMaintenanceData();
+    // reset page to 1 whenever filter (status) or vehicle changes
   }, [
     params?.id,
     session?.accessToken,
     editMaintenanceModal.isOpen,
     addMaintenanceModal.isOpen,
+    page,
+    status,
+    maintenancelimit,
   ]);
+
+  useEffect(() => {
+    // when changing vehicle or status, reset to page 1
+    setPage(1);
+  }, [params?.id, status]);
 
   if (loading) {
     return <Loader />;
   }
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(maintenanceTotal / maintenancelimit)
+  );
 
   return (
     <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 mb-8">
@@ -123,14 +180,47 @@ export const VehicleMaintenanceTable: React.FC<{
             </h3>
           </div>
         </div>
-        <button
-          className="ml-4 p-2 rounded-full bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 flex items-center justify-center"
-          title="Adicionar Manutenção"
-          onClick={addMaintenanceModal.onOpen}
-        >
-          <FaPlus size={20} className="text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-4 justify-end">
+            <div
+              className="flex items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <button className="text-sm">
+                <FaFilter />
+              </button>
+              <p className="text-sm">
+                {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+              </p>
+            </div>
+          </div>
+          <button
+            className="ml-4 p-2 rounded-full bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 flex items-center justify-center"
+            title="Adicionar Manutenção"
+            onClick={addMaintenanceModal.onOpen}
+          >
+            <FaPlus size={20} className="text-white" />
+          </button>
+        </div>
       </div>
+
+      {showFilters && (
+        <Filters
+          groups={[
+            {
+              key: "status",
+              label: "Status",
+              options: statusOptions.map((s) => ({
+                label: s.label,
+                value: s.value,
+              })),
+              selected: status,
+              onChange: setStatus,
+            },
+          ]}
+        />
+      )}
+
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-600">
           <thead className="bg-gray-600">
@@ -213,24 +303,37 @@ export const VehicleMaintenanceTable: React.FC<{
                   </span>
                 </td>
                 <td className="px-3 md:px-6 py-4 text-xs">
-                  <button className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+                  <button
+                    className="p-2 rounded-lg hover:bg-gray-700 transition-colors duration-200 cursor-pointer"
+                    onClick={() => editMaintenanceModal.onOpen(maintenance)}
+                  >
                     <FaPencilAlt
                       className="text-gray-300 hover:text-primary-purple transition-colors duration-200"
                       size={16}
-                      onClick={() => editMaintenanceModal.onOpen(maintenance)}
                     />
                   </button>
                 </td>
               </tr>
             ))}
+
+            {maintenanceData.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-center text-gray-400 py-10">
+                  Nenhuma manutenção encontrada.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+
         <Pagination
           page={page}
-          totalPages={Math.ceil(maintenanceTotal / maintenancelimit)}
-          onPageChange={setPage}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p)}
         />
       </div>
     </section>
   );
 };
+
+export default VehicleMaintenanceTable;
