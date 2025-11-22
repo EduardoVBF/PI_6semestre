@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, use } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -9,15 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import {
-  FaTruck,
-  FaWrench,
-  FaDollarSign,
-  FaExclamationTriangle,
-  FaPlus,
-  FaCar,
-  FaFilter,
-} from "react-icons/fa";
+import { FaTruck, FaDollarSign, FaPlus, FaCar, FaFilter } from "react-icons/fa";
 import { IoWaterOutline } from "react-icons/io5";
 import { FaGear } from "react-icons/fa6";
 import Link from "next/link";
@@ -32,14 +24,6 @@ import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import api from "@/utils/api";
 import { TDashboard } from "@/types/TDashboard";
 
-// type MaintenanceItem = {
-//   id: number;
-//   veiculo: string;
-//   kmTroca: number;
-//   kmAtual: number;
-//   kmUltimaTroca: number;
-// };
-
 /* ---------------------- Component ---------------------- */
 export default function Home() {
   const { data: session } = useSession();
@@ -49,7 +33,7 @@ export default function Home() {
   };
   const addFuelSupplyModal = useAddFuelSupplyModal() as { onOpen: () => void };
 
-  const { data: alerts, isLoading: alertsLoading } = useAlerts();
+  const { data: alerts } = useAlerts();
 
   // filtros UI
   const [showFilters, setShowFilters] = useState(false);
@@ -58,20 +42,13 @@ export default function Home() {
   const [dataFinal, setDataFinal] = useState<string | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
 
+  // lista completa de placas (req separada)
+  const [allPlacasList, setAllPlacasList] = useState<string[]>([]);
+
   // dashboard state
   const [dashboard, setDashboard] = useState<TDashboard | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const allVehiclePlacas = dashboard
-    ? dashboard.vehicleConsumptionData.map((v) => v.name)
-    : [];
-
-  const handlePillClick = (placa: string) => {
-    setSelectedPlacas((prev) =>
-      prev.includes(placa) ? prev.filter((p) => p !== placa) : [...prev, placa]
-    );
-  };
 
   // monta query string: placas pode aparecer várias vezes (placas=AAA&placas=BBB)
   const buildQuery = useCallback(() => {
@@ -84,10 +61,41 @@ export default function Home() {
     return params.toString();
   }, [selectedPlacas, dataInicial, dataFinal]);
 
-  // fetch dashboard
+  // pega todas as placas (sem filtro) para popular o filtro de placas
+  useEffect(() => {
+    const fetchAllPlacas = async () => {
+      if (!session?.accessToken) return;
+      try {
+        // Ajuste esse endpoint ao mais apropriado do teu backend (vehicles/refuels/etc).
+        // Aqui busco refuels como exemplo e tento extrair campo de placa.
+        const res = await api.get("/api/v1/vehicles/", {
+          headers: { Authorization: `Bearer ${session.accessToken}` },
+          params: { limit: 1000 },
+        });
+        console.log("Resposta fetchAllPlacas:", res.data);
+
+        const placas: string[] = res.data.vehicles.map(
+          (v: { placa: string }) => v.placa
+        );
+        const uniquePlacas = Array.from(new Set(placas));
+        setAllPlacasList(uniquePlacas);
+      } catch (err) {
+        console.error("Erro ao carregar placas para filtro:", err);
+      }
+    };
+
+    fetchAllPlacas();
+  }, [session]);
+
+  const handlePillClick = (placa: string) => {
+    setSelectedPlacas((prev) =>
+      prev.includes(placa) ? prev.filter((p) => p !== placa) : [...prev, placa]
+    );
+  };
+
+  // fetch dashboard (usa buildQuery para compor a query string corretamente)
   const fetchDashboard = useCallback(
     async (signal?: AbortSignal) => {
-      // checa sessão antes de setar loading
       if (!session) {
         router.push("/login");
         return;
@@ -97,28 +105,16 @@ export default function Home() {
       setError(null);
 
       try {
-        // monta params somente se houver filtro
-        type DashboardParams = {
-          placas?: string[];
-          data_inicial?: string;
-          data_final?: string;
-        };
-        const params: DashboardParams = {};
-        if (selectedPlacas && selectedPlacas.length > 0)
-          params.placas = selectedPlacas;
-        if (dataInicial) params.data_inicial = dataInicial;
-        if (dataFinal) params.data_final = dataFinal;
+        const query = buildQuery();
+        const url = `/api/v1/dashboard/metrics${query ? `?${query}` : ""}`;
 
-        // axios instance 'api' -- passa signal se suportado
-        const response = await api.get("/api/v1/dashboard/metrics", {
+        const response = await api.get(url, {
           headers: {
             Authorization: `Bearer ${
               (session as unknown as { accessToken?: string })?.accessToken ??
               ""
             }`,
           },
-          params: Object.keys(params).length ? params : undefined,
-          // signal funciona em axios recent (se sua versão não suportar, remover ou usar cancelToken)
           signal,
         });
 
@@ -139,14 +135,12 @@ export default function Home() {
 
         setDashboard(normalized);
       } catch (err: unknown) {
-        // detecta AbortError sem usar 'any'
         if (
           typeof err === "object" &&
           err !== null &&
           "name" in err &&
           (err as { name?: unknown }).name === "AbortError"
         ) {
-          // fetch cancelado — ignora
           return;
         }
 
@@ -174,8 +168,7 @@ export default function Home() {
         setLoading(false);
       }
     },
-    // dependências: incluir o que a função usa diretamente
-    [session, selectedPlacas, dataInicial, dataFinal, router]
+    [session, buildQuery, router]
   );
 
   // fetch inicial + refetch quando filtros mudarem
@@ -185,10 +178,7 @@ export default function Home() {
     return () => controller.abort();
   }, [fetchDashboard]);
 
-  const applyFilters = () => {
-    fetchDashboard();
-  };
-
+  // fetch user type (mantive como antes)
   useEffect(() => {
     const userInfo = async () => {
       if (!session?.accessToken) return;
@@ -276,10 +266,10 @@ export default function Home() {
                     Placas
                   </label>
                   <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
-                    {allVehiclePlacas.length === 0 ? (
+                    {allPlacasList.length === 0 ? (
                       <div className="text-sm text-gray-400">Sem placas</div>
                     ) : (
-                      allVehiclePlacas.map((placa) => (
+                      allPlacasList.map((placa) => (
                         <span
                           key={placa}
                           className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors duration-200 ${
@@ -325,12 +315,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-end gap-2">
-                  <button
-                    onClick={applyFilters}
-                    className="bg-primary-purple px-4 py-2 rounded-lg font-semibold"
-                  >
-                    Aplicar Filtros
-                  </button>
+                  {/* removi o botão 'Aplicar Filtros' — filtros aplicam automaticamente */}
                   <button
                     onClick={() => {
                       setSelectedPlacas([]);
@@ -455,7 +440,7 @@ export default function Home() {
               {loading && (
                 <p className="text-sm text-gray-300">Carregando...</p>
               )}
-              {/* {error && <p className="text-sm text-red-400">{error}</p>} */}
+              {error && <p className="text-sm text-red-400">{error}</p>}
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={dashboard?.gastoData ?? []}
@@ -486,97 +471,6 @@ export default function Home() {
               </ResponsiveContainer>
             </div>
           </section>
-
-          {/* Próximas Manutenções (placeholder) */}
-          {/* <section className="bg-gray-700 rounded-xl shadow-lg p-4 lg:p-6 space-y-4">
-          <div className="flex w-full justify-between">
-            <h3 className="text-xl font-semibold mb-4">Próximas Manutenções</h3>
-            <Link
-              href="/management#maintenance"
-              className="text-gray-400 hover:underline hover:text-white"
-            >
-              Ver todas
-            </Link>
-          </div>
-
-          {manutencoes.length === 0 ? (
-            <p className="text-sm text-gray-300">
-              Nenhuma manutenção carregada.
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {manutencoes.map((manutencao) => {
-                const progress =
-                  ((manutencao.kmAtual - manutencao.kmUltimaTroca) /
-                    (manutencao.kmTroca - manutencao.kmUltimaTroca)) *
-                  100;
-                const progressColor =
-                  progress > 90
-                    ? "bg-red-500"
-                    : progress > 70
-                    ? "bg-yellow-500"
-                    : "bg-green-500";
-
-                return (
-                  <li
-                    key={manutencao.id}
-                    className="flex flex-col space-y-2 bg-gray-600 p-3 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <FaWrench size={20} className="text-white/70" />
-                      <div className="flex-grow">
-                        <div className="flex items-center gap-1">
-                          <p className="font-semibold">{manutencao.veiculo}</p>
-                          {progress > 100 && (
-                            <FaExclamationTriangle
-                              size={18}
-                              className="text-yellow-400"
-                            />
-                          )}
-                        </div>
-                        <div className="flex justify-between text-sm text-white/60">
-                          <span>
-                            Última troca:{" "}
-                            {manutencao.kmUltimaTroca.toLocaleString()}
-                          </span>
-                          <span>
-                            KM atual: {manutencao.kmAtual.toLocaleString()}
-                          </span>
-                          <span>
-                            Próxima troca: {manutencao.kmTroca.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {progress < 100 ? (
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-white/60">
-                          Progresso: {progress.toFixed(2)}%
-                        </p>
-                        <p className="text-sm text-white/60">
-                          Próxima troca em{" "}
-                          {manutencao.kmTroca - manutencao.kmAtual} KM
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-red-400 font-bold">
-                        Manutenção Atrasada!
-                      </p>
-                    )}
-                    <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                      <div
-                        className={`h-full ${progressColor} transition-all duration-300`}
-                        style={{
-                          width: `${Math.min(Math.max(progress, 0), 100)}%`,
-                        }}
-                      />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section> */}
         </main>
       )}
       <Footer />
