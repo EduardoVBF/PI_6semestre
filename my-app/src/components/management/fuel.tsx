@@ -19,6 +19,7 @@ import SearchBar from "../searchBar";
 import Filters from "../filters";
 import { useAlerts } from "@/utils/hooks/useFetchAlerts";
 import { TAlert } from "@/types/TAlerts";
+import DateFilters from "../dateFilter";
 
 /**
  * FuelManagement.tsx
@@ -60,6 +61,9 @@ export default function FuelManagement() {
   const [filterFrota, setFilterFrota] = useState<string>("");
   const [filterManutencaoVencida, setFilterManutencaoVencida] =
     useState<string>("");
+
+  const [startDateFilter, setStartDateFilter] = useState<string>("");
+  const [endDateFilter, setEndDateFilter] = useState<string>("");
 
   // armazenamento de users e vehicles (listas completas para lookup)
   const [users, setUsers] = useState<TUserData[]>([]);
@@ -106,6 +110,8 @@ export default function FuelManagement() {
 
         if (search) params.search = search;
         if (placaFilter) params.placa = placaFilter;
+        if (startDateFilter) params.data_inicio = startDateFilter;
+        if (endDateFilter) params.data_fim = endDateFilter;
         // se quiser enviar os outros filtros para a API, descomente e adapte:
         // if (filterTipo) params["tipo"] = filterTipo;
         // if (filterFrota) params["frota"] = filterFrota;
@@ -136,9 +142,16 @@ export default function FuelManagement() {
     filterFrota,
     filterManutencaoVencida,
     placaFilter,
+    startDateFilter,
+    endDateFilter,
     addFuelSupplyModal.isOpen,
     editFuelSupplyModal.isOpen,
   ]);
+
+  // Resetar página quando filtros de data ou placa mudarem
+  useEffect(() => {
+    setPage(1);
+  }, [startDateFilter, endDateFilter, placaFilter]);
 
   /* --------------------------
      FETCH AUX: users (limit 1000)
@@ -182,7 +195,7 @@ export default function FuelManagement() {
 
         const vehiclesList: TGetVehicle[] = Array.isArray(res.data)
           ? res.data
-          : (res.data.vehicles ?? []);
+          : res.data.vehicles ?? [];
 
         setVehicles(vehiclesList);
       } catch (err) {
@@ -209,16 +222,21 @@ export default function FuelManagement() {
         const limit = ALL_REFUELS_FETCH_LIMIT;
 
         while (true) {
+          // inclui filtros de data para que os cards respeitem o DateFilter
           const res = await api.get<TGetAllRefuels>("/api/v1/refuels/", {
             headers: { Authorization: `Bearer ${session.accessToken}` },
-            params: { skip, limit },
+            params: {
+              skip,
+              limit,
+              ...(startDateFilter ? { data_inicio: startDateFilter } : {}),
+              ...(endDateFilter ? { data_fim: endDateFilter } : {}),
+            },
           });
-  
+
           // res.data can be either an array of TRefuel or an object with a `refuels` array.
-          const items: TRefuel[] =
-            Array.isArray(res.data)
-              ? (res.data as unknown as TRefuel[])
-              : ((res.data as TGetAllRefuels).refuels ?? []);
+          const items: TRefuel[] = Array.isArray(res.data)
+            ? (res.data as unknown as TRefuel[])
+            : (res.data as TGetAllRefuels).refuels ?? [];
           if (!items || items.length === 0) break;
 
           all = all.concat(items);
@@ -241,7 +259,13 @@ export default function FuelManagement() {
 
     // Re-fetch quando modais que alteram dados fecharem/abrirem
     fetchAllRefuels();
-  }, [session, addFuelSupplyModal.isOpen, editFuelSupplyModal.isOpen]);
+  }, [
+    session,
+    addFuelSupplyModal.isOpen,
+    editFuelSupplyModal.isOpen,
+    startDateFilter,
+    endDateFilter,
+  ]);
 
   /* --------------------------
      MAPS PARA LOOKUP RÁPIDO
@@ -281,9 +305,12 @@ export default function FuelManagement() {
       const vehicle = vehicleMap.get(p);
       if (!vehicle) return "Não encontrado";
       const parts: string[] = [];
-      if ((vehicle as TGetVehicle).marca) parts.push((vehicle as TGetVehicle).marca);
-      if ((vehicle as TGetVehicle).modelo) parts.push((vehicle as TGetVehicle).modelo);
-      if ((vehicle as TGetVehicle).ano) parts.push(String((vehicle as TGetVehicle).ano));
+      if ((vehicle as TGetVehicle).marca)
+        parts.push((vehicle as TGetVehicle).marca);
+      if ((vehicle as TGetVehicle).modelo)
+        parts.push((vehicle as TGetVehicle).modelo);
+      if ((vehicle as TGetVehicle).ano)
+        parts.push(String((vehicle as TGetVehicle).ano));
       return parts.length > 0 ? parts.join(" ") : "Não encontrado";
     },
     [vehicleMap]
@@ -336,7 +363,8 @@ export default function FuelManagement() {
     return allRefuels.filter((r) => {
       if (!r || !r.data) return false;
       const date = dayjs(r.data);
-      const notBeforeStart = date.isAfter(startDay) || date.isSame(startDay, "day");
+      const notBeforeStart =
+        date.isAfter(startDay) || date.isSame(startDay, "day");
       const notAfterEnd = date.isBefore(endDay) || date.isSame(endDay, "day");
       return notBeforeStart && notAfterEnd;
     });
@@ -425,29 +453,43 @@ export default function FuelManagement() {
               <button className="text-sm">
                 <FaFilter />
               </button>
-              <p className="text-sm">{showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}</p>
+              <p className="text-sm">
+                {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+              </p>
             </div>
           </div>
         </div>
 
         {/* area colapsável de filtros */}
         {showFilters && (
-          <Filters
-            groups={[
-              {
-                key: "placa",
-                label: "Placa",
-                options: getAllPlacas().map((p) => ({ label: p, value: p })),
-                selected: placaFilter,
-                onChange: setPlacaFilter,
-              },
-            ]}
-          />
+          <div>
+            <Filters
+              groups={[
+                {
+                  key: "placa",
+                  label: "Placa",
+                  options: getAllPlacas().map((p) => ({ label: p, value: p })),
+                  selected: placaFilter,
+                  onChange: setPlacaFilter,
+                },
+              ]}
+            />
+            <DateFilters
+              startDate={startDateFilter}
+              endDate={endDateFilter}
+              startLabel="Data Início"
+              endLabel="Data Fim"
+              onChange={({ startDate, endDate }) => {
+                setStartDateFilter(startDate);
+                setEndDateFilter(endDate);
+              }}
+            />
+          </div>
         )}
 
         {/* TABELA */}
         <section className="bg-gray-800 rounded-xl shadow-lg py-3 md:py-6">
-          {(loading || loadingAllRefuels) ? (
+          {loading || loadingAllRefuels ? (
             <div className="flex justify-center py-20">
               <Loader />
             </div>
@@ -488,7 +530,9 @@ export default function FuelManagement() {
                       return (
                         <tr
                           key={String(r.id)}
-                          className={`text-sm ${hasAlert ? "bg-yellow-800/50" : ""}`}
+                          className={`text-sm ${
+                            hasAlert ? "bg-yellow-800/50" : ""
+                          }`}
                         >
                           <td className="p-3 text-gray-300">
                             <div className="flex items-center gap-2">
@@ -557,7 +601,10 @@ export default function FuelManagement() {
                               onClick={() => editFuelSupplyModal.onOpen(r)}
                               className="p-2 rounded-lg hover:bg-gray-700"
                             >
-                              <FaPencilAlt size={16} className="text-gray-300" />
+                              <FaPencilAlt
+                                size={16}
+                                className="text-gray-300"
+                              />
                             </button>
                           </td>
                         </tr>

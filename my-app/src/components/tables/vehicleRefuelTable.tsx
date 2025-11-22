@@ -1,7 +1,7 @@
 import { useEditFuelSupplyModal } from "@/utils/hooks/useEditFuelSupplyModal";
+import { FaExclamationTriangle, FaPencilAlt, FaFilter } from "react-icons/fa";
 import { useAddFuelSupplyModal } from "@/utils/hooks/useAddFuelSupplyModal";
 import { FaPlus, FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
-import { FaExclamationTriangle, FaPencilAlt } from "react-icons/fa";
 import { TRefuel, TGetAllRefuels } from "@/types/TFuel";
 import { IoSpeedometerOutline } from "react-icons/io5";
 import React, { useState, useEffect, useMemo } from "react";
@@ -15,6 +15,8 @@ import api from "@/utils/api";
 import dayjs from "dayjs";
 import { useVehicleAlerts } from "@/utils/hooks/useFetchVehiclesAlerts";
 import { TAlert } from "@/types/TAlerts";
+import Filters from "../filters";
+import DateFilters from "../dateFilter";
 
 export const VehicleRefuelTable: React.FC<{
   vehicleData: TGetVehicle;
@@ -24,13 +26,17 @@ export const VehicleRefuelTable: React.FC<{
   const [fuelSupplyData, setFuelSupplyData] = useState<TRefuel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [fueltotal, setFuelTotal] = useState<number>(0);
-  const [fuelpage, setFuelPage] = useState<number>(1);
+  // const [fuelpage, setFuelPage] = useState<number>(1);
   const [fuellimit] = useState<number>(10);
   const [page, setPage] = useState(1);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const { data: session } = useSession();
   const params = { id: vehicleData?.id };
   const { data: alerts } = useVehicleAlerts(vehicleData?.id?.toString());
+
+  const [startDateFilter, setStartDateFilter] = useState<string>("");
+  const [endDateFilter, setEndDateFilter] = useState<string>("");
 
   const addFuelSupplyModal = useAddFuelSupplyModal() as {
     onOpen: () => void;
@@ -40,6 +46,10 @@ export const VehicleRefuelTable: React.FC<{
     onOpen: (fuelSupplyData: TRefuel) => void;
     isOpen: boolean;
   };
+
+  useEffect(() => {
+    setPage(1);
+  }, [startDateFilter, endDateFilter]);
 
   // Fetch dos abastecimentos do veículo
   useEffect(() => {
@@ -54,11 +64,15 @@ export const VehicleRefuelTable: React.FC<{
           skip: number;
           limit: number;
           placa: string;
+          data_inicio?: string;
+          data_fim?: string;
         };
         const params: UsersQueryParams = {
           skip,
           limit: fuellimit,
           placa: vehicleData?.placa as string,
+          data_inicio: startDateFilter || undefined,
+          data_fim: endDateFilter || undefined,
         };
 
         const response = await api.get<TGetAllRefuels>(`/api/v1/refuels/`, {
@@ -67,9 +81,13 @@ export const VehicleRefuelTable: React.FC<{
           },
           params,
         });
+
         setFuelSupplyData(response.data.refuels);
         setFuelTotal(response.data.total);
-        setFuelPage(response.data.page);
+        // sincroniza a página com a API (se ela retornar a página atual)
+        if (typeof response.data.page === "number") {
+          setPage(response.data.page);
+        }
       } catch (error) {
         console.error("Error fetching fuel supplies data:", error);
         toast.error("Erro ao buscar dados de abastecimentos.");
@@ -87,6 +105,8 @@ export const VehicleRefuelTable: React.FC<{
     page,
     fuellimit,
     vehicleData?.placa,
+    startDateFilter, // <- ADICIONADO
+    endDateFilter, // <- ADICIONADO
   ]);
 
   // compute average from last 10 refuels and notify parent if provided
@@ -116,24 +136,55 @@ export const VehicleRefuelTable: React.FC<{
 
   return (
     <section className="bg-gray-800 rounded-xl shadow-lg p-3 md:p-6 relative">
-      <div className="flex flex-col md:flex-row md:items-center space-x-4 m-2">
-        <h3 className="text-2xl font-semibold text-primary-purple">
-          Histórico de Abastecimentos
-        </h3>
-        <div className="flex space-x-1 items-center">
-          <IoSpeedometerOutline size={25} className="text-gray-400" />
-          <h3 className="text-md font-medium text-gray-400">
-            {vehicleData?.km_atual?.toLocaleString("pt-BR")} km
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col md:flex-row md:items-center space-x-4 m-2">
+          <h3 className="text-2xl font-semibold text-primary-purple">
+            Histórico de Abastecimentos
           </h3>
+          <div className="flex space-x-1 items-center">
+            <IoSpeedometerOutline size={25} className="text-gray-400" />
+            <h3 className="text-md font-medium text-gray-400">
+              {vehicleData?.km_atual?.toLocaleString("pt-BR")} km
+            </h3>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-4 justify-end">
+            <div
+              className="flex items-center gap-2 bg-gray-800 rounded-xl w-fit p-1 cursor-pointer text-gray-400 hover:text-white transition-colors"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <button className="text-sm">
+                <FaFilter />
+              </button>
+              <p className="text-sm">
+                {showFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+              </p>
+            </div>
+          </div>
+          <button
+            className="ml-4 p-2 rounded-full bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 flex items-center justify-center"
+            title="Adicionar Abastecimento  "
+            onClick={addFuelSupplyModal.onOpen}
+          >
+            <FaPlus size={20} className="text-white" />
+          </button>
         </div>
       </div>
-      <button
-        className="absolute top-6 right-6 p-2 rounded-full bg-primary-purple hover:bg-fuchsia-800 transition-colors duration-200 flex items-center justify-center"
-        title="Cadastrar Abastecimento"
-        onClick={addFuelSupplyModal.onOpen}
-      >
-        <FaPlus size={20} className="text-white" />
-      </button>
+
+      {showFilters && (
+        <DateFilters
+          startDate={startDateFilter}
+          endDate={endDateFilter}
+          startLabel="Data Início"
+          endLabel="Data Fim"
+          onChange={({ startDate, endDate }) => {
+            setStartDateFilter(startDate);
+            setEndDateFilter(endDate);
+          }}
+        />
+      )}
+
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-700">
