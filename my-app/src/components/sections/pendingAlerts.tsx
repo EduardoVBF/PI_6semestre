@@ -12,6 +12,10 @@ const PendingAlerts: React.FC<{ filteredData: { alertas: TAlert[] } }> = ({ filt
   // apenas os 3 primeiros alertas para exibição
   const visibleAlerts = notResolvedAlerts.slice(0, 3);
 
+  if (notResolvedAlerts.length === 0) {
+    return null; // Não renderiza nada se não houver alertas pendentes
+  }
+
   return (
     <div className="w-full flex justify-start">
       <section className="w-fit">
