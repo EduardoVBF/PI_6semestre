@@ -61,10 +61,13 @@ export default function MaintenanceManagement() {
     const fetchAllPlacas = async () => {
       if (!session?.accessToken) return;
       try {
-        const res = await api.get<TGetAllMaintenances>("/api/v1/maintenances/", {
-          headers: { Authorization: `Bearer ${session.accessToken}` },
-          params: { limit: 1000 }, // busca ampla, sem placa
-        });
+        const res = await api.get<TGetAllMaintenances>(
+          "/api/v1/maintenances/",
+          {
+            headers: { Authorization: `Bearer ${session.accessToken}` },
+            params: { limit: 1000 }, // busca ampla, sem placa
+          }
+        );
 
         const list = res.data.maintenances || [];
         const placas = list
@@ -106,10 +109,13 @@ export default function MaintenanceManagement() {
 
         if (status) params.status = status;
 
-        const res = await api.get<TGetAllMaintenances>("/api/v1/maintenances/", {
-          headers: { Authorization: `Bearer ${session.accessToken}` },
-          params,
-        });
+        const res = await api.get<TGetAllMaintenances>(
+          "/api/v1/maintenances/",
+          {
+            headers: { Authorization: `Bearer ${session.accessToken}` },
+            params,
+          }
+        );
 
         setMaintenances(res.data.maintenances || []);
         setTotal(res.data.total || 0);
@@ -184,14 +190,8 @@ export default function MaintenanceManagement() {
   ---------------------------*/
   const totalMaintenance = allMaintenances.length;
 
-  const totalCompleted = allMaintenances.filter((m) =>
-    [
-      m.oleo,
-      m.filtro_oleo,
-      m.filtro_combustivel,
-      m.filtro_ar,
-      m.engraxamento,
-    ].some((v) => v)
+  const totalCompleted = allMaintenances.filter(
+    (m) => m.status === "concluida"
   ).length;
 
   const fullMaintenance = allMaintenances.filter((m) =>
@@ -260,7 +260,7 @@ export default function MaintenanceManagement() {
         <div className="bg-fuchsia-800 rounded-xl shadow-lg p-6 flex items-center space-x-4">
           <FaWrench size={40} className="text-white opacity-75" />
           <div>
-            <p className="text-base text-white/80">Manutenções Realizadas</p>
+            <p className="text-base text-white/80">Manutenções Concluídas</p>
             <h2 className="text-4xl font-bold">
               {loadingAll ? "..." : totalCompleted}
             </h2>
@@ -322,7 +322,7 @@ export default function MaintenanceManagement() {
           />
         )}
 
-        {(loading || loadingAll) ? (
+        {loading || loadingAll ? (
           <div className="flex justify-center py-20">
             <Loader />
           </div>
@@ -413,7 +413,9 @@ export default function MaintenanceManagement() {
                           m.status
                         )}`}
                       >
-                        {m.status === "em_andamento" ? "Em andamento" : m.status}
+                        {m.status === "em_andamento"
+                          ? "Em andamento"
+                          : m.status}
                       </span>
                     </td>
 
