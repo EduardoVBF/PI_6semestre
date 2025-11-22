@@ -58,6 +58,7 @@ export default function AddVehicleModal({
 
   useEffect(() => {
     const fetchUsers = async () => {
+      if (!isOpen) return;
       if (!session?.accessToken) return;
 
       try {

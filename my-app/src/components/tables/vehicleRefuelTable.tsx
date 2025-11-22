@@ -19,7 +19,8 @@ import { TAlert } from "@/types/TAlerts";
 export const VehicleRefuelTable: React.FC<{
   vehicleData: TGetVehicle;
   vehicleUserData: TUserData;
-}> = ({ vehicleData, vehicleUserData }) => {
+  onAverageChange?: (avg: number) => void;
+}> = ({ vehicleData, vehicleUserData, onAverageChange }) => {
   const [fuelSupplyData, setFuelSupplyData] = useState<TRefuel[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [fueltotal, setFuelTotal] = useState<number>(0);
@@ -87,6 +88,27 @@ export const VehicleRefuelTable: React.FC<{
     fuellimit,
     vehicleData?.placa,
   ]);
+
+  // compute average from last 10 refuels and notify parent if provided
+  useEffect(() => {
+    if (!fuelSupplyData || fuelSupplyData.length === 0) {
+      onAverageChange?.(0);
+      return;
+    }
+    const recent = fuelSupplyData.slice(-10);
+    const values = recent
+      .map((r) => {
+        const v = Number(r.media);
+        return Number.isFinite(v) && v > 0 ? v : null;
+      })
+      .filter((v) => v !== null) as number[];
+
+    const avg = values.length
+      ? values.reduce((a, b) => a + b, 0) / values.length
+      : 0;
+
+    onAverageChange?.(avg);
+  }, [fuelSupplyData, onAverageChange]);
 
   if (loading) {
     return <Loader />;

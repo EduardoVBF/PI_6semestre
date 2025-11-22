@@ -19,42 +19,14 @@ import Footer from "@/components/footer";
 import Loader from "@/components/loader";
 import api from "@/utils/api";
 
-interface Alert {
-  id: number;
-  user: string;
-  placa: string;
-  veiculo: string;
-  message: string;
-  status?: "pendente";
-}
-
-// Dados simulados para os alertas
-const mockAlerts: Alert[] = [
-  {
-    id: 1,
-    message: "Consumo maior que o normal",
-    placa: "BQI0502",
-    veiculo: "Caminhão IVECO",
-    user: "José Silveira",
-  },
-  {
-    id: 2,
-    message: "Abastecimento suspeito",
-    placa: "BSR9401",
-    veiculo: "Carro FIAT",
-    user: "João Silva",
-  },
-];
-
 export default function VehicleDetails() {
   const [vehicleData, setVehicleData] = useState<TGetVehicle | null>(null);
   const { data: alerts } = useVehicleAlerts(vehicleData?.id?.toString());
   const [userData, setUserData] = useState<TUserData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [avgConsumption, setAvgConsumption] = useState<number>(0);
   const { data: session } = useSession();
   const params = useParams();
-
-  const alertsMock = mockAlerts;
 
   const editVehicleModal = useEditVehicleModal() as {
     onOpen: (vehicleId: TGetVehicle) => void;
@@ -208,21 +180,22 @@ export default function VehicleDetails() {
               <div>
                 <p className="text-sm text-white/80">Média (últimos 10)</p>
                 <p className="font-semibold text-lg">
-                  {Math.random().toFixed(2)} Km/L
+                  {avgConsumption > 0 ? `${avgConsumption.toFixed(2)} Km/L` : "—"}
                 </p>
               </div>
             </div>
           </div>
         </section>
-
+ 
         {/* Tabela de Abastecimentos do veículo */}
         <VehicleRefuelTable
           vehicleData={vehicleData as TGetVehicle}
           vehicleUserData={userData as TUserData}
+          onAverageChange={setAvgConsumption}
         />
-
-        {/* Tabela de Manutenções */}
-        <VehicleMaintenanceTable vehicleData={vehicleData as TGetVehicle} />
+ 
+         {/* Tabela de Manutenções */}
+         <VehicleMaintenanceTable vehicleData={vehicleData as TGetVehicle} />
       </main>
       <Footer />
     </div>
